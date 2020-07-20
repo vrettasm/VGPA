@@ -1,17 +1,31 @@
 import numpy as np
 
 class GaussianMoments(object):
-    # ...
+    """
+    This class creates an object that can return the higher order
+    moments, of an un-centered Gaussian, up to the 8-th order.
+    """
+
     __slots__ = ("m_arr", "v_arr", "n_size")
 
     def __init__(self, m_arr, v_arr):
         """
+        Constructs an object that holds the marginal means and variances.
 
-        :param m_arr:
+        :param m_arr: marginal means array (N x 1).
 
-        :param v_arr:
-
+        :param v_arr: marginal variances array (N x 1).
         """
+
+        # Make sure the inputs are at least 1-D.
+        m_arr, v_arr = np.atleast_1d(m_arr, v_arr)
+
+        # The shapes must match.
+        if m_arr.shape != v_arr.shape:
+            raise RuntimeError(" {0}: Input arrays shape mismatch."
+                               " {1} != {2)".format(self.__class__.__name__,
+                                                    m_arr.shape, v_arr.shape))
+        # _end_if_
 
         # Store the marginal means and variances.
         self.m_arr = m_arr
@@ -66,7 +80,8 @@ class GaussianMoments(object):
                     420 * (self.m_arr ** 2) * (self.v_arr ** 3) +\
                     105 * (self.v_arr ** 4)
         else:
-            raise ValueError(" {0}: Wrong order value. Use 0-8.".format(self.__class__.__name__))
+            raise ValueError(" {0}: Wrong order value."
+                             " Use values 0-8.".format(self.__class__.__name__))
         # _end_if_
 
         return x_out
@@ -112,7 +127,8 @@ class GaussianMoments(object):
                          105 * (self.m_arr ** 3) * (self.v_arr ** 2) +
                          105 * self.m_arr * (self.v_arr ** 3))
         else:
-            raise ValueError(" {0}: Wrong order value. Use 1-8.".format(self.__class__.__name__))
+            raise ValueError(" {0}: Wrong order value."
+                             " Use values 1-8.".format(self.__class__.__name__))
         # _end_if_
 
         return x_out
@@ -155,7 +171,8 @@ class GaussianMoments(object):
                     1260 * (self.m_arr ** 2) * (self.v_arr ** 2) +\
                     420 * (self.v_arr ** 3)
         else:
-            raise ValueError(" {0}: Wrong order value. Use 1-8.".format(self.__class__.__name__))
+            raise ValueError(" {0}: Wrong order value."
+                             " Use values 1-8.".format(self.__class__.__name__))
         # _end_if_
 
         return x_out
