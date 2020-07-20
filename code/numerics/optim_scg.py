@@ -33,7 +33,7 @@ class SCG(object):
 
         # Derivative function.
         if df is None:
-            self.df = finite_diff(self.f, x=None)
+            self.df = lambda x: finite_diff(self.f, x)
         else:
             self.df = df
         # _end_if_
@@ -86,6 +86,9 @@ class SCG(object):
 
         # Initialization.
         x = x0.copy()
+
+        # Make input 1-D.
+        x = np.atleast_1d(x)
 
         # Number of input parameters.
         dim_x = x.shape[0]
