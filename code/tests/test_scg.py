@@ -41,10 +41,10 @@ class TestSCG(unittest.TestCase):
         x_opt, fx_opt = optim_fun(x0)
 
         # The global minimum should be zero.
-        self.assertTrue(np.abs(fx_opt - 0.0) <= 1.0E-8)
+        self.assertTrue(np.allclose(fx_opt, 0.0))
 
         # Also the position 'x' should be zero.
-        self.assertTrue(np.all(np.abs(x_opt - 0.0) <= 1.0E-8))
+        self.assertTrue(np.allclose(x_opt, 0.0))
     # _end_def_
 
     def test_rosenbrock_fun(self):
@@ -73,7 +73,7 @@ class TestSCG(unittest.TestCase):
         x_opt, fx_opt = optim_fun(x0)
 
         # The global minimum should be zero.
-        self.assertTrue(np.abs(fx_opt - 0.0) <= 1.0e-8)
+        self.assertTrue(np.allclose(fx_opt, 0.0))
 
         # The position 'x' should be one.
         self.assertTrue(np.all(np.abs(x_opt - 1.0) <= 1.0e-4))
