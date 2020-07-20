@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.linalg import cholesky
+from scipy.linalg import cholesky
 
 def finite_diff(fun, x, *args):
     """
