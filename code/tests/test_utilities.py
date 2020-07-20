@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
 from math import isclose
-from code.numerics.utilities import finite_diff
+from numpy.linalg import det
+from code.numerics.utilities import finite_diff, log_det
 
 class TestUtilities(unittest.TestCase):
     @classmethod
@@ -47,6 +48,37 @@ class TestUtilities(unittest.TestCase):
 
         # Test.
         self.assertTrue(isclose(finite_diff(fun_2, x0), f_true))
+    # _end_def_
+
+    def test_log_det(self):
+        # Test scalar input:
+        x0 = 3.9
+
+        # Log(Det(x0)).
+        y0 = log_det(x0)
+
+        # In this case is log(x).
+        self.assertEqual(y0, np.log(x0))
+
+        # Test 1D array.
+        x1 = np.random.rand(3)
+
+        # Log(Det(x1)).
+        y1 = log_det(x1)
+
+        # In this case is log(det(diag(x1))).
+        self.assertEqual(y1, np.log(det(np.diag(x1))))
+
+        # Test 2D array.
+        x2 = np.array([[0.95276191, 0.43397299, 0.14783354],
+                       [0.41602952, 0.68498452, 0.30897903],
+                       [0.72359495, 0.29639497, 0.61168427]])
+
+        # Log(Det(x2)).
+        y2 = log_det(x2)
+
+        # Compare to log(det(x2)).
+        self.assertTrue(isclose(y2, -3.525679097590135))
     # _end_def_
 
 
