@@ -1,2 +1,3 @@
 # Ignore files/dirs.
 .idea/
+sim_params.json
