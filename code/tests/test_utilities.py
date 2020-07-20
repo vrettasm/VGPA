@@ -51,13 +51,13 @@ class TestUtilities(unittest.TestCase):
 
     def test_log_det(self):
         # Test scalar input:
-        x0 = 3.9
+        x0 = 3.9457
 
         # Log(Det(x0)).
         y0 = log_det(x0)
 
         # In this case is log(x).
-        self.assertEqual(y0, np.log(x0))
+        self.assertTrue(np.allclose(y0, np.log(x0)))
 
         # Test 1D array.
         x1 = np.random.rand(3)
@@ -66,7 +66,7 @@ class TestUtilities(unittest.TestCase):
         y1 = log_det(x1)
 
         # In this case is log(det(diag(x1))).
-        self.assertEqual(y1, np.log(det(np.diag(x1))))
+        self.assertTrue(np.allclose(y1, np.log(det(np.diag(x1)))))
     # _end_def_
 
 
