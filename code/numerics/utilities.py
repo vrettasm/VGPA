@@ -48,5 +48,5 @@ def finite_diff(fun, x, *args):
     # _end_for_
 
     # Return the numerical gradient.
-    return grad_n[0] if grad_n.ndim == 1 else grad_n
+    return grad_n[0] if dim_x == 1 else grad_n
 # _end_def_
