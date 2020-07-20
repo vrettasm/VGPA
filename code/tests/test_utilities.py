@@ -4,6 +4,15 @@ from math import isclose
 from code.numerics.utilities import finite_diff
 
 class TestUtilities(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        print(" >> TestUtilities - START -")
+    # _end_def_
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        print(" >> TestUtilities - FINISH -")
+    # _end_def_
 
     def test_finite_diff(self):
         # Test point:
