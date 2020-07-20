@@ -3,7 +3,7 @@ import numpy as np
 class GaussianMoments(object):
     """
     This class creates an object that can return the higher order
-    moments, of an un-centered Gaussian, up to the 8-th order.
+    moments, of an non-central Gaussian, up to the 8-th order.
     """
 
     __slots__ = ("m_arr", "v_arr", "n_size")
@@ -37,7 +37,7 @@ class GaussianMoments(object):
 
     def __call__(self, order=0):
         """
-        Compute the correct un-centered moment up to 8-th order.
+        Compute the correct non-central moment up to 8-th order.
 
         :param order: of the un-centered Gaussian moment.
 
@@ -90,7 +90,7 @@ class GaussianMoments(object):
     def dM(self, order=1):
         """
         Compute the derivative with respect to the marginal means,
-        of the un-centered moment, up to 8-th order.
+        of the non-central moment, up to 8-th order.
 
         :param order: of the un-centered Gaussian moment.
 
