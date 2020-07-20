@@ -1,5 +1,4 @@
 import numpy as np
-from .utilities import finite_diff
 
 class SCG(object):
     """
