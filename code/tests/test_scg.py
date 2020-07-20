@@ -16,6 +16,15 @@ class TestSCG(unittest.TestCase):
     # _end_def_
 
     def test_sphere_fun(self):
+        """
+        Test the Sphere Function (n=2).
+
+            f(x) = \Sum_{i=1}^{n} x_i^2
+
+        the global minimum is found at: f(0,0,...,0) = 0.
+
+        :return: None.
+        """
         # Sphere function.
         fun = lambda x: np.sum(x ** 2)
 
@@ -39,6 +48,15 @@ class TestSCG(unittest.TestCase):
     # _end_def_
 
     def test_rosenbrock_fun(self):
+        """
+        Test the Rosenbrock Function (n=2).
+
+            f(x) = 100*(x1 - x0^2)^2 + (1 - x0)^2
+
+        the global minimum is found at: f(1,1) = 0.
+
+        :return: None.
+        """
         # Sphere function.
         fun = lambda x: 100 * (x[1] - x[0] ** 2) ** 2 + (1 - x[0]) ** 2
 
