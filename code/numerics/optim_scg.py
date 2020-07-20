@@ -18,50 +18,51 @@ class SCG(object):
 
     __slots__ = ("f", "df", "nit", "x_tol", "f_tol", "display", "stats")
 
-    def __init__(self, f, df=None, *args):
+    def __init__(self, f, df, *args):
+        """
+        Default constructor the SCG class.
+
+        :param f: is the objective function to be optimised.
+
+        :param df: is the derivative of the objective function w.r.t. 'x'.
+
+        :param args: is a dictionary containing all additional parameters
+                     for both 'f' and 'df' functions.
         """
 
-        :param f:
-
-        :param df:
-
-        :param args:
-        """
+        # Check if we have given parameters.
+        p_list = args[0] if args else {}
 
         # Function handle.
         self.f = f
 
         # Derivative function.
-        if df is None:
-            self.df = lambda x: finite_diff(self.f, x)
-        else:
-            self.df = df
-        # _end_if_
+        self.df = df
 
         # Maximum number of iterations.
-        if "max_it" in args:
-            self.nit = args["max_it"]
+        if "max_it" in p_list:
+            self.nit = p_list["max_it"]
         else:
             self.nit = 150
         # _end_if_
 
         # Error tolerance in 'x'.
-        if "x_tol" in args:
-            self.x_tol = args["x_tol"]
+        if "x_tol" in p_list:
+            self.x_tol = p_list["x_tol"]
         else:
             self.x_tol = 1.0e-6
         # _end_if_
 
         # Error tolerance in 'fx'.
-        if "f_tol" in args:
-            self.f_tol = args["f_tol"]
+        if "f_tol" in p_list:
+            self.f_tol = p_list["f_tol"]
         else:
             self.f_tol = 1.0e-8
         # _end_if_
 
         # Display statistics flag.
-        if "display" in args:
-            self.display = args["display"]
+        if "display" in p_list:
+            self.display = p_list["display"]
         else:
             self.display = False
         # _end_if_
