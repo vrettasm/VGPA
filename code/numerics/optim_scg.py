@@ -1,5 +1,4 @@
 import numpy as np
-from copy import deepcopy
 from .utilities import finite_diff
 
 class SCG(object):
@@ -75,16 +74,18 @@ class SCG(object):
 
     def __call__(self, x0, *args):
         """
+        The call of the object itself will enable the optimization.
 
-        :param x0:
+        :param x0: Initial search point.
 
-        :param args:
+        :param args: additional function / gradient parameters.
 
-        :return:
+        :return: 1)  x: the point where the minimum was found,
+                 2) fx: the function value (at the minimum point).
         """
 
         # Initialization.
-        x = deepcopy(x0)
+        x = x0.copy()
 
         # Number of input parameters.
         dim_x = x.shape[0]
@@ -214,8 +215,8 @@ class SCG(object):
                     return x, fx
                 else:
                     # Update variables for new position.
-                    fold = fnew
-                    gradold = gradnew
+                    fold = fnew.copy()
+                    gradold = gradnew.copy()
 
                     # Evaluate function/gradient at the new point.
                     fnow = self.f(x, *args)
