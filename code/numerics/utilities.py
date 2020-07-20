@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.linalg import cholesky
 
 def finite_diff(fun, x, *args):
     """
@@ -49,4 +50,42 @@ def finite_diff(fun, x, *args):
 
     # Return the numerical gradient.
     return grad_n[0] if dim_x == 1 else grad_n
+# _end_def_
+
+def log_det(x=None):
+    """
+    Returns the log(det(x)), but more stable and accurate.
+
+    :param x: input array (dim_x x dim_x).
+
+    :return: log(det(x)) (dim_x x dim_x).
+
+    Note: if the input is 1D-vector, it will return the
+    log(det()) on the diagonal matrix.
+    """
+
+    # Check if input is empty.
+    if x is None:
+        raise ValueError(" log_det: Input array is Empty! ")
+    # _end_if_
+
+    # Make sure input is 1-D.
+    x = np.atleast_1d(x)
+
+    # If the input is vector.
+    if x.ndim == 1:
+        # Transform it to diagonal matrix.
+        x = np.diag(x)
+    else:
+        # Get the number of rows/cols.
+        rows, cols = x.shape
+
+        # Make sure the array is square.
+        if rows != cols:
+            raise RuntimeError(" log_det: Rows != Cols.")
+        # _end_if_
+    # _end_if_
+
+    # More stable than: log(det(x)).
+    return 2.0 * np.sum(np.log(cholesky(x).diagonal()))
 # _end_def_
