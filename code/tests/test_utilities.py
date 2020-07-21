@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from numpy.linalg import det
-from code.numerics.utilities import finite_diff, log_det
+from code.numerics.utilities import finite_diff, log_det, safe_log
 
 class TestUtilities(unittest.TestCase):
     @classmethod
@@ -15,6 +15,9 @@ class TestUtilities(unittest.TestCase):
     # _end_def_
 
     def test_finite_diff(self):
+        # Information.
+        print(" Testing 'finite_diff' ... ")
+
         # Test point:
         x0 = 0.0
 
@@ -49,7 +52,39 @@ class TestUtilities(unittest.TestCase):
         self.assertTrue(np.allclose(finite_diff(fun_2, x0), f_true))
     # _end_def_
 
+    def test_safe_log(self):
+        # Information.
+        print(" Testing 'safe_log' ... ")
+
+        # Test None input:
+        with self.assertRaises(ValueError):
+            _ = safe_log()
+        # _end_with_
+
+        # Test scalar input:
+        x1 = 3.9457
+
+        # Safe log.
+        y1 = safe_log(x1)
+
+        # In this case is log(x).
+        self.assertTrue(np.allclose(y1, np.log(x1)))
+
+        # Test Lower limit:
+        x2 = 1.0E-330
+        y2 = safe_log(x2)
+        self.assertEqual(y2, np.log(1.0E-300))
+
+        # Test Upper limit:
+        x3 = 1.0E+330
+        y3 = safe_log(x3)
+        self.assertEqual(y3, np.log(1.0E+300))
+    # _end_def_
+
     def test_log_det(self):
+        # Information.
+        print(" Testing 'log_det' ... ")
+
         # Test scalar input:
         x0 = 3.9457
 
