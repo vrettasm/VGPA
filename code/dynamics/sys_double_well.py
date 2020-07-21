@@ -229,12 +229,15 @@ class DoubleWell(object):
         # Derivatives of higher order Gaussian moments w.r.t. 'm' and 'S'.
         Dm2 = gauss_mom.dM(order=2)
         DS2 = gauss_mom.dS(order=2)
+
         # ---
         Dm3 = gauss_mom.dM(order=3)
         DS3 = gauss_mom.dS(order=3)
+
         # ---
         Dm4 = gauss_mom.dM(order=4)
         DS4 = gauss_mom.dS(order=4)
+
         # ---
         Dm6 = gauss_mom.dM(order=6)
         DS6 = gauss_mom.dS(order=6)
