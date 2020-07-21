@@ -56,11 +56,6 @@ class TestUtilities(unittest.TestCase):
         # Information.
         print(" Testing 'safe_log' ... ")
 
-        # Test None input:
-        with self.assertRaises(ValueError):
-            _ = safe_log()
-        # _end_with_
-
         # Test scalar input:
         x1 = 3.9457
 
