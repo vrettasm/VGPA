@@ -5,6 +5,11 @@ from code.src.gaussian_moments import GaussianMoments
 class DoubleWell(object):
     """
 
+    NOTE: The equation numbers correspond to the paper:
+
+    Cedric A. Opper M. Shen Y. Cornford D. and Shawe-Taylor J. (2007).
+    "Variational Inference for Diffusion Processes". Annual Conference
+    on Neural Information Processing Systems (NIPS).
     """
 
     __slots__ = ("sigma_", "theta_", "rng", "status", "sig_inv", "dt")
@@ -139,7 +144,7 @@ class DoubleWell(object):
         # Random variables.
         ek = np.sqrt(self.sigma_ * dt) * self.rng.standard_normal(dim_t)
 
-        # Create the Sample path.
+        # Create the sample path.
         for t in range(1, dim_t):
             x[t] = x[t - 1] + \
                    4 * x[t - 1] * (self.theta_ - x[t - 1] ** 2) * dt + ek[t]
@@ -157,10 +162,7 @@ class DoubleWell(object):
 
     def energy(self, A, b, m, S, idx):
         """
-            ENERGY MODE
-
-        [Description]
-        Energy for the double-well SDE and related quantities (including gradients).
+        Energy for the Double-Well SDE and related quantities (including gradients).
 
         [Input]
         A         : variational linear parameters (N x 1).
@@ -177,20 +179,6 @@ class DoubleWell(object):
         dEsde_dS  : gradient of Esde w.r.t. the covariance (N x 1).
         dEsde_dth : gradient of Esde w.r.t. the parameter theta.
         dEsde_dSig: gradient of Esde w.r.t. the parameter Sigma.
-
-        NOTE: The equation numbers correspond to the paper:
-
-        @CONFERENCE{Archambeau2007b,
-           author = {Cedric Archambeau and Manfred Opper and Yuan Shen
-                     and Dan Cornford and J. Shawe-Taylor},
-           title = {Variational Inference for Diffusion Processes},
-           booktitle = {Annual Conference on Neural Information Processing Systems},
-           year = {2007}
-        }
-
-        Copyright (c) Michail D. Vrettas, PhD - November 2015.
-
-        Last Updated: November 2015.
         """
 
         # Check if the status is true/false.
@@ -254,3 +242,4 @@ class DoubleWell(object):
 
         # --->
         return Esde, Ef, Edf, dEsde_dm, dEsde_dS, dEsde_dth, dEsde_dSig
+# _end_class_
