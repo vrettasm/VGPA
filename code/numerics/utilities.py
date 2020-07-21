@@ -135,14 +135,8 @@ def safe_log(x=None):
     # Make sure input is an array.
     x = np.asarray(x)
 
-    # Check scalar.
-    if x.ndim == 0:
-        x = np.maximum(np.minimum(x, _upr_bound_), _low_bound_)
-    else:
-        # Check lower / upper bounds.
-        x[x < _low_bound_] = _low_bound_
-        x[x > _upr_bound_] = _upr_bound_
-    # _end_if_
+    # Filter out small and large values.
+    x = np.maximum(np.minimum(x, _upr_bound_), _low_bound_)
 
     # Return the log() of the filtered input.
     return np.log(x)
