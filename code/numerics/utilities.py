@@ -73,8 +73,7 @@ def log_det(x):
 
     # If the input is a 1-D vector.
     if x.ndim == 1:
-        # Transform it to diagonal
-        # (square) matrix.
+        # Transform it to diagonal matrix.
         x = np.diag(x)
     else:
         # Get the number of rows/cols.
