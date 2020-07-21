@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 from scipy.linalg import cholesky
 
 
@@ -53,7 +54,7 @@ def finite_diff(fun, x, *args):
     return grad_n[0] if dim_x == 1 else grad_n
 # _end_def_
 
-def log_det(x=None):
+def log_det(x):
     """
     Returns the log(det(x)), but more stable and accurate.
 
@@ -64,11 +65,6 @@ def log_det(x=None):
     Note: if the input is 1D-vector, it will return the
     log(det()) on the diagonal matrix.
     """
-
-    # Check if input is empty.
-    if x is None:
-        raise ValueError(" log_det: Input array is Empty! ")
-    # _end_if_
 
     # Make sure input is array.
     x = np.asarray(x)
@@ -98,7 +94,8 @@ def log_det(x=None):
     return 2.0 * np.sum(np.log(cholesky(x).diagonal()))
 # _end_def_
 
-def safe_log(x=None):
+@njit(fastmath=True)
+def safe_log(x):
     """
     This (helper) function prevents the computation of very small, or very large
     values of logarithms that would lead to -/+ inf, by setting predefined LOWER
@@ -119,24 +116,13 @@ def safe_log(x=None):
     :param x: input array (dim_n x dim_m).
 
     :return: the log(x) after the values of x have been filtered (dim_n x dim_m).
-
-    :raises ValueError: if input is None.
     """
-
-    # Prevent empty input.
-    if x is None:
-        raise ValueError(" safe_log: Input is None.")
-    # _end_if_
-
-    # Define LOWER and UPPER bounds.
-    _low_bound_ = 1.0E-300
-    _upr_bound_ = 1.0E+300
 
     # Make sure input is an array.
     x = np.asarray(x)
 
     # Filter out small and large values.
-    x = np.maximum(np.minimum(x, _upr_bound_), _low_bound_)
+    x = np.maximum(np.minimum(x, 1.0E+300), 1.0E-300)
 
     # Return the log() of the filtered input.
     return np.log(x)
