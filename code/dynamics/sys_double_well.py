@@ -12,7 +12,7 @@ class DoubleWell(object):
     on Neural Information Processing Systems (NIPS).
     """
 
-    __slots__ = ("sigma_", "theta_", "rng", "status", "sig_inv", "dt")
+    __slots__ = ("sigma_", "theta_", "rng", "sig_inv")
 
     def __init__(self, sigma, theta, r_seed=None):
         """
@@ -45,12 +45,6 @@ class DoubleWell(object):
         else:
             self.rng = np.random.default_rng()
         # _end_if_
-
-        # Set the status to False.
-        self.status = False
-
-        # Time - step.
-        self.dt = None
     # _end_def_
 
     @property
@@ -150,17 +144,11 @@ class DoubleWell(object):
                    4 * x[t - 1] * (self.theta_ - x[t - 1] ** 2) * dt + ek[t]
         # _end_for_
 
-        # Set the status to True.
-        self.status = True
-
-        # Set the time-step.
-        self.dt = dt
-
         # Sample path (trajectory).
         return x
     # _end_def_
 
-    def energy(self, A, b, m, S, idx):
+    def energy(self, A, b, m, S, dt, idx):
         """
         Energy for the Double-Well SDE and related quantities (including gradients).
 
@@ -181,12 +169,6 @@ class DoubleWell(object):
         dEsde_dSig: gradient of Esde w.r.t. the parameter Sigma.
         """
 
-        # Check if the status is true/false.
-        if not self.status:
-            raise RuntimeError(" {0}: The trajectory has"
-                               " not implemented yet.".format(self.__class__.__name__))
-        # _end_if_
-
         # Gaussian Moments object.
         gauss_mom = GaussianMoments(m, S)
 
@@ -206,7 +188,7 @@ class DoubleWell(object):
         var_q = 8.0*(Ex6 - c*Ex4 + b*Ex3) + c2*Ex2 - 2.0*b*c*m + b**2
 
         # Energy from the sDyn: Eq(7)
-        Esde = 0.5 * self.sig_inv * np.trapz(var_q, self.dt, idx)
+        Esde = 0.5 * self.sig_inv * np.trapz(var_q, dt, idx)
 
         # Average drift: Eq(20) -> f(t,x) = 4*x*(theta -x^2).
         Ef = 4.0 * (self.theta_ * m - Ex3)
@@ -235,7 +217,7 @@ class DoubleWell(object):
         dEsde_dS = 0.5 * self.sig_inv * (16.0*DS6 - 8.0*c*DS4 + 8.0*b*DS3 + c2*DS2)
 
         # Gradients of Esde w.r.t. 'Theta'.
-        dEsde_dth = 4.0 * self.sig_inv * np.trapz(c*Ex2 - 4.0*Ex4 - b*m, self.dt, idx)
+        dEsde_dth = 4.0 * self.sig_inv * np.trapz(c*Ex2 - 4.0*Ex4 - b*m, dt, idx)
 
         # Gradients of Esde w.r.t. 'Sigma'.
         dEsde_dSig = -Esde * self.sig_inv
