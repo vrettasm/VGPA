@@ -175,13 +175,13 @@ class OrnsteinUhlenbeck(StochasticProcess):
         :param obs_t: observation times.
 
         :return:
-            Esde      : total energy of the sde.
-            Ef        : average drift (dim_n x 1).
-            Edf       : average differentiated drift (dim_n x 1).
-            dEsde_dm  : gradient of Esde w.r.t. the means (dim_n x 1).
-            dEsde_dS  : gradient of Esde w.r.t. the covariance (dim_n x 1).
-            dEsde_dth : gradient of Esde w.r.t. the parameter theta.
-            dEsde_dSig: gradient of Esde w.r.t. the parameter Sigma.
+            Esde       : total energy of the sde.
+            Ef         : average drift (dim_n x 1).
+            Edf        : average differentiated drift (dim_n x 1).
+            dEsde_dm   : gradient of Esde w.r.t. the means (dim_n x 1).
+            dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_n x 1).
+            dEsde_dth  : gradient of Esde w.r.t. the parameter theta.
+            dEsde_dSig : gradient of Esde w.r.t. the parameter Sigma.
         """
 
         # Gaussian Moments object.
