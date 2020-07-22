@@ -204,8 +204,10 @@ class OrnsteinUhlenbeck(StochasticProcess):
         # Average gradient of drift.
         Edf = -self.theta_ * np.ones(m.shape)
 
-        # Gradients of Esde w.r.t. 'm' and 's'.
+        # Gradients of Esde w.r.t. 'means'.
         dEsde_dm = self.sig_inv * (m * (self.theta_ - linear_a) ** 2 + self.theta_ * offset_b - Q2)
+
+        # Gradients of Esde w.r.t. 'variances'.
         dEsde_dS = 0.5 * self.sig_inv * Q1
 
         # Gradients of Esde w.r.t. 'theta'.

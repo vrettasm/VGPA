@@ -225,11 +225,13 @@ class DoubleWell(StochasticProcess):
         Dm6 = gauss_mom.dM(order=6)
         DS6 = gauss_mom.dS(order=6)
 
-        # Gradients of Esde w.r.t. 'm' and 's'.
+        # Gradients of Esde w.r.t. 'means'.
         dEsde_dm = 0.5 * self.sig_inv * (16 * Dm6 - 8 * c * Dm4 + 8 * offset_b * Dm3 + c2 * Dm2 - 2 * offset_b * c)
+
+        # Gradients of Esde w.r.t. 'variances'.
         dEsde_dS = 0.5 * self.sig_inv * (16 * DS6 - 8 * c * DS4 + 8 * offset_b * DS3 + c2 * DS2)
 
-        # Gradients of Esde w.r.t. 'Theta'.
+        # Gradients of Esde w.r.t. 'theta'.
         dEsde_dth = 4.0 * self.sig_inv * np.trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t)
 
         # Gradients of Esde w.r.t. 'sigma'.
