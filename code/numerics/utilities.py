@@ -31,19 +31,25 @@ def finite_diff(fun, x, *args):
     # Step size.
     delta_h = 1.0e-6
 
-    # Scaled identity matrix.
-    e = np.diag(delta_h * np.ones(dim_x))
+    # Unit vector.
+    e = np.zeros(dim_x)
 
     # Iterate over all the dimensions.
     for i in range(dim_x):
-        # Move a small way 'x + e'.
-        f_p = fun(x + e[i], *args)
+        # Turn ON the i-th dimension.
+        e[i] = delta_h
 
-        # Move a small way 'x - e'.
-        f_m = fun(x - e[i], *args)
+        # Move a small way 'x + dh'.
+        f_p = fun(x + e, *args)
+
+        # Move a small way 'x - dh'.
+        f_m = fun(x - e, *args)
 
         # Use central difference formula.
         grad_n[i] = 0.5 * (f_p - f_m) / delta_h
+
+        # Turn OFF the i-th dimension.
+        e[i] = 0.0
     # _end_for_
 
     # Return the numerical gradient.
