@@ -155,13 +155,13 @@ class DoubleWell(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, bias_b, m, s, dt, obs_t):
+    def energy(self, linear_a, offset_b, m, s, dt, obs_t):
         """
         Energy for the Double-Well SDE and related quantities (including gradients).
 
         :param linear_a: variational linear parameters (dim_n x 1).
 
-        :param bias_b: variational offset parameters (dim_n x 1).
+        :param offset_b: variational offset parameters (dim_n x 1).
 
         :param m: marginal means (dim_n x 1).
 
@@ -197,8 +197,8 @@ class DoubleWell(StochasticProcess):
         Ex6 = gauss_mom(order=6)
 
         # Auxiliary variable.
-        var_q = 8.0 * (Ex6 - c * Ex4 + bias_b * Ex3) +\
-                c2 * Ex2 - 2.0 * bias_b * c * m + bias_b ** 2
+        var_q = 8.0 * (Ex6 - c * Ex4 + offset_b * Ex3) + \
+                c2 * Ex2 - 2.0 * offset_b * c * m + offset_b ** 2
 
         # Energy from the sDyn: Eq(7)
         Esde = 0.5 * self.sig_inv * np.trapz(var_q, dt, obs_t)
@@ -207,7 +207,7 @@ class DoubleWell(StochasticProcess):
         Ef = 4.0 * (self.theta_ * m - Ex3)
 
         # Average gradient of drift: -> df(t,x)_dx = 4*theta - 12*x^2.
-        Edf = 4.0 * (self.theta_ - 3 * Ex2)
+        Edf = 4.0 * (self.theta_ - 3.0 * Ex2)
 
         # Derivatives of higher order Gaussian moments w.r.t. 'm' and 's'.
         Dm2 = gauss_mom.dM(order=2)
@@ -226,11 +226,11 @@ class DoubleWell(StochasticProcess):
         DS6 = gauss_mom.dS(order=6)
 
         # Gradients of Esde w.r.t. 'm' and 's'.
-        dEsde_dm = 0.5 * self.sig_inv * (16.0*Dm6 - 8.0*c*Dm4 + 8.0*bias_b*Dm3 + c2*Dm2 - 2.0*bias_b*c)
-        dEsde_dS = 0.5 * self.sig_inv * (16.0*DS6 - 8.0*c*DS4 + 8.0*bias_b*DS3 + c2*DS2)
+        dEsde_dm = 0.5 * self.sig_inv * (16 * Dm6 - 8 * c * Dm4 + 8 * offset_b * Dm3 + c2 * Dm2 - 2 * offset_b * c)
+        dEsde_dS = 0.5 * self.sig_inv * (16 * DS6 - 8 * c * DS4 + 8 * offset_b * DS3 + c2 * DS2)
 
         # Gradients of Esde w.r.t. 'Theta'.
-        dEsde_dth = 4.0 * self.sig_inv * np.trapz(c*Ex2 - 4.0*Ex4 - bias_b*m, dt, obs_t)
+        dEsde_dth = 4.0 * self.sig_inv * np.trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t)
 
         # Gradients of Esde w.r.t. 'sigma'.
         dEsde_dSig = -Esde * self.sig_inv

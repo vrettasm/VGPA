@@ -2,6 +2,7 @@ import numpy as np
 from .stochastic_process import StochasticProcess
 from code.src.gaussian_moments import GaussianMoments
 
+
 class OrnsteinUhlenbeck(StochasticProcess):
     """
 
@@ -157,13 +158,13 @@ class OrnsteinUhlenbeck(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, bias_b, m, s, dt, obs_t):
+    def energy(self, linear_a, offset_b, m, s, dt, obs_t):
         """
         Energy for the OU SDE and related quantities (including gradients).
 
         :param linear_a: variational linear parameters (dim_n x 1).
 
-        :param bias_b: variational offset parameters (dim_n x 1).
+        :param offset_b: variational offset parameters (dim_n x 1).
 
         :param m: marginal means (dim_n x 1).
 
@@ -191,10 +192,10 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         # Pre-compute these quantities only once.
         Q1 = (self.theta_ - linear_a) ** 2
-        Q2 = linear_a * bias_b
+        Q2 = linear_a * offset_b
 
         # Energy from the sDyn: Eq(7)
-        var_q = Ex2 * Q1 + 2 * m * (self.theta_ - linear_a) * bias_b + bias_b ** 2
+        var_q = Ex2 * Q1 + 2 * m * (self.theta_ - linear_a) * offset_b + offset_b ** 2
         Esde = 0.5 * self.sig_inv * np.trapz(var_q, dt, obs_t)
 
         # Average drift.
@@ -204,11 +205,11 @@ class OrnsteinUhlenbeck(StochasticProcess):
         Edf = -self.theta_ * np.ones(m.shape)
 
         # Gradients of Esde w.r.t. 'm' and 's'.
-        dEsde_dm = self.sig_inv * (m * (self.theta_ - linear_a) ** 2 + self.theta_ * bias_b - Q2)
+        dEsde_dm = self.sig_inv * (m * (self.theta_ - linear_a) ** 2 + self.theta_ * offset_b - Q2)
         dEsde_dS = 0.5 * self.sig_inv * Q1
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = self.sig_inv * np.trapz(Ex2 * (self.theta_ - linear_a) + m * bias_b, dt, obs_t)
+        dEsde_dth = self.sig_inv * np.trapz(Ex2 * (self.theta_ - linear_a) + m * offset_b, dt, obs_t)
 
         # Gradients of Esde w.r.t. 'sigma'.
         dEsde_dSig = -self.sig_inv * Esde
