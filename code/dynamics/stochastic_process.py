@@ -147,7 +147,7 @@ class StochasticProcess(object):
         if h_mask is not None:
             # Here we have (d < D)
             obs_y = obs_y[:, h_mask]
-        # _end_def_
+        # _end_if_
 
         # Dimensionality of observations.
         dim_d = obs_y.shape[1]
