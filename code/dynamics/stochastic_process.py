@@ -141,7 +141,7 @@ class StochasticProcess(object):
         obs_t = np.array(idx[1:-1].tolist())
 
         # Extract the complete observations (d = D) at times obs_t.
-        obs_y = np.take(self.xt, obs_t, axis=0)
+        obs_y = np.take(self.xt, obs_t, axis=1)
 
         # Check if a mask has been given.
         if h_mask is not None:
