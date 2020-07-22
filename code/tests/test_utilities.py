@@ -40,16 +40,17 @@ class TestUtilities(unittest.TestCase):
         self.assertTrue(np.allclose(finite_diff(fun_1, x0), f_true))
 
         # Even more complex function.
-        fun_2 = lambda x: np.exp(np.sin(x))
+        fun_2 = lambda x: np.sin(x[0]**2 * x[1]**2)
 
         # Test point.
-        x0 = 1.0
+        z = np.array([1.5, 2.0])
 
         # True value.
-        f_true = np.cos(x0)*np.exp(np.sin(x0))
+        f_true = [np.cos(z[0] ** 2 * z[1] ** 2) * 2.0 * z[0] * z[1] ** 2,
+                  np.cos(z[0] ** 2 * z[1] ** 2) * 2.0 * z[0] ** 2 * z[1]]
 
         # Test.
-        self.assertTrue(np.allclose(finite_diff(fun_2, x0), f_true))
+        self.assertTrue(np.allclose(finite_diff(fun_2, z), f_true))
     # _end_def_
 
     def test_safe_log(self):
