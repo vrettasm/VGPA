@@ -44,6 +44,18 @@ class StochasticProcess(object):
         return self.xt
     # _end_def_
 
+    @sample_path.setter
+    def sample_path(self, new_value):
+        """
+        Accessor method.
+
+        :param new_value: of the sample path (trajectory).
+
+        :return: None.
+        """
+        self.xt = new_value
+    # _end_def_
+
     @property
     def time_window(self):
         """
@@ -58,6 +70,18 @@ class StochasticProcess(object):
         # _end_def_
 
         return self.tk
+    # _end_def_
+
+    @time_window.setter
+    def time_window(self, new_value):
+        """
+        Accessor method.
+
+        :param new_value: of the time window (for inference).
+
+        :return: None.
+        """
+        self.tk = new_value
     # _end_def_
 
     @property
