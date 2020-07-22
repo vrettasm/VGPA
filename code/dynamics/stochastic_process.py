@@ -114,6 +114,9 @@ class StochasticProcess(object):
                                       " are not created.".format(self.__class__.__name__))
         # _end_def_
 
+        # Make sure input is numpy array.
+        rn = np.asarray(rn)
+
         # Get the discrete time step.
         dt = np.diff(self.tk)[0]
 
@@ -150,13 +153,17 @@ class StochasticProcess(object):
         dim_d = obs_y.shape[1]
 
         # Check if (co)-variance vector/matrix is given.
-        if np.isscalar(rn):
+        if rn.ndim == 0:
             # Add fixed Gaussian noise.
             obs_y += np.sqrt(rn) * self.rand_g.standard_normal(dim_m)
         else:
-            # Variance (diagonal) matrix.
+            # For the moment consider only diagonal matrices.
             if rn.ndim == 1:
+                # Vector.
                 rn = np.diag(rn)
+            else:
+                # Square matrix.
+                rn *= np.eye(dim_d)
             # _end_if_
 
             # Get the square root of the noise matrix.
