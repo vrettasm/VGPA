@@ -171,7 +171,7 @@ class StochasticProcess(object):
 
             # Add fixed Gaussian noise.
             obs_y += sq_rn.dot(self.rand_g.standard_normal(dim_d, dim_m)).T
-        # _end_def_
+        # _end_if_
 
         # Observation (times / values).
         return obs_t, obs_y
