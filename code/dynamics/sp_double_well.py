@@ -1,28 +1,36 @@
 import numpy as np
+from .stochastic_process import StochasticProcess
 from code.src.gaussian_moments import GaussianMoments
 
 
-class DoubleWell(object):
+class DoubleWell(StochasticProcess):
     """
+    Information about the double-well potential:
+
+    https://en.wikipedia.org/wiki/Double-well_potential
 
     NOTE: The equation numbers correspond to the paper:
 
     Cedric A. Opper M. Shen Y. Cornford D. and Shawe-Taylor J. (2007).
     "Variational Inference for Diffusion Processes". Annual Conference
     on Neural Information Processing Systems (NIPS).
+
     """
 
-    __slots__ = ("sigma_", "theta_", "rng", "sig_inv")
+    __slots__ = ("sigma_", "theta_", "sig_inv")
 
     def __init__(self, sigma, theta, r_seed=None):
         """
+        Default constructor of the DW object.
 
-        :param sigma:
+        :param sigma: noise diffusion coefficient.
 
-        :param theta:
+        :param theta: drift model parameter.
 
-        :param r_seed:
+        :param r_seed: random seed.
         """
+        # Call the constructor of the parent class.
+        super().__init__(r_seed)
 
         # Store the diffusion noise.
         if sigma > 0.0:
@@ -38,13 +46,6 @@ class DoubleWell(object):
 
         # Store the drift parameter.
         self.theta_ = theta
-
-        # Create a random number generator.
-        if r_seed is not None:
-            self.rng = np.random.default_rng(r_seed)
-        else:
-            self.rng = np.random.default_rng()
-        # _end_if_
     # _end_def_
 
     @property
@@ -105,7 +106,7 @@ class DoubleWell(object):
 
     # _end_def_
 
-    def trajectory(self, t0, tf, dt=0.01):
+    def make_trajectory(self, t0, tf, dt=0.01):
         """
         Generates a realizations of the double well (DW)
         dynamical system, within a specified time-window.
@@ -116,11 +117,14 @@ class DoubleWell(object):
 
         :param dt: time-step discretization.
 
-        :return: Xt trajectory.
+        :return: None.
         """
 
+        # Create a time-window (for inference).
+        tk = np.arange(t0, tf + dt, dt)
+
         # Number of actual trajectory samples.
-        dim_t = np.arange(t0, tf + dt, dt).size
+        dim_t = tk.size
 
         # Preallocate return array for efficiency.
         x = np.zeros(dim_t)
@@ -144,8 +148,11 @@ class DoubleWell(object):
                    4 * x[t - 1] * (self.theta_ - x[t - 1] ** 2) * dt + ek[t]
         # _end_for_
 
-        # Sample path (trajectory).
-        return x
+        # Store the sample path (trajectory).
+        self.sample_path = x
+
+        # Store the time window (inference).
+        self.time_window = tk
     # _end_def_
 
     def energy(self, A, b, m, S, dt, idx):
@@ -224,4 +231,6 @@ class DoubleWell(object):
 
         # --->
         return Esde, Ef, Edf, dEsde_dm, dEsde_dS, dEsde_dth, dEsde_dSig
+    # _end_def_
+
 # _end_class_
