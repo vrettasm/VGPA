@@ -137,7 +137,7 @@ class Euler(OdeSolver):
             mt[k + 1] = mk + self.fun_mt(mk, ak, bk) * self.dt
 
             # -Eq(10)- NEW "covariance" point.
-            st[k + 1] = sk + self.fun_ct(sk, sk, sigma) * self.dt
+            st[k + 1] = sk + self.fun_ct(sk, ak, sigma) * self.dt
         # _end_for_
 
         # Return the marginal moments.
