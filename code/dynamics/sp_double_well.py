@@ -156,7 +156,7 @@ class DoubleWell(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, dt, obs_t):
+    def energy(self, linear_a, offset_b, m, s, obs_t):
         """
         Energy for the Double-Well SDE and related quantities (including gradients).
 
@@ -167,8 +167,6 @@ class DoubleWell(StochasticProcess):
         :param m: marginal means (dim_n x 1).
 
         :param s: marginal variances (dim_n x 1).
-
-        :param dt: discrete time step.
 
         :param obs_t: observation times.
 
@@ -187,6 +185,9 @@ class DoubleWell(StochasticProcess):
 
         # Constant value.
         c = 4.0 * self.theta_ + linear_a
+
+        # Get the time step from the parent class.
+        dt = self.time_step
 
         # Auxiliary constant.
         c2 = c ** 2

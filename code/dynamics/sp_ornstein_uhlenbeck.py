@@ -159,7 +159,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, dt, obs_t):
+    def energy(self, linear_a, offset_b, m, s, obs_t):
         """
         Energy for the OU SDE and related quantities (including gradients).
 
@@ -170,8 +170,6 @@ class OrnsteinUhlenbeck(StochasticProcess):
         :param m: marginal means (dim_n x 1).
 
         :param s: marginal variances (dim_n x 1).
-
-        :param dt: discrete time step.
 
         :param obs_t: observation times.
 
@@ -187,6 +185,9 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         # Gaussian Moments object.
         gauss_mom = GaussianMoments(m, s)
+
+        # Get the time step from the parent class.
+        dt = self.time_step
 
         # Higher order Gaussian Moments.
         Ex2 = gauss_mom(order=2)

@@ -85,6 +85,23 @@ class StochasticProcess(object):
     # _end_def_
 
     @property
+    def time_step(self):
+        """
+        Accessor method.
+
+        :return: the time step of the discrete path.
+        """
+        # Check if the sample path is created.
+        if self.tk is None:
+            raise NotImplementedError(" {0}:"
+                                      " Time window is not created.".format(self.__class__.__name__))
+        # _end_def_
+
+        # Return the 'dt'.
+        return np.abs(self.tk[1] - self.tk[0])
+    # _end_def_
+
+    @property
     def rng(self):
         """
         Accessor method.
