@@ -1,6 +1,7 @@
 import numpy as np
 from numba import njit
 from scipy.linalg import cholesky
+from scipy.integrate import trapz as sp_trapz
 
 
 def finite_diff(fun, x, *args):
@@ -127,4 +128,63 @@ def safe_log(x):
 
     # Return the log() of the filtered input.
     return np.log(x)
+# _end_def_
+
+
+def my_trapz(fx, dx=1.0, obs_t=None):
+    """
+    This method computes the numerical integral of the discrete function
+    values 'fx', with space increment dt, using the composite trapezoidal
+    rule.
+
+    This code applies the function: scipy.integrate.trapz() between the
+    times of the observations 'obs_t'. This is because the function 'fx'
+    is very rough (it jumps at observation times), therefore computing the
+    integral incrementally we achieve better numerical results.
+
+    If no 'obs_t' is given, then we call directly trapz().
+
+    NOTE: to allow easy vectorization the input values 'fx', assume that
+    the first dimension is the one we are integrating over. So:
+    1) if 'fx' is scalar (dim_n),
+    2) if 'fx' is vector (dim_n x dim_d),
+    3) if 'fx' is matrix (dim_n x dim_d x dim_d).
+    4) etc.
+
+    :param fx: function values (discrete) (dim_n).
+
+    :param dx: discrete step (time-wise) (scalar).
+
+    :param obs_t: observation times (indexes) - optional.
+
+    :return: definite integral as approximated by trapezoidal rule.
+    """
+
+    # Check if there are observation times (indexes).
+    if obs_t is None:
+        return sp_trapz(fx, dx=dx, axis=0)
+    # _end_id_
+
+    # Total integral.
+    tot_area = 0.0
+
+    # First index.
+    f = 0
+
+    # Compute the integral partially.
+    for k, l in enumerate(obs_t):
+        # Compute the integral incrementally.
+        tot_area += sp_trapz(fx[f:l+1], dx=dx, axis=0)
+
+        # Set the next first index.
+        f = obs_t[k]
+    # _end_for_
+
+    # Final interval.
+    if f != fx.shape[0] - 1:
+        tot_area += sp_trapz(fx[f:], dx=dx, axis=0)
+    # _end_if_
+
+    # Return the total integral.
+    return tot_area
 # _end_def_
