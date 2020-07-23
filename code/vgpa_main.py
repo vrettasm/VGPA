@@ -133,7 +133,7 @@ def main(params_file=None, data_file=None):
         sys.exit(1)
     # _end_try_
 
-# _end_maim_
+# _end_main_
 
 
 # Run the script.
