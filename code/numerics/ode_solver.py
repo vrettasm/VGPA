@@ -32,7 +32,7 @@ class OdeSolver(object):
 
     @staticmethod
     def fun_ct(st, at, sn):
-        return -st.dot(st) - st.dot(at.T) + sn
+        return -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
 
 # _end_class_
