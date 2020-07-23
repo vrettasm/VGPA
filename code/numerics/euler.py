@@ -43,7 +43,7 @@ class Euler(OdeSolver):
             return self.solve_1D(at, bt, m0, s0, sigma)
         else:
             return self.solve_nD(at, bt, m0, s0, sigma)
-        # _end_id_
+        # _end_if_
 
     # _end_def_
 
