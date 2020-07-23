@@ -150,14 +150,14 @@ class StochasticProcess(object):
             obs_y = obs_y[:, h_mask]
         # _end_if_
 
-        # Dimensionality of observations.
-        dim_d = obs_y.shape[1]
-
         # Check if (co)-variance vector/matrix is given.
         if rn.ndim == 0:
             # Add fixed Gaussian noise.
             obs_y += np.sqrt(rn) * self.rand_g.standard_normal(dim_m)
         else:
+            # Dimensionality of observations.
+            dim_d = 1 if obs_y.ndim == 1 else obs_y.shape[-1]
+
             # For the moment consider only diagonal matrices.
             if rn.ndim == 1:
                 # Vector.
