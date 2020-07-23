@@ -1,4 +1,5 @@
 import numpy as np
+from code.numerics.utilities import my_trapz
 from .stochastic_process import StochasticProcess
 from code.src.gaussian_moments import GaussianMoments
 
@@ -196,7 +197,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         # Energy from the sDyn: Eq(7)
         var_q = Ex2 * Q1 + 2 * m * (self.theta_ - linear_a) * offset_b + offset_b ** 2
-        Esde = 0.5 * self.sig_inv * np.trapz(var_q, dt, obs_t)
+        Esde = 0.5 * self.sig_inv * my_trapz(var_q, dt, obs_t)
 
         # Average drift.
         Ef = -self.theta_ * m
@@ -211,7 +212,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         dEsde_dS = 0.5 * self.sig_inv * Q1
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = self.sig_inv * np.trapz(Ex2 * (self.theta_ - linear_a) + m * offset_b, dt, obs_t)
+        dEsde_dth = self.sig_inv * my_trapz(Ex2 * (self.theta_ - linear_a) + m * offset_b, dt, obs_t)
 
         # Gradients of Esde w.r.t. 'sigma'.
         dEsde_dSig = -self.sig_inv * Esde

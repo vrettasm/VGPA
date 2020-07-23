@@ -1,4 +1,5 @@
 import numpy as np
+from code.numerics.utilities import my_trapz
 from .stochastic_process import StochasticProcess
 from code.src.gaussian_moments import GaussianMoments
 
@@ -201,7 +202,7 @@ class DoubleWell(StochasticProcess):
                 c2 * Ex2 - 2.0 * offset_b * c * m + offset_b ** 2
 
         # Energy from the sDyn: Eq(7)
-        Esde = 0.5 * self.sig_inv * np.trapz(var_q, dt, obs_t)
+        Esde = 0.5 * self.sig_inv * my_trapz(var_q, dt, obs_t)
 
         # Average drift: Eq(20) -> f(t,x) = 4*x*(theta -x^2).
         Ef = 4.0 * (self.theta_ * m - Ex3)
@@ -232,7 +233,7 @@ class DoubleWell(StochasticProcess):
         dEsde_dS = 0.5 * self.sig_inv * (16 * DS6 - 8 * c * DS4 + 8 * offset_b * DS3 + c2 * DS2)
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = 4.0 * self.sig_inv * np.trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t)
+        dEsde_dth = 4.0 * self.sig_inv * my_trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t)
 
         # Gradients of Esde w.r.t. 'sigma'.
         dEsde_dSig = -Esde * self.sig_inv
