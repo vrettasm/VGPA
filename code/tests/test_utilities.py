@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from numpy.linalg import det
-from code.numerics.utilities import finite_diff, log_det, safe_log
+from code.numerics.utilities import finite_diff, log_det, safe_log, my_trapz
 
 class TestUtilities(unittest.TestCase):
     @classmethod
@@ -98,6 +98,44 @@ class TestUtilities(unittest.TestCase):
 
         # In this case is log(det(diag(x1))).
         self.assertTrue(np.allclose(y1, np.log(det(np.diag(x1)))))
+    # _end_def_
+
+    def test_my_trapz(self):
+        from scipy.integrate import trapz as sp_trapz
+
+        # Information.
+        print(" Testing 'my_trapz' ... ")
+
+        # Three function types (scalar, vector, matrix):
+        fxs = np.random.rand(1000)
+        fxv = np.random.rand(1000, 2)
+        fxm = np.random.rand(1000, 2, 2)
+
+        # Discrete step.
+        dx = 0.01
+
+        # Test all types.
+        for x_val in [fxs, fxv, fxm]:
+            # Integrals.
+            tot_1 = my_trapz(x_val, dx=dx)
+            tot_2 = sp_trapz(x_val, dx=dx, axis=0)
+
+            # Test how close they are.
+            self.assertTrue(np.all(np.abs(tot_1 - tot_2) <= 1.0e-8))
+        # _end_for_
+
+        # Test with observation times.
+        fxo = np.random.rand(1000)
+
+        # Observation times (indexes).
+        obs_t = [10, 20, 30, 40, 50, 60, 500]
+
+        # Integrals.
+        tot_1 = my_trapz(fxo, dx=dx, obs_t=obs_t)
+        tot_2 = sp_trapz(fxo, dx=dx, axis=0)
+
+        # Test how close they are.
+        self.assertTrue(np.all(np.abs(tot_1 - tot_2) <= 1.0e-6))
     # _end_def_
 
 
