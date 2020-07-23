@@ -103,7 +103,7 @@ class StochasticProcess(object):
 
         :param rn: Observation noise (co)-variance.
 
-        :param h_mask: List that masks only the observed values.
+        :param h_mask: boolean that masks only the observed values.
 
         :return: observation times / observation values (with i.i.d. white noise).
         """
@@ -132,7 +132,7 @@ class StochasticProcess(object):
         dim_m = int(np.floor(np.abs(self.tk[0] - self.tk[-1]) * n_obs))
 
         # Number of discrete time points.
-        dim_t = self.tk.shape[0]
+        dim_t = self.tk.size
 
         # Observation indexes.
         idx = np.linspace(0, dim_t, dim_m + 2, dtype=np.int)
