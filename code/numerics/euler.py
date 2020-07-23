@@ -4,7 +4,7 @@ from .ode_solver import OdeSolver
 
 class Euler(OdeSolver):
     """
-    Euler method of integration:
+    Euler's method of integration:
 
     https://en.wikipedia.org/wiki/Euler_method
 
