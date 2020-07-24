@@ -134,10 +134,10 @@ class Euler(OdeSolver):
             mk = mt[k]
 
             # -Eq(09)- NEW "mean" point.
-            mt[k + 1] = mk + self.fun_mt(mk, ak, bk) * self.dt
+            mt[k + 1] = mk + self.fun_mt_nD(mk, ak, bk) * self.dt
 
             # -Eq(10)- NEW "covariance" point.
-            st[k + 1] = sk + self.fun_ct(sk, ak, sigma) * self.dt
+            st[k + 1] = sk + self.fun_st_nD(sk, ak, sigma) * self.dt
         # _end_for_
 
         # Return the marginal moments.
@@ -244,10 +244,10 @@ class Euler(OdeSolver):
             psit = psi[t]
 
             # -Eq(14)- NEW "Lambda" point.
-            lam[t - 1] = lamt - self.fun_lam(dEsde_dm[t], at, lamt) * self.dt + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - self.fun_lam_nD(dEsde_dm[t], at, lamt) * self.dt + dEobs_dm[t - 1]
 
             # -Eq(15)- NEW "Psi" point.
-            psi[t - 1] = psit - self.fun_psi(dEsde_ds[t], at, psit) * self.dt + dEobs_ds[t - 1]
+            psi[t - 1] = psit - self.fun_psi_nD(dEsde_ds[t], at, psit) * self.dt + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.
