@@ -35,4 +35,14 @@ class OdeSolver(object):
         return -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
 
+    @staticmethod
+    def fun_lam(df_dm, at, lam_t):
+        return -df_dm + lam_t.dot(at.T)
+    # _end_def_
+
+    @staticmethod
+    def fun_psi(df_ds, at, psi_t):
+        return -df_ds + psi_t.dot(at) + at.T.dot(psi_t)
+    # _end_def_
+
 # _end_class_
