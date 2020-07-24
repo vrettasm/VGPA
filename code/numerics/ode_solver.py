@@ -25,23 +25,46 @@ class OdeSolver(object):
     # means and covariances for the "nD" versions. These are very
     # helpful for the Runge-Kutta (2/4) implementations!
 
+    # # Define locally (lambda) functions.
+    #         fun_st = lambda ski, aki, sig: (-2.0 * aki * ski + sig)
+
     @staticmethod
-    def fun_mt(mt, at, bt):
+    def fun_mt_1D(mt, at, bt):
+        return -at * mt + bt
+    # _end_def_
+
+    @staticmethod
+    def fun_mt_nD(mt, at, bt):
         return -mt.dot(at.T) + bt
     # _end_def_
 
     @staticmethod
-    def fun_ct(st, at, sn):
+    def fun_st_1D(st, at, sn):
+        return -2.0 * at * st + sn
+    # _end_def_
+
+    @staticmethod
+    def fun_st_nD(st, at, sn):
         return -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
 
     @staticmethod
-    def fun_lam(df_dm, at, lam_t):
-        return -df_dm + lam_t.dot(at.T)
+    def fun_lam_1D(df_dm, at, lamt):
+        return -df_dm + lamt * at
     # _end_def_
 
     @staticmethod
-    def fun_psi(df_ds, at, psi_t):
+    def fun_lam_nD(df_dm, at, lamt):
+        return -df_dm + lamt.dot(at.T)
+    # _end_def_
+
+    @staticmethod
+    def fun_psi_1D(df_ds, at, psit):
+        return -df_ds + 2.0 * psit * at
+    # _end_def_
+
+    @staticmethod
+    def fun_psi_nD(df_ds, at, psi_t):
         return -df_ds + psi_t.dot(at) + at.T.dot(psi_t)
     # _end_def_
 
