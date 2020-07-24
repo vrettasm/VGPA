@@ -222,7 +222,7 @@ class Heun(OdeSolver):
 
         :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x 1).
 
-        :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x 1),
+        :return: 1) lam: Lagrange multipliers for the mean values (dim_n x 1),
                  2) psi: Lagrange multipliers for the var values (dim_n x 1).
         """
 
