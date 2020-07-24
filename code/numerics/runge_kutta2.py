@@ -20,7 +20,7 @@ class RungeKutta2(OdeSolver):
         super().__init__(dt)
     # _end_def_
 
-    def __call__(self, *args):
+    def fwd(self, *args):
         """
         Solution of the ode.
 
@@ -40,14 +40,14 @@ class RungeKutta2(OdeSolver):
 
         # Dimensionality of the system.
         if at.shape[-1] == 1:
-            return self.solve_1D(at, bt, m0, s0, sigma)
+            return self.solve_fwd_1D(at, bt, m0, s0, sigma)
         else:
-            return self.solve_nD(at, bt, m0, s0, sigma)
+            return self.solve_fwd_nD(at, bt, m0, s0, sigma)
         # _end_if_
 
     # _end_def_
 
-    def solve_1D(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd_1D(self, lin_a, off_b, m0, s0, sigma):
         """
         Runge-Kutta integration method 1D.
 
@@ -82,10 +82,6 @@ class RungeKutta2(OdeSolver):
         ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
         bk_mid = 0.5 * (off_b[0:-1] + off_b[1:])
 
-        # Define locally (lambda) functions.
-        fun_mt = lambda mki, aki, bki: (-aki * mki + bki)
-        fun_st = lambda ski, aki, sig: (-2.0 * aki * ski + sig)
-
         # Run through all time points.
         for k in range(dim_n - 1):
             # Get the values at time 'tk'.
@@ -101,19 +97,19 @@ class RungeKutta2(OdeSolver):
             b_mid = bk_mid[k]
 
             # -Eq(09)- NEW "mean" point.
-            mt[k + 1] = mk + fun_mt((mk + h * fun_mt(mk, ak, bk)),
-                                    a_mid, b_mid) * self.dt
+            mt[k + 1] = mk + self.fun_mt_1D((mk + h * fun_mt(mk, ak, bk)),
+                                            a_mid, b_mid) * self.dt
 
             # -Eq(10)- NEW "variance" point.
-            st[k + 1] = sk + fun_st((sk + h * fun_st(sk, sk, sigma)),
-                                    a_mid, sigma) * self.dt
+            st[k + 1] = sk + self.fun_st_1D((sk + h * fun_st(sk, sk, sigma)),
+                                            a_mid, sigma) * self.dt
         # _end_for_
 
         # Return the marginal moments.
         return mt, st
     # _end_def_
 
-    def solve_nD(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd_nD(self, lin_a, off_b, m0, s0, sigma):
         """
         Euler integration method nD.
 
@@ -162,12 +158,12 @@ class RungeKutta2(OdeSolver):
             b_mid = bk_mid[k]
 
             # -Eq(09)- NEW "mean" point.
-            mt[k + 1] = mk + self.fun_mt((mk + h * self.fun_mt(mk, ak, bk)),
-                                         a_mid, b_mid) * self.dt
+            mt[k + 1] = mk + self.fun_mt_nD((mk + h * self.fun_mt_nD(mk, ak, bk)),
+                                            a_mid, b_mid) * self.dt
 
             # -Eq(10)- NEW "covariance" point.
-            st[k + 1] = sk + self.fun_ct((sk + h * self.fun_ct(sk, ak, sigma)),
-                                         a_mid, sigma) * self.dt
+            st[k + 1] = sk + self.fun_st_nD((sk + h * self.fun_st_nD(sk, ak, sigma)),
+                                            a_mid, sigma) * self.dt
         # _end_for_
 
         # Return the marginal moments.
