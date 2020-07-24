@@ -7,6 +7,14 @@ from code.numerics.runge_kutta4 import RungeKutta4
 class FwdOde(object):
     """
     Forward ODE integration methods for the VGPA algorithm.
+
+    This class implements a set of forward ode integration methods for the
+    computation of the marginal posterior moments "m(t)" and "s(t)" of the
+    variational algorithms.  To make it easier and more broadly applicable
+    the algorithm detects  the dimensions of the state  vector (dim_d) and
+    calls either the -1D or -nD version of the selected algorithm. This is
+    due to significant performance gains when writing the code in 1D rather
+    than nD.
     """
 
     __slots__ = ("dt", "method", "solver")
