@@ -72,7 +72,7 @@ class FwdOde(object):
 
         :return: marginal means and co-variances.
         """
-        return self.solver(*args)
+        return self.solver.fwd(*args)
     # _end_def_
 
     # Auxiliary.
