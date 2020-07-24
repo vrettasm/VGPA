@@ -78,6 +78,10 @@ class RungeKutta2(OdeSolver):
         # Half step-size.
         h = 0.5 * self.dt
 
+        # Compute the midpoints at time 't + 0.5*dt'.
+        ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
+        bk_mid = 0.5 * (off_b[0:-1] + off_b[1:])
+
         # Define locally (lambda) functions.
         fun_mt = lambda mki, aki, bki: (-aki * mki + bki)
         fun_st = lambda ski, aki, sig: (-2.0 * aki * ski + sig)
@@ -93,8 +97,8 @@ class RungeKutta2(OdeSolver):
             mk = mt[k]
 
             # Get the midpoints at time 't + 0.5*dt'.
-            a_mid = 0.5 * (ak + lin_a[k + 1])
-            b_mid = 0.5 * (bk + off_b[k + 1])
+            a_mid = ak_mid[k]
+            b_mid = bk_mid[k]
 
             # -Eq(09)- NEW "mean" point.
             mt[k + 1] = mk + fun_mt((mk + h * fun_mt(mk, ak, bk)),
@@ -139,6 +143,10 @@ class RungeKutta2(OdeSolver):
         # Half step-size.
         h = 0.5 * self.dt
 
+        # Compute the midpoints at time 't + 0.5*dt'.
+        ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
+        bk_mid = 0.5 * (off_b[0:-1] + off_b[1:])
+
         # Run through all time points.
         for k in range(dim_n - 1):
             # Get the values at time 'tk'.
@@ -150,8 +158,8 @@ class RungeKutta2(OdeSolver):
             mk = mt[k]
 
             # Get the midpoints at time 't + 0.5*dt'.
-            a_mid = 0.5 * (ak + lin_a[k + 1])
-            b_mid = 0.5 * (bk + off_b[k + 1])
+            a_mid = ak_mid[k]
+            b_mid = bk_mid[k]
 
             # -Eq(09)- NEW "mean" point.
             mt[k + 1] = mk + self.fun_mt((mk + h * self.fun_mt(mk, ak, bk)),
