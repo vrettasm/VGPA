@@ -44,8 +44,6 @@ class Euler(OdeSolver):
 
         # Return the solution of the fwd-ode.
         return self.solve_fwd(at, bt, m0, s0, sigma, single_dim)
-        # _end_if_
-
     # _end_def_
 
     def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
