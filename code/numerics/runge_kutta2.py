@@ -90,12 +90,12 @@ class RungeKutta2(OdeSolver):
             b_mid = bk_mid[k]
 
             # -Eq(09)- NEW "mean" point.
-            mt[k + 1] = mk + fun_mt((mk + h * fun_mt(mk, ak, bk, single_dim)),
-                                    a_mid, b_mid, single_dim) * dt
+            mt[k + 1] = mk + dt * fun_mt((mk + h * fun_mt(mk, ak, bk, single_dim)),
+                                         a_mid, b_mid, single_dim)
 
             # -Eq(10)- NEW "variance" point.
-            st[k + 1] = sk + fun_st((sk + h * fun_st(sk, sk, sigma, single_dim)),
-                                    a_mid, sigma, single_dim) * dt
+            st[k + 1] = sk + dt * fun_st((sk + h * fun_st(sk, sk, sigma, single_dim)),
+                                         a_mid, sigma, single_dim)
         # _end_for_
 
         # Marginal moments.
@@ -171,13 +171,13 @@ class RungeKutta2(OdeSolver):
             lamk = lamt - h * fun_lam(dEsde_dm[t], at, lamt, single_dim)
 
             # NEW "lambda" point.
-            lam[t - 1] = lamt - fun_lam(dEmk, ak, lamk, single_dim) * dt + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - dt * fun_lam(dEmk, ak, lamk, single_dim) + dEobs_dm[t - 1]
 
             # Psi (backward) propagation.
             psik = psit - h * fun_psi(dEsde_ds[t], at, psit, single_dim)
 
             # NEW "Psi" point.
-            psi[t - 1] = psit - fun_psi(dEsk, ak, psik, single_dim) * dt + dEobs_ds[t - 1]
+            psi[t - 1] = psit - dt * fun_psi(dEsk, ak, psik, single_dim) + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.
