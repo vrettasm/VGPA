@@ -20,9 +20,9 @@ class RungeKutta4(OdeSolver):
         super().__init__(dt)
     # _end_def_
 
-    def __call__(self, *args):
+    def fwd(self, *args):
         """
-        Solution of the ode.
+        Solution of the ode. This provides the interface.
 
         :param args: dictionary with the variational parameters.
 
@@ -38,91 +38,17 @@ class RungeKutta4(OdeSolver):
         s0 = p_list["s0"]
         sigma = p_list["sigma"]
 
-        # Dimensionality of the system.
-        if at.shape[-1] == 1:
-            return self.solve_1D(at, bt, m0, s0, sigma)
-        else:
-            return self.solve_nD(at, bt, m0, s0, sigma)
-        # _end_if_
+        # Dimensionality flag of the system.
+        # True, if it is single dimensional.
+        single_dim = at.shape[-1] == 1
 
+        # Return the solution of the fwd-ode.
+        return self.solve_fwd(at, bt, m0, s0, sigma, single_dim)
     # _end_def_
 
-    def solve_1D(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
         """
-        Runge-Kutta integration method 1D.
-
-        :param lin_a: Linear variational parameters (dim_n x 1).
-
-        :param off_b: Offset variational parameters (dim_n x 1).
-
-        :param m0: Initial marginal mean (scalar).
-
-        :param s0: Initial marginal variance (scalar).
-
-        :param sigma: System noise variance (scalar).
-
-        :return: 1) mt: posterior means values (dim_n x 1).
-                 2) st: posterior variance values (dim_n x 1).
-        """
-
-        # Get the number of discrete time points.
-        dim_n = off_b.shape[0]
-
-        # Preallocate the return arrays.
-        mt = np.zeros(dim_n)
-        st = np.zeros(dim_n)
-
-        # Initialize the first moments.
-        mt[0], st[0] = m0, s0
-
-        # Compute the midpoints at time 't + 0.5*dt'.
-        ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
-        bk_mid = 0.5 * (off_b[0:-1] + off_b[1:])
-
-        # Define locally (lambda) functions.
-        fun_mt = lambda mki, aki, bki: (-aki * mki + bki)
-        fun_st = lambda ski, aki, sig: (-2.0 * aki * ski + sig)
-
-        # Run through all time points.
-        for k in range(dim_n - 1):
-            # Get the values at time 'tk'.
-            ak = lin_a[k]
-            bk = off_b[k]
-
-            # Marginal moments.
-            sk = st[k]
-            mk = mt[k]
-
-            # Get the midpoints at time 't + 0.5*dt'.
-            a_mid = ak_mid[k]
-            b_mid = bk_mid[k]
-
-            # Intermediate steps.
-            pk1 = fun_mt(mk, ak, bk) * self.dt
-            pk2 = fun_mt((mk + 0.5 * pk1), a_mid, b_mid) * self.dt
-            pk3 = fun_mt((mk + 0.5 * pk2), a_mid, b_mid) * self.dt
-            pk4 = fun_mt((mk + pk3), lin_a[k + 1], off_b[k + 1]) * self.dt
-
-            # NEW "mean" point.
-            mt[k + 1] = mk + (pk1 + 2.0 * (pk2 + pk3) + pk4) / 6.0
-
-            # Intermediate steps.
-            pl1 = fun_st(sk, ak, sigma) * self.dt
-            pl2 = fun_st((sk + 0.5 * pl1), a_mid, sigma) * self.dt
-            pl3 = fun_st((sk + 0.5 * pl2), a_mid, sigma) * self.dt
-            pl4 = fun_st((sk + pl3), lin_a[k + 1], sigma) * self.dt
-
-            # NEW "variance" point
-            st[k + 1] = sk + (pl1 + 2.0 * (pl2 + pl3) + pl4) / 6.0
-        # _end_for_
-
-        # Return the marginal moments.
-        return mt, st
-    # _end_def_
-
-    def solve_nD(self, lin_a, off_b, m0, s0, sigma):
-        """
-        Euler integration method nD.
+        Runge-Kutta 4 integration method. This provides the actual solution.
 
         :param lin_a: Linear variational parameters (dim_n x dim_d x dim_d).
 
@@ -134,18 +60,39 @@ class RungeKutta4(OdeSolver):
 
         :param sigma: System noise variance (dim_d x dim_d).
 
+        :param single_dim: Boolean flag. Determines which version of the
+        code will be called.
+
         :return: 1) mt: posterior means values (dim_n x dim_d).
                  2) st: posterior variance values (dim_n x dim_d x dim_d).
         """
-        # Get the dimensions.
-        dim_n, dim_d = off_b.shape
 
-        # Preallocate the return arrays.
-        mt = np.zeros((dim_n, dim_d))
-        st = np.zeros((dim_n, dim_d, dim_d))
+        # Pre-allocate memory according to single_dim.
+        if single_dim:
+            # Number of discrete time points.
+            dim_n = off_b.shape[0]
+
+            # Return arrays.
+            mt = np.zeros(dim_n)
+            st = np.zeros(dim_n)
+        else:
+            # Get the dimensions.
+            dim_n, dim_d = off_b.shape
+
+            # Return arrays.
+            mt = np.zeros((dim_n, dim_d))
+            st = np.zeros((dim_n, dim_d, dim_d))
+        # _end_if_
 
         # Initialize the first moments.
         mt[0], st[0] = m0, s0
+
+        # Discrete time step.
+        dt = self.dt
+
+        # Local copies of auxiliary functions.
+        fun_mt = self.fun_mt
+        fun_st = self.fun_st
 
         # Compute the midpoints at time 't + 0.5*dt'.
         ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
@@ -166,26 +113,137 @@ class RungeKutta4(OdeSolver):
             b_mid = bk_mid[k]
 
             # Intermediate steps.
-            pk1 = self.fun_mt(mk, ak, bk) * self.dt
-            pk2 = self.fun_mt((mk + 0.5 * pk1), a_mid, b_mid) * self.dt
-            pk3 = self.fun_mt((mk + 0.5 * pk2), a_mid, b_mid) * self.dt
-            pk4 = self.fun_mt((mk + pk3), lin_a[k + 1], off_b[k + 1]) * self.dt
+            K1 = fun_mt(mk, ak, bk, single_dim) * dt
+            K2 = fun_mt((mk + 0.5 * K1), a_mid, b_mid, single_dim) * dt
+            K3 = fun_mt((mk + 0.5 * K2), a_mid, b_mid, single_dim) * dt
+            K4 = fun_mt((mk + K3), lin_a[k + 1], off_b[k + 1], single_dim) * dt
 
             # NEW "mean" point.
-            mt[k + 1] = mk + (pk1 + 2.0 * (pk2 + pk3) + pk4) / 6.0
+            mt[k + 1] = mk + (K1 + 2.0 * (K2 + K3) + K4) / 6.0
 
             # Intermediate steps.
-            pl1 = self.fun_ct(sk, ak, sigma) * self.dt
-            pl2 = self.fun_ct((sk + 0.5 * pl1), a_mid, sigma) * self.dt
-            pl3 = self.fun_ct((sk + 0.5 * pl2), a_mid, sigma) * self.dt
-            pl4 = self.fun_ct((sk + pl3), lin_a[k + 1], sigma) * self.dt
+            L1 = fun_st(sk, ak, sigma, single_dim) * dt
+            L2 = fun_st((sk + 0.5 * L1), a_mid, sigma, single_dim) * dt
+            L3 = fun_st((sk + 0.5 * L2), a_mid, sigma, single_dim) * dt
+            L4 = fun_st((sk + L3), lin_a[k + 1], sigma, single_dim) * dt
 
             # NEW "variance" point
-            st[k + 1] = sk + (pl1 + 2.0 * (pl2 + pl3) + pl4) / 6.0
+            st[k + 1] = sk + (L1 + 2.0 * (L2 + L3) + L4) / 6.0
         # _end_for_
 
-        # Return the marginal moments.
+        # Marginal moments.
         return mt, st
+    # _end_def_
+
+    def bwd(self, *args):
+        """
+        Backward solution of the ode. Provides the interface.
+
+        :param args: dictionary with the variational parameters.
+
+        :return: the result of the solver (Lagrange multipliers).
+        """
+        # Get the list of parameters.
+        p_list = args[0]
+
+        # Unpack the list.
+        at = p_list["at"]
+        dEsde_dm = p_list["dEsde_dm"]
+        dEsde_ds = p_list["dEsde_ds"]
+        dEobs_dm = p_list["dEobs_dm"]
+        dEobs_ds = p_list["dEobs_ds"]
+
+        # Dimensionality flag of the system.
+        # True, if it is single dimensional.
+        single_dim = at.shape[-1] == 1
+
+        # Return the solution of the bwd-ode.
+        return self.solve_bwd(at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim)
+    # _end_def_
+
+    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):
+        """
+        RK4 integration method. Provides the actual solution.
+
+        :param lin_a: Linear variational parameters (dim_n x dim_d x dim_d).
+
+        :param dEsde_dm: Derivative of Esde w.r.t. m(t), (dim_n x dim_d).
+
+        :param dEsde_ds: Derivative of Esde w.r.t. s(t), (dim_n x dim_d x dim_d).
+
+        :param dEobs_dm: Derivative of Eobs w.r.t. m(t), (dim_n x dim_d).
+
+        :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x dim_d x dim_d).
+
+        :param single_dim: Boolean flag. Determines which version of the
+        code will be called.
+
+        :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x dim_d),
+                 2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
+        """
+
+        # Pre-allocate memory according to single_dim.
+        if single_dim:
+            # Number of discrete points.
+            dim_n = dEsde_dm.shape[0]
+
+            # Return arrays.
+            lam = np.zeros(dim_n)
+            psi = np.zeros(dim_n)
+        else:
+            # Get the dimensions.
+            dim_n, dim_d = dEsde_dm.shape
+
+            # Return arrays.
+            lam = np.zeros((dim_n, dim_d))
+            psi = np.zeros((dim_n, dim_d, dim_d))
+        # _end_if_
+
+        # Discrete time step.
+        dt = self.dt
+
+        # Local copies of auxiliary functions.
+        fun_lam = self.fun_lam
+        fun_psi = self.fun_psi
+
+        # Compute the midpoints at time 't + 0.5*dt'.
+        ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
+        dEmk_mid = 0.5 * (dEsde_dm[0:-1] + dEsde_dm[1:])
+        dEsk_mid = 0.5 * (dEsde_ds[0:-1] + dEsde_ds[1:])
+
+        # Run through all time points.
+        for t in range(dim_n - 1, 0, -1):
+            # Get the values at time 't'.
+            at = lin_a[t]
+            lamt = lam[t]
+            psit = psi[t]
+
+            # Get the midpoints at time 't - 0.5*dt'.
+            ak = ak_mid[t]
+            dEmk = dEmk_mid[t]
+            dEsk = dEsk_mid[t]
+
+            # Lambda (backward) propagation: Intermediate steps.
+            K1 = fun_lam(dEsde_dm[t], at, lamt, single_dim) * dt
+            K2 = fun_lam(dEmk, ak, (lamt - 0.5 * K1), single_dim) * dt
+            K3 = fun_lam(dEmk, ak, (lamt - 0.5 * K2), single_dim) * dt
+            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lamt - K3), single_dim) * dt
+
+            # NEW "Lambda" point.
+            lam[t - 1] = lamt - (K1 + 2.0 * (K2 + K3) + K4) / 6.0 + dEobs_dm[t - 1]
+
+            # Psi (backward) propagation: Intermediate steps.
+            L1 = fun_psi(dEsde_ds[t], at, psit, single_dim) * dt
+            L2 = fun_psi(dEsk, ak, (psit - 0.5 * L1), single_dim) * dt
+            L3 = fun_psi(dEsk, ak, (psit - 0.5 * L2), single_dim) * dt
+            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psit - L3), single_dim) * dt
+
+            # NEW "Psi" point.
+            psi[t - 1] = psit - (L1 + 2.0 * (L2 + L3) + L4) / 6.0 + dEobs_ds[t - 1]
+        # _end_for_
+
+        # Lagrange multipliers.
+        return lam, psi
     # _end_def_
 
 # _end_class_
