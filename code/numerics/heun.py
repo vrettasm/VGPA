@@ -247,22 +247,24 @@ class Heun(OdeSolver):
             ak = lin_a[t - 1]
 
             # -Eq(14)- "Lambda" Prediction step.
-            ftp = self.fun_lam_1D(dEsde_dm[t], at, lamt)
+            f_predict = self.fun_lam_1D(dEsde_dm[t], at, lamt)
 
             # "Lambda" Correction step.
-            ftc = self.fun_lam_1D(dEsde_dm[t - 1], ak, (lamt - ftp * self.dt))
+            f_correct = self.fun_lam_1D(dEsde_dm[t - 1], ak,
+                                        (lamt - f_predict * self.dt))
 
             # NEW "Lambda" point.
-            lam[t - 1] = lamt - h * (ftp + ftc) + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - h * (f_predict + f_correct) + dEobs_dm[t - 1]
 
             # -Eq(15)- "Psi" Prediction step.
-            ftp = self.fun_psi_1D(dEsde_ds[t], at, psit)
+            f_predict = self.fun_psi_1D(dEsde_ds[t], at, psit)
 
             # "Psi" Correction step.
-            ftc = self.fun_psi_1D(dEsde_ds[t - 1], ak, (psit - ftp * self.dt))
+            f_correct = self.fun_psi_1D(dEsde_ds[t - 1], ak,
+                                        (psit - f_predict * self.dt))
 
             # NEW "Psi" point:
-            psi[t - 1] = psit - h * (ftp + ftc) + dEobs_ds[t - 1]
+            psi[t - 1] = psit - h * (f_predict + f_correct) + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.
@@ -307,22 +309,22 @@ class Heun(OdeSolver):
             ak = lin_a[t - 1]
 
             # -Eq(14)- "Lambda" Prediction step.
-            ftp = self.fun_lam_nD(dEsde_dm[t], at, lamt)
+            f_predict = self.fun_lam_nD(dEsde_dm[t], at, lamt)
 
             # "Lambda" Correction step.
-            ftc = self.fun_lam_nD(dEsde_dm[t - 1], ak, (lamt - ftp * self.dt))
-
+            f_correct = self.fun_lam_nD(dEsde_dm[t - 1], ak,
+                                        (lamt - f_predict * self.dt))
             # NEW "Lambda" point.
-            lam[t - 1] = lamt - h * (ftp + ftc) + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - h * (f_predict + f_correct) + dEobs_dm[t - 1]
 
             # -Eq(15)- "Psi" Prediction step.
-            ftp = self.fun_psi_nD(dEsde_ds[t], at, psit)
+            f_predict = self.fun_psi_nD(dEsde_ds[t], at, psit)
 
             # "Psi" Correction step.
-            ftc = self.fun_psi_nD(dEsde_ds[t - 1], ak, (psit - ftp * self.dt))
-
+            f_correct = self.fun_psi_nD(dEsde_ds[t - 1], ak,
+                                        (psit - f_predict * self.dt))
             # NEW "Psi" point:
-            psi[t - 1] = psit - h * (ftp + ftc) + dEobs_ds[t - 1]
+            psi[t - 1] = psit - h * (f_predict + f_correct) + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.
