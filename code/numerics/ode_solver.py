@@ -20,10 +20,6 @@ class OdeSolver(object):
         # _end_if_
     # _end_def_
 
-    # Define (static) methods for the computation of the marginal
-    # means and covariances for the "nD" versions. These are very
-    # helpful for the Runge-Kutta (2/4) implementations!
-
     @staticmethod
     def fun_mt(mt, at, bt, single_dim=True):
         # Switch according to single_dim.
