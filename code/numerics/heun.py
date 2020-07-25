@@ -22,7 +22,7 @@ class Heun(OdeSolver):
 
     def fwd(self, *args):
         """
-        Solution of the ode.
+        Forward solution of the ode. This provides the interface.
 
         :param args: dictionary with the variational parameters.
 
@@ -38,86 +38,17 @@ class Heun(OdeSolver):
         s0 = p_list["s0"]
         sigma = p_list["sigma"]
 
-        # Dimensionality of the system.
-        if at.shape[-1] == 1:
-            return self.solve_fwd_1D(at, bt, m0, s0, sigma)
-        else:
-            return self.solve_fwd_nD(at, bt, m0, s0, sigma)
-        # _end_if_
+        # Dimensionality flag of the system.
+        # True, if it is single dimensional.
+        single_dim = at.shape[-1] == 1
 
+        # Return the solution of the fwd-ode.
+        return self.solve_fwd(at, bt, m0, s0, sigma, single_dim)
     # _end_def_
 
-    def solve_fwd_1D(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
         """
-        Heun integration method 1D.
-
-        :param lin_a: Linear variational parameters (dim_n x 1).
-
-        :param off_b: Offset variational parameters (dim_n x 1).
-
-        :param m0: Initial marginal mean (scalar).
-
-        :param s0: Initial marginal variance (scalar).
-
-        :param sigma: System noise variance (scalar).
-
-        :return: 1) mt: posterior means values (dim_n x 1).
-                 2) st: posterior variance values (dim_n x 1).
-        """
-
-        # Get the number of discrete time points.
-        dim_n = off_b.shape[0]
-
-        # Preallocate the return arrays.
-        mt = np.zeros(dim_n)
-        st = np.zeros(dim_n)
-
-        # Initialize the first moments.
-        mt[0], st[0] = m0, s0
-
-        # Half step-size.
-        h = 0.5 * self.dt
-
-        # Run through all time points.
-        for k in range(dim_n - 1):
-            # Get the values at time 'tk'.
-            ak = lin_a[k]
-            bk = off_b[k]
-
-            # Marginal moments.
-            sk = st[k]
-            mk = mt[k]
-
-            # Get the value at time 't+1'.
-            a_plus = lin_a[k + 1]
-            b_plus = off_b[k + 1]
-
-            # -Eq(09)- Prediction step:
-            ftp = -ak * mk + bk
-
-            # Correction step:
-            ftc = -a_plus * (mk + ftp * self.dt) + b_plus
-
-            # NEW "mean" point.
-            mt[k + 1] = mk + h * (ftp + ftc)
-
-            # -Eq(10)- Prediction step:
-            ftp = -2.0 * ak * sk + sigma
-
-            # Correction step:
-            ftc = -2.0 * a_plus * (sk + ftp * self.dt) + sigma
-
-            # NEW "variance" point.
-            st[k + 1] = sk + h * (ftp + ftc)
-        # _end_for_
-
-        # Return the marginal moments.
-        return mt, st
-    # _end_def_
-
-    def solve_fwd_nD(self, lin_a, off_b, m0, s0, sigma):
-        """
-        Heun integration method nD.
+        Heun integration method. This provides the actual solution.
 
         :param lin_a: Linear variational parameters (dim_n x dim_d x dim_d).
 
@@ -129,21 +60,42 @@ class Heun(OdeSolver):
 
         :param sigma: System noise variance (dim_d x dim_d).
 
+        :param single_dim: Boolean flag. Determines which version of the
+        code will be called.
+
         :return: 1) mt: posterior means values (dim_n x dim_d).
                  2) st: posterior variance values (dim_n x dim_d x dim_d).
         """
-        # Get the dimensions.
-        dim_n, dim_d = off_b.shape
 
-        # Preallocate the return arrays.
-        mt = np.zeros((dim_n, dim_d))
-        st = np.zeros((dim_n, dim_d, dim_d))
+        # Pre-allocate memory according to single_dim.
+        if single_dim:
+            # Number of discrete time points.
+            dim_n = off_b.shape[0]
+
+            # Return arrays.
+            mt = np.zeros(dim_n)
+            st = np.zeros(dim_n)
+        else:
+            # Get the dimensions.
+            dim_n, dim_d = off_b.shape
+
+            # Return arrays.
+            mt = np.zeros((dim_n, dim_d))
+            st = np.zeros((dim_n, dim_d, dim_d))
+        # _end_if_
 
         # Initialize the first moments.
         mt[0], st[0] = m0, s0
 
+        # Discrete time step.
+        dt = self.dt
+
+        # Local copies of auxiliary functions.
+        fun_mt = self.fun_mt
+        fun_st = self.fun_st
+
         # Half step-size.
-        h = 0.5 * self.dt
+        h = 0.5 * dt
 
         # Run through all time points.
         for k in range(dim_n - 1):
@@ -160,31 +112,31 @@ class Heun(OdeSolver):
             b_plus = off_b[k + 1]
 
             # -Eq(09)- Prediction step:
-            ftp = self.fun_mt_nD(mk, ak, bk)
+            f_predict = fun_mt(mk, ak, bk, single_dim)
 
             # Correction step:
-            ftc = self.fun_mt_nD((mk + ftp * self.dt), a_plus, b_plus)
+            f_correct = fun_mt((mk + f_predict * dt, single_dim), a_plus, b_plus)
 
             # NEW "mean" point.
-            mt[k + 1] = mk + h * (ftp + ftc)
+            mt[k + 1] = mk + h * (f_predict + f_correct)
 
             # -Eq(10)- Prediction step:
-            ftp = self.fun_st_nD(sk, ak, sigma)
+            f_predict = fun_st(sk, ak, sigma, single_dim)
 
             # Correction step:
-            ftc = self.fun_st_nD((sk + ftp * self.dt), a_plus, sigma)
+            f_correct = fun_st((sk + f_predict * dt, single_dim), a_plus, sigma)
 
             # NEW "variance" point.
-            st[k + 1] = sk + h * (ftp + ftc)
+            st[k + 1] = sk + h * (f_predict + f_correct)
         # _end_for_
 
-        # Return the marginal moments.
+        # Marginal moments.
         return mt, st
     # _end_def_
 
     def bwd(self, *args):
         """
-        Backward solution of the ode.
+        Backward solution of the ode.  Provides the interface.
 
         :param args: dictionary with the variational parameters.
 
@@ -200,80 +152,17 @@ class Heun(OdeSolver):
         dEobs_dm = p_list["dEobs_dm"]
         dEobs_ds = p_list["dEobs_ds"]
 
-        # Dimensionality of the system.
-        if at.shape[-1] == 1:
-            return self.solve_bwd_1D(at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds)
-        else:
-            return self.solve_bwd_nD(at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds)
-        # _end_if_
+        # Dimensionality flag of the system.
+        # True, if it is single dimensional.
+        single_dim = at.shape[-1] == 1
+
+        # Return the solution of the bwd-ode.
+        return self.solve_bwd(at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim)
     # _end_def_
 
-    def solve_bwd_1D(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
+    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):
         """
-        Heun integration method 1D.
-
-        :param lin_a: Linear variational parameters (dim_n x 1).
-
-        :param dEsde_dm: Derivative of Esde w.r.t. m(t), (dim_n x 1).
-
-        :param dEsde_ds: Derivative of Esde w.r.t. s(t), (dim_n x 1).
-
-        :param dEobs_dm: Derivative of Eobs w.r.t. m(t), (dim_n x 1).
-
-        :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x 1).
-
-        :return: 1) lam: Lagrange multipliers for the mean values (dim_n x 1),
-                 2) psi: Lagrange multipliers for the var values (dim_n x 1).
-        """
-
-        # Get the dimensions.
-        dim_n = dEsde_dm.shape[0]
-
-        # Preallocate the return arrays.
-        lam = np.zeros(dim_n)
-        psi = np.zeros(dim_n)
-
-        # Half step-size.
-        h = 0.5 * self.dt
-
-        # Run through all time points.
-        for t in range(dim_n - 1, 0, -1):
-            # Get the values at time 't'.
-            at = lin_a[t]
-            lamt = lam[t]
-            psit = psi[t]
-
-            # Get the value at time 't-1'.
-            ak = lin_a[t - 1]
-
-            # -Eq(14)- "Lambda" Prediction step.
-            f_predict = self.fun_lam_1D(dEsde_dm[t], at, lamt)
-
-            # "Lambda" Correction step.
-            f_correct = self.fun_lam_1D(dEsde_dm[t - 1], ak,
-                                        (lamt - f_predict * self.dt))
-
-            # NEW "Lambda" point.
-            lam[t - 1] = lamt - h * (f_predict + f_correct) + dEobs_dm[t - 1]
-
-            # -Eq(15)- "Psi" Prediction step.
-            f_predict = self.fun_psi_1D(dEsde_ds[t], at, psit)
-
-            # "Psi" Correction step.
-            f_correct = self.fun_psi_1D(dEsde_ds[t - 1], ak,
-                                        (psit - f_predict * self.dt))
-
-            # NEW "Psi" point:
-            psi[t - 1] = psit - h * (f_predict + f_correct) + dEobs_ds[t - 1]
-        # _end_for_
-
-        # Lagrange multipliers.
-        return lam, psi
-    # _end_def_
-
-    def solve_bwd_nD(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
-        """
-        heun integration method 1D.
+        Heun integration method 1D. Provides the actual solution.
 
         :param lin_a: Linear variational parameters (dim_n x dim_d x dim_d).
 
@@ -285,18 +174,39 @@ class Heun(OdeSolver):
 
         :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x dim_d x dim_d).
 
-        :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x 1),
-                 2) psi: Lagrange multipliers for the var values (dim_n x 1).
-        """
-        # Get the dimensions.
-        dim_n, dim_d = dEsde_dm.shape
+        :param single_dim: Boolean flag. Determines which version of the
+        code will be called.
 
-        # Preallocate the return arrays.
-        lam = np.zeros((dim_n, dim_d))
-        psi = np.zeros((dim_n, dim_d, dim_d))
+        :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x dim_d),
+                 2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
+        """
+
+        # Pre-allocate memory according to single_dim.
+        if single_dim:
+            # Number of discrete points.
+            dim_n = dEsde_dm.shape[0]
+
+            # Return arrays.
+            lam = np.zeros(dim_n)
+            psi = np.zeros(dim_n)
+        else:
+            # Get the dimensions.
+            dim_n, dim_d = dEsde_dm.shape
+
+            # Return arrays.
+            lam = np.zeros((dim_n, dim_d))
+            psi = np.zeros((dim_n, dim_d, dim_d))
+        # _end_if_
+
+        # Discrete time step.
+        dt = self.dt
+
+        # Local copies of auxiliary functions.
+        fun_lam = self.fun_lam
+        fun_psi = self.fun_psi
 
         # Half step-size.
-        h = 0.5 * self.dt
+        h = 0.5 * dt
 
         # Run through all time points.
         for t in range(dim_n - 1, 0, -1):
@@ -309,20 +219,20 @@ class Heun(OdeSolver):
             ak = lin_a[t - 1]
 
             # -Eq(14)- "Lambda" Prediction step.
-            f_predict = self.fun_lam_nD(dEsde_dm[t], at, lamt)
+            f_predict = fun_lam(dEsde_dm[t], at, lamt, single_dim)
 
             # "Lambda" Correction step.
-            f_correct = self.fun_lam_nD(dEsde_dm[t - 1], ak,
-                                        (lamt - f_predict * self.dt))
+            f_correct = fun_lam(dEsde_dm[t - 1], ak, (lamt - f_predict * dt), single_dim)
+
             # NEW "Lambda" point.
             lam[t - 1] = lamt - h * (f_predict + f_correct) + dEobs_dm[t - 1]
 
             # -Eq(15)- "Psi" Prediction step.
-            f_predict = self.fun_psi_nD(dEsde_ds[t], at, psit)
+            f_predict = fun_psi(dEsde_ds[t], at, psit, single_dim)
 
             # "Psi" Correction step.
-            f_correct = self.fun_psi_nD(dEsde_ds[t - 1], ak,
-                                        (psit - f_predict * self.dt))
+            f_correct = fun_psi(dEsde_ds[t - 1], ak, (psit - f_predict * dt), single_dim)
+
             # NEW "Psi" point:
             psi[t - 1] = psit - h * (f_predict + f_correct) + dEobs_ds[t - 1]
         # _end_for_
