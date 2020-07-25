@@ -20,32 +20,6 @@ class RungeKutta2(OdeSolver):
         super().__init__(dt)
     # _end_def_
 
-    def fwd(self, *args):
-        """
-        Forward solution of the ode. This provides the interface.
-
-        :param args: dictionary with the variational parameters.
-
-        :return: the result of the solver (marginal moments).
-        """
-        # Get the list of parameters.
-        p_list = args[0]
-
-        # Unpack the list.
-        at = p_list["at"]
-        bt = p_list["bt"]
-        m0 = p_list["m0"]
-        s0 = p_list["s0"]
-        sigma = p_list["sigma"]
-
-        # Dimensionality flag of the system.
-        # True, if it is single dimensional.
-        single_dim = at.shape[-1] == 1
-
-        # Return the solution of the fwd-ode.
-        return self.solve_fwd(at, bt, m0, s0, sigma, single_dim)
-    # _end_def_
-
     def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
         """
         Runge-Kutta (2) integration method. This provides the actual solution.
@@ -126,32 +100,6 @@ class RungeKutta2(OdeSolver):
 
         # Marginal moments.
         return mt, st
-    # _end_def_
-
-    def bwd(self, *args):
-        """
-        Backward solution of the ode. Provides the interface.
-
-        :param args: dictionary with the variational parameters.
-
-        :return: the result of the solver (Lagrange multipliers).
-        """
-        # Get the list of parameters.
-        p_list = args[0]
-
-        # Unpack the list.
-        at = p_list["at"]
-        dEsde_dm = p_list["dEsde_dm"]
-        dEsde_ds = p_list["dEsde_ds"]
-        dEobs_dm = p_list["dEobs_dm"]
-        dEobs_ds = p_list["dEobs_ds"]
-
-        # Dimensionality flag of the system.
-        # True, if it is single dimensional.
-        single_dim = at.shape[-1] == 1
-
-        # Return the solution of the bwd-ode.
-        return self.solve_bwd(at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim)
     # _end_def_
 
     def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):

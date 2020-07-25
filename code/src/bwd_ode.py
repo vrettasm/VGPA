@@ -65,15 +65,29 @@ class BwdOde(object):
         # _end_if_
     # _end_def_
 
-    def __call__(self, *args):
+    def __call__(self, at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
         """
-        Call the solver method.
+        Call the bwd solve method of the solver object.
+        This is the uniform interface af all methods.
 
-        :param args: dictionary with variational parameters.
+        :param at: Linear variational parameters.
 
-        :return: marginal means and co-variances.
+        :param dEsde_dm: Derivative of Esde w.r.t. m(t).
+
+        :param dEsde_ds: Derivative of Esde w.r.t. s(t).
+
+        :param dEobs_dm: Derivative of Eobs w.r.t. m(t).
+
+        :param dEobs_ds: Derivative of Eobs w.r.t. s(t).
+
+        :return:
         """
-        return self.solver.bwd(*args)
+        # Dimensionality flag of the system.
+        # True, if it is single dimensional.
+        single_dim = at.shape[-1] == 1
+
+        # Return the solution of the fwd-ode.
+        return self.solver.solve_bwd(at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim)
     # _end_def_
 
     # Auxiliary.

@@ -64,15 +64,29 @@ class FwdOde(object):
         # _end_if_
     # _end_def_
 
-    def __call__(self, *args):
+    def __call__(self, at, bt, m0, s0, sigma):
         """
-        Call the solver method.
+        Call the fwd solve method of the solver object.
+        This is the uniform interface af all methods.
 
-        :param args: dictionary with variational parameters.
+        :param at: Linear (variational) parameters.
 
-        :return: marginal means and co-variances.
+        :param bt: Offset (variational) parameters.
+
+        :param m0: Initial marginal mean (at t=0).
+
+        :param s0: Initial marginal variance (at t=0).
+
+        :param sigma: System noise coefficient.
+
+        :return: the result of the solver (marginal moments).
         """
-        return self.solver.fwd(*args)
+        # Dimensionality flag of the system.
+        # True, if it is single dimensional.
+        single_dim = at.shape[-1] == 1
+
+        # Return the solution of the fwd-ode.
+        return self.solver.solve_fwd(at, bt, m0, s0, sigma, single_dim)
     # _end_def_
 
     # Auxiliary.
