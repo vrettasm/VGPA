@@ -136,7 +136,7 @@ class Heun(OdeSolver):
 
     def bwd(self, *args):
         """
-        Backward solution of the ode.  Provides the interface.
+        Backward solution of the ode. Provides the interface.
 
         :param args: dictionary with the variational parameters.
 
@@ -162,7 +162,7 @@ class Heun(OdeSolver):
 
     def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):
         """
-        Heun integration method 1D. Provides the actual solution.
+        Heun integration method. Provides the actual solution.
 
         :param lin_a: Linear variational parameters (dim_n x dim_d x dim_d).
 
