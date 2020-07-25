@@ -1,4 +1,3 @@
-
 class OdeSolver(object):
     """
     Parent class of all ODE solvers.
@@ -24,9 +23,6 @@ class OdeSolver(object):
     # Define (static) methods for the computation of the marginal
     # means and covariances for the "nD" versions. These are very
     # helpful for the Runge-Kutta (2/4) implementations!
-
-    # # Define locally (lambda) functions.
-    #         fun_st = lambda ski, aki, sig: (-2.0 * aki * ski + sig)
 
     @staticmethod
     def fun_mt_1D(mt, at, bt):
@@ -64,8 +60,8 @@ class OdeSolver(object):
     # _end_def_
 
     @staticmethod
-    def fun_psi_nD(df_ds, at, psi_t):
-        return -df_ds + psi_t.dot(at) + at.T.dot(psi_t)
+    def fun_psi_nD(df_ds, at, psit):
+        return -df_ds + psit.dot(at) + at.T.dot(psit)
     # _end_def_
 
 # _end_class_
