@@ -6,6 +6,8 @@ class Euler(OdeSolver):
     """
     Euler's method of integration:
 
+    y_{n+1} = y_{n} + h * f(t_{n}, y_{n})
+
     https://en.wikipedia.org/wiki/Euler_method
 
     """
