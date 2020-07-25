@@ -6,6 +6,9 @@ class Heun(OdeSolver):
     """
     Heun's method of integration:
 
+    c_{n+1} = y_{n} + h * f(t_{n}, y_{n})
+    y_{n+1} = y_{n} + h/2 * (f(t_{n}, y_{n}) * f(t_{n+1}, c_{n+1}) )
+
     https://en.wikipedia.org/wiki/Heun%27s_method
 
     """
