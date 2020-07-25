@@ -25,43 +25,39 @@ class OdeSolver(object):
     # helpful for the Runge-Kutta (2/4) implementations!
 
     @staticmethod
-    def fun_mt_1D(mt, at, bt):
-        return -at * mt + bt
+    def fun_mt(mt, at, bt, single_dim=True):
+        # Switch according to single_dim.
+        if single_dim:
+            return -at * mt + bt
+        else:
+            return -at.dot(mt.T) + bt
     # _end_def_
 
     @staticmethod
-    def fun_mt_nD(mt, at, bt):
-        return -mt.dot(at.T) + bt
+    def fun_st(st, at, sn, single_dim=True):
+        # Switch according to single_dim.
+        if single_dim:
+            return -2.0 * at * st + sn
+        else:
+            return -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
 
     @staticmethod
-    def fun_st_1D(st, at, sn):
-        return -2.0 * at * st + sn
+    def fun_lam(df_dm, at, lamt, single_dim=True):
+        # Switch according to single_dim.
+        if single_dim:
+            return -df_dm + lamt * at
+        else:
+            return -df_dm + lamt.dot(at.T)
     # _end_def_
 
     @staticmethod
-    def fun_st_nD(st, at, sn):
-        return -at.dot(st) - st.dot(at.T) + sn
-    # _end_def_
-
-    @staticmethod
-    def fun_lam_1D(df_dm, at, lamt):
-        return -df_dm + lamt * at
-    # _end_def_
-
-    @staticmethod
-    def fun_lam_nD(df_dm, at, lamt):
-        return -df_dm + lamt.dot(at.T)
-    # _end_def_
-
-    @staticmethod
-    def fun_psi_1D(df_ds, at, psit):
-        return -df_ds + 2.0 * psit * at
-    # _end_def_
-
-    @staticmethod
-    def fun_psi_nD(df_ds, at, psit):
-        return -df_ds + psit.dot(at) + at.T.dot(psit)
+    def fun_psi(df_ds, at, psit, single_dim=True):
+        # Switch according to single_dim.
+        if single_dim:
+            return -df_ds + 2.0 * psit * at
+        else:
+            return -df_ds + psit.dot(at) + at.T.dot(psit)
     # _end_def_
 
 # _end_class_
