@@ -72,6 +72,9 @@ class RungeKutta4(OdeSolver):
         ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
         bk_mid = 0.5 * (off_b[0:-1] + off_b[1:])
 
+        # Half step-size.
+        h = 0.5 * dt
+
         # Run through all time points.
         for k in range(dim_n - 1):
             # Get the values at time 'tk'.
@@ -87,22 +90,22 @@ class RungeKutta4(OdeSolver):
             b_mid = bk_mid[k]
 
             # Intermediate steps.
-            K1 = fun_mt(mk, ak, bk, single_dim) * dt
-            K2 = fun_mt((mk + 0.5 * K1), a_mid, b_mid, single_dim) * dt
-            K3 = fun_mt((mk + 0.5 * K2), a_mid, b_mid, single_dim) * dt
-            K4 = fun_mt((mk + K3), lin_a[k + 1], off_b[k + 1], single_dim) * dt
+            K1 = fun_mt(mk, ak, bk, single_dim)
+            K2 = fun_mt((mk + h * K1), a_mid, b_mid, single_dim)
+            K3 = fun_mt((mk + h * K2), a_mid, b_mid, single_dim)
+            K4 = fun_mt((mk + dt * K3), lin_a[k + 1], off_b[k + 1], single_dim)
 
             # NEW "mean" point.
-            mt[k + 1] = mk + (K1 + 2.0 * (K2 + K3) + K4) / 6.0
+            mt[k + 1] = mk + dt * (K1 + 2.0 * (K2 + K3) + K4) / 6.0
 
             # Intermediate steps.
-            L1 = fun_st(sk, ak, sigma, single_dim) * dt
-            L2 = fun_st((sk + 0.5 * L1), a_mid, sigma, single_dim) * dt
-            L3 = fun_st((sk + 0.5 * L2), a_mid, sigma, single_dim) * dt
-            L4 = fun_st((sk + L3), lin_a[k + 1], sigma, single_dim) * dt
+            L1 = fun_st(sk, ak, sigma, single_dim)
+            L2 = fun_st((sk + h * L1), a_mid, sigma, single_dim)
+            L3 = fun_st((sk + h * L2), a_mid, sigma, single_dim)
+            L4 = fun_st((sk + dt * L3), lin_a[k + 1], sigma, single_dim)
 
             # NEW "variance" point
-            st[k + 1] = sk + (L1 + 2.0 * (L2 + L3) + L4) / 6.0
+            st[k + 1] = sk + dt * (L1 + 2.0 * (L2 + L3) + L4) / 6.0
         # _end_for_
 
         # Marginal moments.
@@ -150,6 +153,9 @@ class RungeKutta4(OdeSolver):
         # Discrete time step.
         dt = self.dt
 
+        # Half step-size.
+        h = 0.5 * dt
+
         # Local copies of auxiliary functions.
         fun_lam = self.fun_lam
         fun_psi = self.fun_psi
@@ -172,22 +178,22 @@ class RungeKutta4(OdeSolver):
             dEsk = dEsk_mid[t]
 
             # Lambda (backward) propagation: Intermediate steps.
-            K1 = fun_lam(dEsde_dm[t], at, lamt, single_dim) * dt
-            K2 = fun_lam(dEmk, ak, (lamt - 0.5 * K1), single_dim) * dt
-            K3 = fun_lam(dEmk, ak, (lamt - 0.5 * K2), single_dim) * dt
-            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lamt - K3), single_dim) * dt
+            K1 = fun_lam(dEsde_dm[t], at, lamt, single_dim)
+            K2 = fun_lam(dEmk, ak, (lamt - h * K1), single_dim)
+            K3 = fun_lam(dEmk, ak, (lamt - h * K2), single_dim)
+            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lamt - dt * K3), single_dim)
 
             # NEW "Lambda" point.
-            lam[t - 1] = lamt - (K1 + 2.0 * (K2 + K3) + K4) / 6.0 + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - dt * (K1 + 2.0 * (K2 + K3) + K4) / 6.0 + dEobs_dm[t - 1]
 
             # Psi (backward) propagation: Intermediate steps.
-            L1 = fun_psi(dEsde_ds[t], at, psit, single_dim) * dt
-            L2 = fun_psi(dEsk, ak, (psit - 0.5 * L1), single_dim) * dt
-            L3 = fun_psi(dEsk, ak, (psit - 0.5 * L2), single_dim) * dt
-            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psit - L3), single_dim) * dt
+            L1 = fun_psi(dEsde_ds[t], at, psit, single_dim)
+            L2 = fun_psi(dEsk, ak, (psit - h * L1), single_dim)
+            L3 = fun_psi(dEsk, ak, (psit - h * L2), single_dim)
+            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psit - dt * L3), single_dim)
 
             # NEW "Psi" point.
-            psi[t - 1] = psit - (L1 + 2.0 * (L2 + L3) + L4) / 6.0 + dEobs_ds[t - 1]
+            psi[t - 1] = psit - dt * (L1 + 2.0 * (L2 + L3) + L4) / 6.0 + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.
