@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-from scipy.linalg import cholesky
+from scipy.linalg import cholesky, inv
 from scipy.integrate import trapz as sp_trapz
 
 
@@ -187,4 +187,25 @@ def my_trapz(fx, dx=1.0, obs_t=None):
 
     # Return the total integral.
     return tot_area
+# _end_def_
+
+def chol_inv(x):
+    """
+    Inverts an input array (matrix) using Cholesky decomposition.
+
+    :param x: input array (dim_d x dim_d)
+
+    :return: inverted 'x' and inverted Cholesky factor.
+    """
+
+    # Make sure input is array.
+    x = np.asarray(x)
+
+    # Invert the Cholesky decomposition.
+    c_inv = inv(cholesky(x))
+
+    # Invert input matrix.
+    x_inv = c_inv.T.dot(c_inv)
+
+    return x_inv, c_inv
 # _end_def_
