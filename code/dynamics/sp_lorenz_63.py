@@ -103,6 +103,18 @@ class Lorenz63(StochasticProcess):
         return self.theta_
     # _end_def_
 
+    @theta.setter
+    def theta(self, new_value):
+        """
+        Accessor method.
+
+        :param new_value: for the drift parameter.
+
+        :return: None.
+        """
+        self.theta_ = new_value
+    # _end_def_
+
     @property
     def sigma(self):
         """
@@ -111,6 +123,36 @@ class Lorenz63(StochasticProcess):
         :return: the system noise parameter.
         """
         return self.sigma_
+    # _end_def_
+
+    @sigma.setter
+    def sigma(self, new_value):
+        """
+        Accessor method.
+
+        :param new_value: for the sigma diffusion.
+
+        :return: None.
+        """
+
+        # Check the dimensionality.
+        if new_value.shape != (3, 3):
+            raise ValueError(" {0}: Wrong matrix dimensions:"
+                             " {1}".format(self.__class__.__name__, new_value.shape))
+        # _end_if_
+
+        # Check for positive definiteness.
+        if np.all(np.linalg.eigvals(new_value) > 0.0):
+            # Make the change.
+            self.sigma_ = new_value
+
+            # Update the inverse value.
+            self.sig_inv = inv(self.sigma_)
+        else:
+            raise RuntimeError(" {0}: Noise matrix is not"
+                               " positive definite.".format(self.__class__.__name__,
+                                                            new_value))
+        # _end_if_
     # _end_def_
 
     def make_trajectory(self, t0, tf, dt=0.01):
