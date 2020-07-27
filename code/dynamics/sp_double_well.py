@@ -12,10 +12,10 @@ class DoubleWell(StochasticProcess):
 
     NOTE: The equation numbers correspond to the paper:
 
-    Cedric A. Opper M. Shen Y. Cornford D. and Shawe-Taylor J. (2007).
-    "Variational Inference for Diffusion Processes". Annual Conference
-    on Neural Information Processing Systems (NIPS).
-
+    Cedric Archambeau, Manfred Opper, Yuan Shen, Dan Cornford, and
+    John Shawe-Taylor (2007). "Variational Inference for Diffusion
+    Processes". Annual Conference on Neural Information Processing
+    Systems (NIPS).
     """
 
     __slots__ = ("sigma_", "theta_", "sig_inv")
