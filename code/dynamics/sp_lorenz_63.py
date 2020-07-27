@@ -82,6 +82,8 @@ class Lorenz63(StochasticProcess):
 
         # Check for positive definiteness.
         if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
+
+            # This is not the best way to invert.
             self.sig_inv = inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
@@ -134,7 +136,6 @@ class Lorenz63(StochasticProcess):
 
         :return: None.
         """
-
         # Check the dimensionality.
         if new_value.shape != (3, 3):
             raise ValueError(" {0}: Wrong matrix dimensions:"
