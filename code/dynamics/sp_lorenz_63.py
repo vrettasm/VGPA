@@ -15,7 +15,7 @@ def l63(x, u):
 
     :param u: model parameters (theta=10, rho=28, beta=8/3).
 
-    :return: One step ahead in the eq.
+    :return: One step ahead in the equation.
     """
 
     # Unpack parameters.
@@ -155,8 +155,8 @@ class Lorenz63(StochasticProcess):
             ek = cholesky(self.sigma_ * dt)
         except LinAlgError:
             # Show a warning message.
-            print(" Warning : The input matrix could was not positive"
-                  " definite. The diagonal elements will be used instead.")
+            print(" Warning : The input matrix was not positive definite."
+                  " The diagonal elements will be used instead.")
 
             # If it fails use the diagonal only.
             ek = np.sqrt(np.eye(3) * self.sigma_ * dt)
@@ -245,7 +245,7 @@ class Lorenz63(StochasticProcess):
             mt, st = m[t], s[t]
 
             # Compute the energy and the related gradients.
-            Efg, Edm, EdS = self.energy_dm_ds(at, bt, mt, st, diag_sig_inv)
+            Efg, Edm, Eds = self.energy_dm_ds(at, bt, mt, st, diag_sig_inv)
 
             # Energy Esde(t):
             Esde[t] = 0.5 * diag_sig_inv.dot(Efg)
@@ -254,16 +254,17 @@ class Lorenz63(StochasticProcess):
             dEsde_dm[t] = Edm
 
             # Gradient dEsde(t)/dS(t):
-            dEsde_ds[t] = EdS
+            dEsde_ds[t] = Eds
 
             # Average drift: <f(Xt)>
-            Ef[t] = np.array([(vS * (mt[1] - mt[0])),
-                              (vR * mt[0] - mt[1] - st[2, 0] - mt[0] * mt[2]),
-                              (st[1, 0] + mt[0] * mt[1] - vB * mt[2])])
+            Ef[t] = np.array([vS * (mt[1] - mt[0]),
+                              vR * mt[0] - mt[1] - st[2, 0] - mt[0] * mt[2],
+                              st[1, 0] + mt[0] * mt[1] - vB * mt[2]])
 
             # Average gradient of drift: <Df(Xt)>
             Edf[t] = np.array([[-vS, vS, 0],
-                               [(vR - mt[2]), -1, -mt[0]], [mt[1], mt[0], -vB]])
+                               [vR - mt[2], -1, -mt[0]],
+                               [mt[1], mt[0], -vB]])
 
             # Gradients of Esde w.r.t. 'Theta'.
             dEsde_dth[t] = self.Efg_drift_theta(at, bt, mt, st)
@@ -324,8 +325,8 @@ class Lorenz63(StochasticProcess):
         # Note that this is symmetric so we extract
         # only the upper triangular elements of S(t).
         Sxx, Sxy, Sxz = st[0]
-        Syy, Syz = st[1, 1:]
-        Szz = st[2, 2]
+        _, Syy, Syz = st[1]
+        _, _, Szz = st[2]
 
         # Compute second (2nd) order expectations.
         Exx = Sxx + mx ** 2
@@ -374,70 +375,54 @@ class Lorenz63(StochasticProcess):
 
         # Compute the derivatives of second (2nd) order
         # expectations with respect to mt.
-        dExx_dmx = 2 * mx
-        dExy_dmx = my
-        dExz_dmx = mz
-        # ---
-        dEyy_dmy = 2 * my
-        dExy_dmy = mx
-        dEyz_dmy = mz
-        # ---
-        dEzz_dmz = 2 * mz
-        dExz_dmz = mx
-        dEyz_dmz = my
+        dExx_dmx, dExy_dmx, dExz_dmx = 2.0 * mx, my, mz
+        dEyy_dmy, dExy_dmy, dEyz_dmy = 2.0 * my, mx, mz
+        dEzz_dmz, dExz_dmz, dEyz_dmz = 2.0 * mz, mx, my
 
         # Compute the derivatives of second (2nd) order
         # expectations with respect to St.
-        dExx_dSxx = 1
-        dEyy_dSyy = 1
-        dEzz_dSzz = 1
-        dExy_dSxy = 1
-        dExz_dSxz = 1
-        dEyz_dSyz = 1
+        dExx_dSxx, dEyy_dSyy, dEzz_dSzz = 1, 1, 1
+        dExy_dSxy, dExz_dSxz, dEyz_dSyz = 1, 1, 1
 
         # Compute the derivatives of third (3rd) order
         # expectations with respect to mt.
-        dExxy_dmx = 2 * Exy
-        dExxz_dmx = 2 * Exz
+        dExxy_dmx = 2.0 * Exy
+        dExxz_dmx = 2.0 * Exz
         dExyy_dmx = Eyy
         dExzz_dmx = Ezz
         dExyz_dmx = Eyz
         # ---
         dExxy_dmy = Exx
-        dExyy_dmy = 2 * Exy
+        dExyy_dmy = 2.0 * Exy
         dExyz_dmy = Exz
         # ---
         dExxz_dmz = Exx
-        dExzz_dmz = 2 * Exz
+        dExzz_dmz = 2.0 * Exz
         dExyz_dmz = Exy
 
         # Compute the derivatives of third (3rd) order
         # expectations with respect to St.
         dExxy_dSxx = my
         dExxz_dSxx = mz
-        dExxy_dSxy = 2 * mx
-        dExyy_dSxy = 2 * my
+        dExxy_dSxy = 2.0 * mx
+        dExyy_dSxy = 2.0 * my
         dExyz_dSxy = mz
-        dExzz_dSxz = 2 * mz
+        dExzz_dSxz = 2.0 * mz
         dExyz_dSxz = my
-        dExxz_dSxz = 2 * mx
+        dExxz_dSxz = 2.0 * mx
         dExyy_dSyy = mx
         dExyz_dSyz = mx
         dExzz_dSzz = mx
 
         # Compute the derivatives of forth (4th) order expectations w.r.t. to mt.
-        dExxyy_dmx = 2 * Exyy
-        dExxzz_dmx = 2 * Exzz
-        dExxyy_dmy = 2 * Exxy
-        dExxzz_dmz = 2 * Exxz
+        dExxyy_dmx = 2.0 * Exyy
+        dExxzz_dmx = 2.0 * Exzz
+        dExxyy_dmy = 2.0 * Exxy
+        dExxzz_dmz = 2.0 * Exxz
 
         # Compute the derivatives of forth (4th) order expectations w.r.t. to St.
-        dExxyy_dSxx = Eyy
-        dExxzz_dSxx = Ezz
-        dExxyy_dSxy = 4 * Exy
-        dExxzz_dSxz = 4 * Exz
-        dExxyy_dSyy = Exx
-        dExxzz_dSzz = Exx
+        dExxyy_dSxx, dExxzz_dSxx, dExxyy_dSxy = Eyy, Ezz, 4.0 * Exy
+        dExxzz_dSxz, dExxyy_dSyy, dExxzz_dSzz = 4.0 * Exz, Exx, Exx
 
         # Compute the expectation for the dEsde(t)/dm(t).
         dmx1 = dExx_dmx * (vS ** 2 + A11 ** 2) + 2 * (dExy_dmx * (-vS ** 2 + vS * A11 - vS * A12 +
