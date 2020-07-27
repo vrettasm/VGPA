@@ -6,19 +6,28 @@ class Likelihood(object):
     retrieving the observation values and times.
     """
 
-    __slots__ = ("obs_v", "obs_t")
+    __slots__ = ("obs_v", "obs_t", "obs_h")
 
-    def __init__(self, values, times):
+    def __init__(self, values, times, operator):
         """
         Default constructor. No checks are performed
         for the validity of the input data.
 
-        :param values: observation values.
+        :param values: observation values. This is a
+        numpy array that contains the observations.
 
-        :param times: observation times.
+        :param times: observation times. This is a
+        vector that contains the discrete times that
+        the observations occur.
+
+        :param operator: observation operator. This is
+        an object (function or matrix) that maps the
+        observation space. It is usually assumed to be
+        the identity matrix (for simplicity).
         """
-        self.obs_v = values
         self.obs_t = times
+        self.obs_v = values
+        self.obs_h = operator
     # _end_def_
 
     @property
@@ -39,6 +48,16 @@ class Likelihood(object):
         :return: the observation times.
         """
         return self.obs_t
+    # _end_def_
+
+    @property
+    def operator(self):
+        """
+        Accessor method.
+
+        :return: the observation operator.
+        """
+        return self.obs_h
     # _end_def_
 
 # _end_class_
