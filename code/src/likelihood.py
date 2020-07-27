@@ -8,7 +8,7 @@ class Likelihood(object):
 
     __slots__ = ("obs_v", "obs_t", "obs_h")
 
-    def __init__(self, values, times, operator):
+    def __init__(self, values, times, operator=None):
         """
         Default constructor. No checks are performed
         for the validity of the input data.
@@ -25,9 +25,18 @@ class Likelihood(object):
         observation space. It is usually assumed to be
         the identity matrix (for simplicity).
         """
+
+        # Store observation times/values.
         self.obs_t = times
         self.obs_v = values
-        self.obs_h = operator
+
+        # Default operator is identity matrix.
+        if operator is None:
+            self.obs_h = 1
+        else:
+            self.obs_h = operator
+        # _end_if_
+
     # _end_def_
 
     @property
