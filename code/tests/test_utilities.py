@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from numpy.linalg import det
-from code.numerics.utilities import finite_diff, log_det, safe_log, my_trapz
+from code.numerics.utilities import finite_diff, log_det, safe_log, my_trapz, chol_inv
 
 class TestUtilities(unittest.TestCase):
     @classmethod
@@ -136,6 +136,44 @@ class TestUtilities(unittest.TestCase):
 
         # Test how close they are.
         self.assertTrue(np.all(np.abs(tot_1 - tot_2) <= 1.0e-6))
+    # _end_def_
+
+    def test_chol_inv(self):
+        # Information.
+        print(" Testing 'chol_inv' ... ")
+
+        # Scalar value test.
+        x = 0.2
+
+        # Invert the input value.
+        x_inv, _ = chol_inv(x)
+
+        # Test how close they are.
+        self.assertTrue(np.allclose(x * x_inv, 1.0))
+
+        # Diagonal matrix test.
+        x = np.diag(np.random.rand(3))
+
+        # Invert the input value.
+        x_inv, _ = chol_inv(x)
+
+        # Test how close they are.
+        self.assertTrue(np.allclose(x.dot(x_inv), np.eye(3)))
+
+        # Positive definite matrix test.
+        N = 10
+        x = np.linspace(0.5, 1.5, N * N).reshape(N, N)
+        x = 0.5 * (x + x.T) + np.eye(N) * N
+
+        # Invert the input value.
+        x_inv, _ = chol_inv(x)
+
+        # Test inverted.
+        test_eye = x_inv.dot(x)
+
+        # This is not the right test, but we check how close
+        # these two matrices are on average.
+        self.assertTrue(np.mean(test_eye - np.eye(N)) <= 1.0e-5)
     # _end_def_
 
 
