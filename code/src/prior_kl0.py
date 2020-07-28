@@ -61,7 +61,8 @@ class PriorKL0(object):
         z0 = m0 - self.mu0
 
         # Energy of the initial moment.
-        kl0 = - np.log(s0) - 0.5 * (1.0 - np.log(self.tau0)) + 0.5 / self.tau0 * (z0 ** 2 + s0)
+        kl0 = - np.log(s0) - 0.5 * (1.0 - np.log(self.tau0)) +\
+              0.5 / self.tau0 * (z0 ** 2 + s0)
 
         # Kullback-Liebler at t=0.
         return kl0
@@ -88,8 +89,8 @@ class PriorKL0(object):
 
         # Energy of the initial moment.
         kl0 = 0.5 * (log_det(self.tau0.dot(inv_s0)) +
-                     np.sum(np.diag(inv_tau0.dot(z0.T.dot(z0) + s0 - self.tau0))))
-
+                     np.sum(np.diag(inv_tau0.dot(z0.T.dot(z0) +
+                                                 s0 - self.tau0))))
         # Kullback-Liebler at t=0.
         return kl0
     # _end_def_
