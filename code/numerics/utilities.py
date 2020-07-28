@@ -201,6 +201,11 @@ def chol_inv(x):
     # Make sure input is array.
     x = np.asarray(x)
 
+    # Check if the input is scalar.
+    if x.ndim == 0:
+        return 1.0 / x, 1.0 / np.sqrt(x)
+    # _end_if_
+
     # Invert the Cholesky decomposition.
     c_inv = inv(cholesky(x))
 
