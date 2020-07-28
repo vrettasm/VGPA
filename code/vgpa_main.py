@@ -118,10 +118,10 @@ def main(params_file=None, data_file=None):
         # Create a simulation object.
         sim_01 = Simulation(output_name)
 
-        # Setup its parameters and water data.
+        # Setup its parameters (initialization).
         sim_01.setup(params, water_data)
 
-        # Run the simulation.
+        # Run the simulation (smoothing).
         sim_01.run()
 
         # Save the results.
