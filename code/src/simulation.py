@@ -1,7 +1,6 @@
 import h5py
-from pathlib import Path
-
 import numpy as np
+from pathlib import Path
 
 class Simulation(object):
     """
@@ -63,6 +62,15 @@ class Simulation(object):
     # _end_def_
 
     def run(self):
+        # Create an optimizer object.
+        # optimizer = SCG()
+
+        # Run the optimization.
+        # x, fx = optimizer(fun, grad_fun)
+
+        # Store the results.
+        # self.m_data["x"] = x
+        # self.m_data["fx"] = fx
         pass
     # _end_def_
 
