@@ -1,3 +1,4 @@
+import numpy as np
 
 class Likelihood(object):
     """
@@ -27,16 +28,15 @@ class Likelihood(object):
         """
 
         # Store observation times/values.
-        self.obs_t = times
-        self.obs_v = values
+        self.obs_t = np.asarray(times)
+        self.obs_v = np.asarray(values)
 
         # Default operator is identity matrix.
         if operator is None:
-            self.obs_h = 1
+            self.obs_h = np.asarray(1)
         else:
-            self.obs_h = operator
+            self.obs_h = np.asarray(operator)
         # _end_if_
-
     # _end_def_
 
     @property
