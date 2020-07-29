@@ -62,20 +62,43 @@ class Simulation(object):
     # _end_def_
 
     def run(self):
-        # Create an optimizer object.
-        # optimizer = SCG()
-
-        # Run the optimization.
-        # x, fx = optimizer(fun, grad_fun)
-
-        # Store the results.
-        # self.m_data["x"] = x
-        # self.m_data["fx"] = fx
         pass
     # _end_def_
 
     def save(self):
-        pass
+        """
+        Saves the simulation results to a file. All the data should be stored
+        inside the self.output dictionary and be of type "numpy.ndarray". For
+        the moment the file is saved in the same directory as the main program.
+        :return: None.
+        """
+
+        # Check if the output dictionary is empty.
+        if not self.output:
+            # Print a message and do not save anything.
+            print(" {0}: Simulation data structure 'output'"
+                  " is empty.".format(self.__class__.__name__))
+        else:
+            # Initial message.
+            print(" Saving the results to: {0}.h5".format(self.name))
+
+            # Create the output filename. Remove spaces (if any).
+            file_out = Path(self.name.strip().replace(" ", "_") + ".h5")
+
+            # Save the data to an 'HDF5' file format.
+            # NOTE:  Create file; truncate if exists.
+            with h5py.File(file_out, 'w') as out_file:
+                # Local reference.
+                data = self.output
+
+                # Extract all the data.
+                for key in data:
+                    # Default compressions level is '4'.
+                    out_file.create_dataset(key, data=data[key], compression='gzip')
+                # _end_for_
+            # _end_with_
+
+        # _end_if_
     # _end_def_
 
 # _end_class_
