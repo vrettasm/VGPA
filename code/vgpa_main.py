@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import sys
+import json
 import pandas as pd
 from pathlib import Path
-from code.src.simulation import Simulation
+from .src.simulation import Simulation
 
 # INFO:
 __author__ = "Michail Vrettas, PhD"
@@ -22,9 +23,6 @@ def validateInputParametersFile(filename):
 
     :raises ValueError: if a keyword is missing from the file.
     """
-
-    # Import locally the json package.
-    import json
 
     # Open the file in "Read Only" mode.
     with open(filename, 'r') as input_file:
@@ -99,7 +97,7 @@ def main(params_file=None, data_file=None):
     # _end_if_
 
     # Display where we got the water data from.
-    print(" Simulation water data file: {0}".format(data_file))
+    print(" Simulation observational data file: {0}".format(data_file))
 
     try:
         # Open the water data in "Read Only" mode.
@@ -117,16 +115,16 @@ def main(params_file=None, data_file=None):
         # _end_if_
 
         # Create a simulation object.
-        sim_01 = Simulation(output_name)
+        sim_vgpa = Simulation(output_name)
 
         # Setup its parameters (initialization).
-        sim_01.setup(params, obs_data)
+        sim_vgpa.setup(params, obs_data)
 
         # Run the simulation (smoothing).
-        sim_01.run()
+        sim_vgpa.run()
 
         # Save the results.
-        sim_01.save()
+        sim_vgpa.save()
     except Exception as e1:
         print(e1)
 
