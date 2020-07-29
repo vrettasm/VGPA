@@ -8,7 +8,7 @@ class PriorKL0(object):
 
     __slots__ = ("mu0", "tau0", "single_dim")
 
-    def __init__(self, mu0, tau0):
+    def __init__(self, mu0, tau0, single_dim=True):
         """
         Default constructor.
 
@@ -22,9 +22,8 @@ class PriorKL0(object):
         # Prior co-variance (t=0).
         self.tau0 = np.asarray(tau0)
 
-        # Marks whether the dynamical system
-        # is single / multiple dimensional.
-        self.single_dim = self.mu0.size == 1
+        # Single / multiple dimensional.
+        self.single_dim = single_dim
     # _end_def_
 
     def __call__(self, m0, s0):
