@@ -10,22 +10,20 @@ class FwdOde(object):
 
     This class implements a set of forward ode integration methods for the
     computation of the marginal posterior moments "m(t)" and "s(t)" of the
-    variational GP algorithm.  To make it easier and more adaptable to its
-    input the algorithm detects the dimensions of the state vector (dim_d)
-    and calls either the -1D or -nD version of the selected algorithm.
-    This is due to significant performance gains when writing the code in
-    -1D rather than -nD.
+    variational GP algorithm.
     """
 
     __slots__ = ("dt", "method", "solver")
 
-    def __init__(self, dt, method):
+    def __init__(self, dt, method, single_dim=True):
         """
         Default constructor of forwards ode solver.
 
         :param dt: discrete time step.
 
         :param method: of integration.
+
+        :param single_dim: flags the ode as 1D or nD.
         """
 
         # Check if time step is positive.
@@ -44,19 +42,19 @@ class FwdOde(object):
             # Create the solver object.
             if str.lower(method) == "euler":
 
-                self.solver = Euler(dt)
+                self.solver = Euler(dt, single_dim)
 
             elif str.lower(method) == "heun":
 
-                self.solver = Heun(dt)
+                self.solver = Heun(dt, single_dim)
 
             elif str.lower(method) == "rk2":
 
-                self.solver = RungeKutta2(dt)
+                self.solver = RungeKutta2(dt, single_dim)
 
             elif str.lower(method) == "rk4":
 
-                self.solver = RungeKutta4(dt)
+                self.solver = RungeKutta4(dt, single_dim)
             # _end_if_
         else:
             raise ValueError(" {0}: Integration method is unknown"
@@ -81,12 +79,8 @@ class FwdOde(object):
 
         :return: the result of the solver (marginal moments).
         """
-        # Dimensionality flag of the system.
-        # True, if it is single dimensional.
-        single_dim = at.shape[-1] == 1
-
         # Return the solution of the fwd-ode.
-        return self.solver.solve_fwd(at, bt, m0, s0, sigma, single_dim)
+        return self.solver.solve_fwd(at, bt, m0, s0, sigma)
     # _end_def_
 
     # Auxiliary.

@@ -10,17 +10,19 @@ class RungeKutta2(OdeSolver):
 
     """
 
-    def __init__(self, dt):
+    def __init__(self, dt, single_dim):
         """
         Default constructor.
 
         :param dt: discrete time step.
+
+        :param single_dim: flags the ode as 1D or nD.
         """
         # Call the constructor of the parent class.
-        super().__init__(dt)
+        super().__init__(dt, single_dim)
     # _end_def_
 
-    def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
+    def solve_fwd(self, lin_a, off_b, m0, s0, sigma):
         """
         Runge-Kutta (2) integration method. This provides the actual solution.
 
@@ -34,15 +36,12 @@ class RungeKutta2(OdeSolver):
 
         :param sigma: System noise variance (dim_d x dim_d).
 
-        :param single_dim: Boolean flag. Determines which version of the
-        code will be called.
-
         :return: 1) mt: posterior means values (dim_n x dim_d).
                  2) st: posterior variance values (dim_n x dim_d x dim_d).
         """
 
         # Pre-allocate memory according to single_dim.
-        if single_dim:
+        if self.single_dim:
             # Number of discrete time points.
             dim_n = off_b.shape[0]
 
@@ -90,19 +89,19 @@ class RungeKutta2(OdeSolver):
             b_mid = bk_mid[k]
 
             # -Eq(09)- NEW "mean" point.
-            mt[k + 1] = mk + dt * fun_mt((mk + h * fun_mt(mk, ak, bk, single_dim)),
-                                         a_mid, b_mid, single_dim)
+            mt[k + 1] = mk + dt * fun_mt((mk + h * fun_mt(mk, ak, bk)),
+                                         a_mid, b_mid)
 
             # -Eq(10)- NEW "variance" point.
-            st[k + 1] = sk + dt * fun_st((sk + h * fun_st(sk, sk, sigma, single_dim)),
-                                         a_mid, sigma, single_dim)
+            st[k + 1] = sk + dt * fun_st((sk + h * fun_st(sk, sk, sigma)),
+                                         a_mid, sigma)
         # _end_for_
 
         # Marginal moments.
         return mt, st
     # _end_def_
 
-    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):
+    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
         """
         RK2 integration method. Provides the actual solution.
 
@@ -116,15 +115,12 @@ class RungeKutta2(OdeSolver):
 
         :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x dim_d x dim_d).
 
-        :param single_dim: Boolean flag. Determines which version of the
-        code will be called.
-
         :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x dim_d),
                  2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
         """
 
         # Pre-allocate memory according to single_dim.
-        if single_dim:
+        if self.single_dim:
             # Number of discrete points.
             dim_n = dEsde_dm.shape[0]
 
@@ -168,16 +164,16 @@ class RungeKutta2(OdeSolver):
             dEsk = dEsk_mid[t]
 
             # Lambda (backward) propagation.
-            lamk = lamt - h * fun_lam(dEsde_dm[t], at, lamt, single_dim)
+            lamk = lamt - h * fun_lam(dEsde_dm[t], at, lamt)
 
             # NEW "lambda" point.
-            lam[t - 1] = lamt - dt * fun_lam(dEmk, ak, lamk, single_dim) + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - dt * fun_lam(dEmk, ak, lamk) + dEobs_dm[t - 1]
 
             # Psi (backward) propagation.
-            psik = psit - h * fun_psi(dEsde_ds[t], at, psit, single_dim)
+            psik = psit - h * fun_psi(dEsde_ds[t], at, psit)
 
             # NEW "Psi" point.
-            psi[t - 1] = psit - dt * fun_psi(dEsk, ak, psik, single_dim) + dEobs_ds[t - 1]
+            psi[t - 1] = psit - dt * fun_psi(dEsk, ak, psik) + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.

@@ -12,17 +12,19 @@ class Euler(OdeSolver):
 
     """
 
-    def __init__(self, dt):
+    def __init__(self, dt, single_dim):
         """
         Default constructor.
 
         :param dt: discrete time step.
+
+        :param single_dim: flags the ode as 1D or nD.
         """
         # Call the constructor of the parent class.
-        super().__init__(dt)
+        super().__init__(dt, single_dim)
     # _end_def_
 
-    def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
+    def solve_fwd(self, lin_a, off_b, m0, s0, sigma):
         """
         Euler integration method. This provides the actual solution.
 
@@ -36,15 +38,12 @@ class Euler(OdeSolver):
 
         :param sigma: System noise variance (dim_d x dim_d).
 
-        :param single_dim: Boolean flag. Determines which version of the
-        code will be called.
-
         :return: 1) mt: posterior means values (dim_n x dim_d).
                  2) st: posterior variance values (dim_n x dim_d x dim_d).
         """
 
         # Pre-allocate memory according to single_dim.
-        if single_dim:
+        if self.single_dim:
             # Number of discrete time points.
             dim_n = off_b.shape[0]
 
@@ -81,17 +80,17 @@ class Euler(OdeSolver):
             mk = mt[k]
 
             # -Eq(09)- NEW "mean" point.
-            mt[k + 1] = mk + fun_mt(mk, ak, bk, single_dim) * dt
+            mt[k + 1] = mk + fun_mt(mk, ak, bk) * dt
 
             # -Eq(10)- NEW "covariance" point.
-            st[k + 1] = sk + fun_st(sk, ak, sigma, single_dim) * dt
+            st[k + 1] = sk + fun_st(sk, ak, sigma) * dt
         # _end_for_
 
         # Marginal moments.
         return mt, st
     # _end_def_
 
-    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):
+    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
         """
         Euler integration method. Provides the actual solution.
 
@@ -105,15 +104,12 @@ class Euler(OdeSolver):
 
         :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x dim_d x dim_d).
 
-        :param single_dim: Boolean flag. Determines which version of the
-        code will be called.
-
         :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x dim_d),
                  2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
         """
 
         # Pre-allocate memory according to single_dim.
-        if single_dim:
+        if self.single_dim:
             # Number of discrete points.
             dim_n = dEsde_dm.shape[0]
 
@@ -144,10 +140,10 @@ class Euler(OdeSolver):
             psit = psi[t]
 
             # -Eq(14)- NEW "Lambda" point.
-            lam[t - 1] = lamt - fun_lam(dEsde_dm[t], at, lamt, single_dim) * dt + dEobs_dm[t - 1]
+            lam[t - 1] = lamt - fun_lam(dEsde_dm[t], at, lamt) * dt + dEobs_dm[t - 1]
 
             # -Eq(15)- NEW "Psi" point.
-            psi[t - 1] = psit - fun_psi(dEsde_ds[t], at, psit, single_dim) * dt + dEobs_ds[t - 1]
+            psi[t - 1] = psit - fun_psi(dEsde_ds[t], at, psit) * dt + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.

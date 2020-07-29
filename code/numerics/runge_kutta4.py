@@ -10,17 +10,19 @@ class RungeKutta4(OdeSolver):
 
     """
 
-    def __init__(self, dt):
+    def __init__(self, dt, single_dim):
         """
         Default constructor.
 
         :param dt: discrete time step.
+
+        :param single_dim: flags the ode as 1D or nD.
         """
         # Call the constructor of the parent class.
-        super().__init__(dt)
+        super().__init__(dt, single_dim)
     # _end_def_
 
-    def solve_fwd(self, lin_a, off_b, m0, s0, sigma, single_dim=True):
+    def solve_fwd(self, lin_a, off_b, m0, s0, sigma):
         """
         Runge-Kutta 4 integration method. This provides the actual solution.
 
@@ -34,15 +36,12 @@ class RungeKutta4(OdeSolver):
 
         :param sigma: System noise variance (dim_d x dim_d).
 
-        :param single_dim: Boolean flag. Determines which version of the
-        code will be called.
-
         :return: 1) mt: posterior means values (dim_n x dim_d).
                  2) st: posterior variance values (dim_n x dim_d x dim_d).
         """
 
         # Pre-allocate memory according to single_dim.
-        if single_dim:
+        if self.single_dim:
             # Number of discrete time points.
             dim_n = off_b.shape[0]
 
@@ -90,19 +89,19 @@ class RungeKutta4(OdeSolver):
             b_mid = bk_mid[k]
 
             # Intermediate steps.
-            K1 = fun_mt(mk, ak, bk, single_dim)
-            K2 = fun_mt((mk + h * K1), a_mid, b_mid, single_dim)
-            K3 = fun_mt((mk + h * K2), a_mid, b_mid, single_dim)
-            K4 = fun_mt((mk + dt * K3), lin_a[k + 1], off_b[k + 1], single_dim)
+            K1 = fun_mt(mk, ak, bk)
+            K2 = fun_mt((mk + h * K1), a_mid, b_mid)
+            K3 = fun_mt((mk + h * K2), a_mid, b_mid)
+            K4 = fun_mt((mk + dt * K3), lin_a[k + 1], off_b[k + 1])
 
             # NEW "mean" point.
             mt[k + 1] = mk + dt * (K1 + 2.0 * (K2 + K3) + K4) / 6.0
 
             # Intermediate steps.
-            L1 = fun_st(sk, ak, sigma, single_dim)
-            L2 = fun_st((sk + h * L1), a_mid, sigma, single_dim)
-            L3 = fun_st((sk + h * L2), a_mid, sigma, single_dim)
-            L4 = fun_st((sk + dt * L3), lin_a[k + 1], sigma, single_dim)
+            L1 = fun_st(sk, ak, sigma)
+            L2 = fun_st((sk + h * L1), a_mid, sigma)
+            L3 = fun_st((sk + h * L2), a_mid, sigma)
+            L4 = fun_st((sk + dt * L3), lin_a[k + 1], sigma)
 
             # NEW "variance" point
             st[k + 1] = sk + dt * (L1 + 2.0 * (L2 + L3) + L4) / 6.0
@@ -112,7 +111,7 @@ class RungeKutta4(OdeSolver):
         return mt, st
     # _end_def_
 
-    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds, single_dim=True):
+    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
         """
         RK4 integration method. Provides the actual solution.
 
@@ -126,15 +125,12 @@ class RungeKutta4(OdeSolver):
 
         :param dEobs_ds: Derivative of Eobs w.r.t. s(t), (dim_n x dim_d x dim_d).
 
-        :param single_dim: Boolean flag. Determines which version of the
-        code will be called.
-
         :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x dim_d),
                  2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
         """
 
         # Pre-allocate memory according to single_dim.
-        if single_dim:
+        if self.single_dim:
             # Number of discrete points.
             dim_n = dEsde_dm.shape[0]
 
@@ -178,19 +174,19 @@ class RungeKutta4(OdeSolver):
             dEsk = dEsk_mid[t]
 
             # Lambda (backward) propagation: Intermediate steps.
-            K1 = fun_lam(dEsde_dm[t], at, lamt, single_dim)
-            K2 = fun_lam(dEmk, ak, (lamt - h * K1), single_dim)
-            K3 = fun_lam(dEmk, ak, (lamt - h * K2), single_dim)
-            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lamt - dt * K3), single_dim)
+            K1 = fun_lam(dEsde_dm[t], at, lamt)
+            K2 = fun_lam(dEmk, ak, (lamt - h * K1))
+            K3 = fun_lam(dEmk, ak, (lamt - h * K2))
+            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lamt - dt * K3))
 
             # NEW "Lambda" point.
             lam[t - 1] = lamt - dt * (K1 + 2.0 * (K2 + K3) + K4) / 6.0 + dEobs_dm[t - 1]
 
             # Psi (backward) propagation: Intermediate steps.
-            L1 = fun_psi(dEsde_ds[t], at, psit, single_dim)
-            L2 = fun_psi(dEsk, ak, (psit - h * L1), single_dim)
-            L3 = fun_psi(dEsk, ak, (psit - h * L2), single_dim)
-            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psit - dt * L3), single_dim)
+            L1 = fun_psi(dEsde_ds[t], at, psit)
+            L2 = fun_psi(dEsk, ak, (psit - h * L1))
+            L3 = fun_psi(dEsk, ak, (psit - h * L2))
+            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psit - dt * L3))
 
             # NEW "Psi" point.
             psi[t - 1] = psit - dt * (L1 + 2.0 * (L2 + L3) + L4) / 6.0 + dEobs_ds[t - 1]
