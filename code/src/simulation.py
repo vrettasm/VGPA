@@ -1,9 +1,20 @@
 import h5py
 import numpy as np
 from pathlib import Path
+
+from .fwd_ode import FwdOde
+from .bwd_ode import BwdOde
+
 from ..dynamics.sp_lorenz_63 import Lorenz63
 from ..dynamics.sp_double_well import DoubleWell
 from ..dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
+
+from ..src.variational import VarGP
+from ..src.prior_kl0 import PriorKL0
+from ..src.gaussian_like import GaussianLikelihood
+
+from ..numerics.optim_scg import SCG
+
 
 class Simulation(object):
     """
@@ -74,7 +85,7 @@ class Simulation(object):
 
         :return: None.
 
-        :raises ValueError: if some data are missing.
+        :raises ValueError: if some data are wrong.
         """
 
         # Extract drift parameters.
@@ -93,29 +104,39 @@ class Simulation(object):
         self.m_data["random_seed"] = params["Random-Seed"]
 
         # Extract observation setup.
-        self.m_data["observations"] = params["Observations"]
+        self.m_data["obs_setup"] = params["Observations"]
 
         # Extract prior parameters.
         self.m_data["prior"] = params["Prior"]
 
         # Stochastic model.
-        if params["Model"].lower() == "double-well":
+        if params["Model"].upper() == "DW":
 
+            # Create the model.
             self.m_data["model"] = DoubleWell(self.m_data["noise"]["sys"],
                                               self.m_data["drift"],
                                               self.m_data["random_seed"])
+            # One-dimensional model.
+            self.m_data["single_dim"] = True
 
-        elif params["Model"].lower() == "ornstein-uhlenbeck":
+        elif params["Model"].upper() == "OU":
 
+            # Create the model.
             self.m_data["model"] = OrnsteinUhlenbeck(self.m_data["noise"]["sys"],
                                                      self.m_data["drift"],
                                                      self.m_data["random_seed"])
+            # One-dimensional model.
+            self.m_data["single_dim"] = True
 
-        elif params["Model"].lower() == "lorenz63":
+        elif params["Model"].upper() == "L63":
 
+            # Create the model.
             self.m_data["model"] = Lorenz63(self.m_data["noise"]["sys"],
                                             self.m_data["drift"],
                                             self.m_data["random_seed"])
+            # Three-dimensional model.
+            self.m_data["single_dim"] = False
+
         else:
             raise ValueError(" {0}: Unknown stochastic model ->"
                              " {1}".format(self.__class__.__name__, params["Model"]))
@@ -125,15 +146,18 @@ class Simulation(object):
         self.m_data["model"].make_trajectory(self.m_data["time_window"]["t0"],
                                              self.m_data["time_window"]["tf"],
                                              self.m_data["time_window"]["dt"])
+        # Observation operator.
+        self.m_data["obs_H"] = params["obs_setup"]["operator"]
+
         # This needs to be revisited.
         if data is not None:
             self.m_data["obs_t"] = data[0]
             self.m_data["obs_y"] = data[1]
         else:
             # Sample observations from the trajectory.
-            obs_t, obs_y = self.m_data["model"].collect_obs(params["Observations"]["density"],
+            obs_t, obs_y = self.m_data["model"].collect_obs(params["obs_setup"]["density"],
                                                             self.m_data["noise"]["obs"],
-                                                            params["Observations"]["operator"])
+                                                            self.m_data["obs_H"])
             # Add them to the dictionary.
             self.m_data["obs_t"] = obs_t
             self.m_data["obs_y"] = obs_y
@@ -142,7 +166,50 @@ class Simulation(object):
     # _end_def_
 
     def run(self):
-        pass
+        """
+        TBD
+
+        :return: None.
+        """
+        # Extract the stochastic model.
+        model_s = self.m_data["model"]
+
+        # Forward ODE solver.
+        fwd_ode = FwdOde(self.m_data["time_window"]["dt"],
+                         self.m_data["ode_solver"],
+                         self.m_data["single_dim"])
+
+        # Backward ODE solver.
+        bwd_ode = BwdOde(self.m_data["time_window"]["dt"],
+                         self.m_data["ode_solver"],
+                         self.m_data["single_dim"])
+
+        # Likelihood object.
+        likelihood = GaussianLikelihood(self.m_data["obs_y"],
+                                        self.m_data["obs_t"],
+                                        self.m_data["obs_H"],
+                                        self.m_data["single_dim"])
+        # Prior moments.
+        kl0 = PriorKL0(self.m_data["prior"]["mu0"],
+                       self.m_data["prior"]["tau0"],
+                       self.m_data["single_dim"])
+
+        # Variational GP model.
+        vgpa = VarGP(model_s, fwd_ode, bwd_ode, likelihood, kl0,
+                     self.m_data["obs_y"], self.m_data["obs_t"])
+
+        # Setup SCG options.
+        options = {'max_it': 500, 'x_tol': 1.0e-6, 'f_tol': 1.0e-8}
+
+        # SCG optimization.
+        optimize = SCG(vgpa.free_energy, vgpa.gradient, options)
+
+        # Run the optimization procedure.
+        x, fx = optimize(vgpa.initialization())
+
+        # Store the results.
+        self.output["x"] = x
+        self.output["fx"] = fx
     # _end_def_
 
     def save(self):
