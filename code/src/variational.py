@@ -50,7 +50,7 @@ class VarGP(object):
             a0 = 0.5 * (self.model.sigma / 0.25) * np.ones(dim_n)
 
             # Build a uni-variate extrapolation (with cubic splines).
-            fb0 = interpolate.UnivariateSpline(time_x, obs_z, k=3)
+            fb0 = interpolate.CubicSpline(time_x, obs_z)
 
             # Generate the offset parameters on the whole time window.
             b0 = fb0(time_window)
@@ -64,14 +64,9 @@ class VarGP(object):
             # Discrete time step.
             dt = self.model.time_step
 
-            # Preallocate m(t=0).
-            mt0 = np.zeros((dim_n, dim_d))
-
-            # Build a spline extrapolation for each dimension separately.
-            for i in range(dim_d):
-                fbi = interpolate.UnivariateSpline(time_x, obs_z[:, i].T, k=3)
-                mt0[:, i] = fbi(time_window)
-            # _end_for_
+            # Cubic spline extrapolation for each dimension separately.
+            fb0 = interpolate.CubicSpline(time_x, obs_z)
+            mt0 = fb0(time_window)
 
             # Preallocate variational parameters.
             a0 = np.zeros((dim_n, dim_d, dim_d))
