@@ -13,11 +13,12 @@ __email__ = "michail.vrettas@gmail.com"
 
 def validateInputParametersFile(filename):
     """
-    Validates an input (json) file to check if it contains the required keys.
-    It does not validate the values of the keys.
+    Validates an input (json) file to check if
+    it contains the required keys. It does not
+    validate the values of the keys.
 
-    :param filename: Is a "Path" object that contains the input model parameters
-    for the simulation.
+    :param filename: Is a "Path" object that
+    contains the input model parameters for the simulation.
 
     :return: A dictionary loaded from the input file.
 
@@ -33,7 +34,8 @@ def validateInputParametersFile(filename):
         # Required keys in the json file.
         required_keys = ("Data_Filename", "Output_Name", "Model",
                          "Ode-method", "Time-window", "Noise",
-                         "Observations", "Drift", "Prior")
+                         "Observations", "Drift", "Prior",
+                         "Random-Seed")
 
         # Check the keywords for membership in the file.
         for k in required_keys:
