@@ -1,6 +1,9 @@
 import h5py
 import numpy as np
 from pathlib import Path
+from ..dynamics.sp_lorenz_63 import Lorenz63
+from ..dynamics.sp_double_well import DoubleWell
+from ..dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
 
 class Simulation(object):
     """
@@ -9,19 +12,19 @@ class Simulation(object):
     1) Create a simulation object. You can also give a name
     that will be used when saving the data.
 
-        >> sim_01 = Simulation("Sim_01")
+        >> sim_vgpa = Simulation("Sim_01")
 
     2) Setup its simulation parameters.
 
-        >> sim_01.setup(params)
+        >> sim_vgpa.setup(params, data)
 
     3) Run the simulation (this step might take a while).
 
-        >> sim_01.run()
+        >> sim_vgpa.run()
 
     4) Finally save the results in a hdf5 (compressed) file.
 
-        >> sim_01.save()
+        >> sim_vgpa.save()
     """
 
     __slots__ = ("name", "m_data", "rng", "output")
@@ -58,7 +61,84 @@ class Simulation(object):
     # _end_def_
 
     def setup(self, params, data):
-        pass
+        """
+        This method is called BEFORE the run() and sets up all the variables for
+        the simulation.  It is also responsible for checking the validity of the
+        input parameters before use.
+
+        :param params: (dict) contains all the given parameters. If None, then it
+        will use the default parameters to initialize object. However this is not
+        recommended since the user will have no control on the parameters.
+
+        :param data: array with observation times and values (t, yt).
+
+        :return: None.
+
+        :raises ValueError: if some data are missing.
+        """
+
+        # Extract drift parameters.
+        self.m_data["drift"] = params["Drift"]
+
+        # Extract noise parameters.
+        self.m_data["noise"] = params["Noise"]
+
+        # Extract time window.
+        self.m_data["time_window"] = params["Time-window"]
+
+        # Extract ODE solver.
+        self.m_data["ode_solver"] = params["Ode-method"]
+
+        # Extract Random seed.
+        self.m_data["random_seed"] = params["Random-Seed"]
+
+        # Extract observation setup.
+        self.m_data["observations"] = params["Observations"]
+
+        # Extract prior parameters.
+        self.m_data["prior"] = params["Prior"]
+
+        # Stochastic model.
+        if params["Model"].lower() == "double-well":
+
+            self.m_data["model"] = DoubleWell(self.m_data["noise"]["sys"],
+                                              self.m_data["drift"],
+                                              self.m_data["random_seed"])
+
+        elif params["Model"].lower() == "ornstein-uhlenbeck":
+
+            self.m_data["model"] = OrnsteinUhlenbeck(self.m_data["noise"]["sys"],
+                                                     self.m_data["drift"],
+                                                     self.m_data["random_seed"])
+
+        elif params["Model"].lower() == "lorenz63":
+
+            self.m_data["model"] = Lorenz63(self.m_data["noise"]["sys"],
+                                            self.m_data["drift"],
+                                            self.m_data["random_seed"])
+        else:
+            raise ValueError(" {0}: Unknown stochastic model ->"
+                             " {1}".format(self.__class__.__name__, params["Model"]))
+        # _end_if_
+
+        # Make the trajectory (of the stochastic process).
+        self.m_data["model"].make_trajectory(self.m_data["time_window"]["t0"],
+                                             self.m_data["time_window"]["tf"],
+                                             self.m_data["time_window"]["dt"])
+        # This needs to be revisited.
+        if data is not None:
+            self.m_data["obs_t"] = data[0]
+            self.m_data["obs_y"] = data[1]
+        else:
+            # Sample observations from the trajectory.
+            obs_t, obs_y = self.m_data["model"].collect_obs(params["Observations"]["density"],
+                                                            self.m_data["noise"]["obs"],
+                                                            params["Observations"]["operator"])
+            # Add them to the dictionary.
+            self.m_data["obs_t"] = obs_t
+            self.m_data["obs_y"] = obs_y
+        # _end_if_
+
     # _end_def_
 
     def run(self):
@@ -97,7 +177,6 @@ class Simulation(object):
                     out_file.create_dataset(key, data=data[key], compression='gzip')
                 # _end_for_
             # _end_with_
-
         # _end_if_
     # _end_def_
 
