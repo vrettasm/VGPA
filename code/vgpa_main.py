@@ -33,7 +33,9 @@ def validateInputParametersFile(filename):
         model_params = json.load(input_file)
 
         # Required keys in the json file.
-        required_keys = ("x01", "x02")
+        required_keys = ("Data_Filename", "Output_Name", "Model",
+                         "Ode-method", "Time-window", "Noise",
+                         "Observations", "Drift", "Prior")
 
         # Check the keywords for membership in the file.
         for k in required_keys:
@@ -62,7 +64,7 @@ def main(params_file=None, data_file=None):
 
     :param params_file: (string) that points to the input file for the parameters.
 
-    :param data_file: (string) that points to the input file for the water data.
+    :param data_file: (string) that points to the input file for the observations.
 
     :return: None.
     """
@@ -102,9 +104,8 @@ def main(params_file=None, data_file=None):
     try:
         # Open the water data in "Read Only" mode.
         with open(data_file, 'r') as input_file:
-            # The file should have four columns.
-            water_data = pd.read_csv(input_file,
-                                     names=["ID", "Datenum", "Precipitation_cm", "WTD_m"])
+            # The file should have two columns.
+            obs_data = pd.read_csv(input_file, names=["t", "Yt"])
         # _end_with_
 
         # Get the output name from the file.
@@ -112,14 +113,14 @@ def main(params_file=None, data_file=None):
 
         # If nothing has been given set a default name.
         if output_name is None:
-            output_name = "Sim_01"
+            output_name = "Sim_00"
         # _end_if_
 
         # Create a simulation object.
         sim_01 = Simulation(output_name)
 
         # Setup its parameters (initialization).
-        sim_01.setup(params, water_data)
+        sim_01.setup(params, obs_data)
 
         # Run the simulation (smoothing).
         sim_01.run()
