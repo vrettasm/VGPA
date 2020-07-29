@@ -1,7 +1,7 @@
 import numpy as np
-from code.numerics.utilities import my_trapz
+from ..numerics.utilities import my_trapz
 from .stochastic_process import StochasticProcess
-from code.src.gaussian_moments import GaussianMoments
+from ..src.gaussian_moments import GaussianMoments
 
 
 class OrnsteinUhlenbeck(StochasticProcess):
