@@ -5,13 +5,15 @@ class StochasticProcess(object):
     This is a base (parent) class for all the stochastic process models.
     """
 
-    __slots__ = ("xt", "tk", "rand_g")
+    __slots__ = ("xt", "tk", "rand_g", "single_dimension")
 
-    def __init__(self, r_seed=None):
+    def __init__(self, r_seed=None, single_dim=True):
         """
         Default constructor.
 
         :param r_seed: random seed.
+
+        :param single_dim: single dimensional flag.
         """
 
         # Create a random number generator.
@@ -21,11 +23,24 @@ class StochasticProcess(object):
             self.rand_g = np.random.default_rng()
         # _end_if_
 
+        # Single dimensional process.
+        self.single_dimension = single_dim
+
         # Sample-path.
         self.xt = None
 
         # Time-window.
         self.tk = None
+    # _end_def_
+
+    @property
+    def single_dim(self):
+        """
+        Accessor method.
+
+        :return: True if the stochastic process is 1-D.
+        """
+        return self.single_dimension
     # _end_def_
 
     @property
