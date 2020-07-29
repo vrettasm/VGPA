@@ -1,7 +1,7 @@
-from code.numerics.heun import Heun
-from code.numerics.euler import Euler
-from code.numerics.runge_kutta2 import RungeKutta2
-from code.numerics.runge_kutta4 import RungeKutta4
+from ..numerics.heun import Heun
+from ..numerics.euler import Euler
+from ..numerics.runge_kutta2 import RungeKutta2
+from ..numerics.runge_kutta4 import RungeKutta4
 
 
 class FwdOde(object):
