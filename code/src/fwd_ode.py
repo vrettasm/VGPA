@@ -34,32 +34,32 @@ class FwdOde(object):
                              " strictly positive -> {1}.".format(self.__class__.__name__, dt))
         # _end_if_
 
-        # Check if the method is included.
-        if method in ["euler", "heun", "rk2", "rk4"]:
-            # Get a copy of the method name.
-            self.method = method
+        # Convert method to lower-case.
+        method_str = str(method).lower()
 
-            # Create the solver object.
-            if str.lower(method) == "euler":
+        # Create the solver object.
+        if method_str == "euler":
 
-                self.solver = Euler(dt, single_dim)
+            self.solver = Euler(dt, single_dim)
 
-            elif str.lower(method) == "heun":
+        elif method_str == "heun":
 
-                self.solver = Heun(dt, single_dim)
+            self.solver = Heun(dt, single_dim)
 
-            elif str.lower(method) == "rk2":
+        elif method_str == "rk2":
 
-                self.solver = RungeKutta2(dt, single_dim)
+            self.solver = RungeKutta2(dt, single_dim)
 
-            elif str.lower(method) == "rk4":
+        elif method_str == "rk4":
 
-                self.solver = RungeKutta4(dt, single_dim)
-            # _end_if_
+            self.solver = RungeKutta4(dt, single_dim)
         else:
             raise ValueError(" {0}: Integration method is unknown"
                              " -> {1}.".format(self.__class__.__name__, method))
         # _end_if_
+
+        # Get a copy of the method name (for the __str__).
+        self.method = method
     # _end_def_
 
     def __call__(self, at, bt, m0, s0, sigma):
