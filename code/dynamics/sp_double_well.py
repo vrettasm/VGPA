@@ -31,7 +31,7 @@ class DoubleWell(StochasticProcess):
         :param r_seed: random seed.
         """
         # Call the constructor of the parent class.
-        super().__init__(r_seed)
+        super().__init__(r_seed, single_dim=True)
 
         # Store the diffusion noise.
         if sigma > 0.0:
