@@ -1,5 +1,5 @@
 import numpy as np
-from code.numerics.utilities import my_trapz
+from ..numerics.utilities import my_trapz
 from .stochastic_process import StochasticProcess
 from scipy.linalg import cholesky, inv, LinAlgError
 
