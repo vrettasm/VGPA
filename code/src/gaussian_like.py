@@ -9,7 +9,7 @@ class GaussianLikelihood(Likelihood):
 
     __slots__ = ("single_dim", "log2pi")
 
-    def __init__(self, values, times, operator, single_dim=True):
+    def __init__(self, values, times, noise, operator, single_dim=True):
         """
         Default constructor.
 
@@ -17,12 +17,14 @@ class GaussianLikelihood(Likelihood):
 
         :param times: observation times.
 
+        :param noise: observation noise.
+
         :param operator: observation operator.
 
         :param single_dim: single dimension flag.
         """
         # Call the constructor of the parent class.
-        super().__init__(values, times, operator)
+        super().__init__(values, times, noise, operator)
 
         # Marks whether the likelihood corresponds to
         # a single or multiple dimensions observations.
@@ -32,7 +34,7 @@ class GaussianLikelihood(Likelihood):
         self.log2pi = np.log(2.0 * np.pi)
     # _end_def_
 
-    def __call__(self, m, s, rn):
+    def __call__(self, m, s):
         """
         Compute the Gaussian likelihood function. This is a
         convenience method that will call automatically the
@@ -42,18 +44,16 @@ class GaussianLikelihood(Likelihood):
 
         :param s: marginal variances s(t), (dim_n x dim_d x dim_d).
 
-        :param rn: observation noise co-variance R(t), (dim_d x dim_d).
-
         :return: Energy from the observation likelihood, (scalar).
         """
         if self.single_dim:
-            return self.gauss_1D(m, s, rn)
+            return self.gauss_1D(m, s)
         else:
-            return self.gauss_nD(m, s, rn)
+            return self.gauss_nD(m, s)
         # _end_if_
     # _end_def_
 
-    def gradients(self, m, s, rn):
+    def gradients(self, m, s):
         """
         Compute the gradients of the Gaussian likelihood function.
         This is a convenience method that will call automatically
@@ -61,28 +61,24 @@ class GaussianLikelihood(Likelihood):
 
         :param m: marginal means m(t), (dim_n x dim_d).
 
-        :param s: marginal variances s(t), (dim_n x dim_d x dim_d).
-
-        :param rn: observation noise co-variance R(t), (dim_d x dim_d).
+        :param s: marginal variances s(t), (dim_n x 1).
 
         :return: Energy from the observation likelihood, (scalar).
         """
         if self.single_dim:
-            return self.gradients_1D(m, s, rn)
+            return self.gradients_1D(m, s)
         else:
-            return self.gradients_nD(m, s, rn)
+            return self.gradients_nD(m)
         # _end_if_
     # _end_def_
 
-    def gauss_1D(self, m, s, rn):
+    def gauss_1D(self, m, s):
         """
         Gaussian 1D method.
 
         :param m: marginal means m(t), (dim_n x 1).
 
         :param s: marginal variances s(t), (dim_n x 1).
-
-        :param rn: observation noise variance R(t), (scalar).
 
         :return: Energy from the observation likelihood, (scalar).
         """
@@ -99,22 +95,20 @@ class GaussianLikelihood(Likelihood):
         Ex2 = (m[obs_t] ** 2) + s[obs_t]
 
         # Energy from the observations.
-        Eobs = 0.5 * np.sum((obs_y ** 2) - 2.0 * obs_y * m[obs_t] + Ex2) / rn +\
-               0.5 * dim_m * (self.log2pi + np.log(rn))
+        Eobs = 0.5 * np.sum((obs_y ** 2) - 2.0 * obs_y * m[obs_t] + Ex2) / self.noise +\
+               0.5 * dim_m * (self.log2pi + np.log(self.noise))
 
         # Energy term from the observations.
         return Eobs
     # _end_def_
 
-    def gauss_nD(self, m, s, rn):
+    def gauss_nD(self, m, s):
         """
         Gaussian nD method.
 
         :param m: marginal means m(t), (dim_n x dim_d).
 
         :param s: marginal variances s(t), (dim_n x dim_d x dim_d).
-
-        :param rn: observation noise variance R(t), (dim_d x dim_d).
 
         :return: Energy from the observation likelihood, (scalar).
         """
@@ -133,7 +127,7 @@ class GaussianLikelihood(Likelihood):
         W = (obs_y - m[obs_t]).dot(H)
 
         # Inverted Cholesky factor.
-        inv_rn, inv_chol_factor = chol_inv(rn)
+        inv_rn, inv_chol_factor = chol_inv(self.noise)
 
         # Extract the diagonal elements.
         diag_inv_rn = inv_rn.diagonal()
@@ -157,21 +151,19 @@ class GaussianLikelihood(Likelihood):
         # _end_for_
 
         # Compute the final including the constants.
-        Eobs = 0.5 * (Eobs + dim_m * (dim_o * self.log2pi + log_det(rn)))
+        Eobs = 0.5 * (Eobs + dim_m * (dim_o * self.log2pi + log_det(self.noise)))
 
         # Energy from the (noisy) observation set.
         return Eobs
     # _end_def_
 
-    def gradients_1D(self, m, s, rn):
+    def gradients_1D(self, m, s):
         """
         1D gradients of Eobs.
 
         :param m: marginal means m(t), (dim_n x 1).
 
         :param s: marginal variances s(t), (dim_n x 1).
-
-        :param rn: observation noise variance R(t), (scalar).
 
         :return: dEobs_dm, dEobs_ds, dEobs_dr.
         """
@@ -199,27 +191,23 @@ class GaussianLikelihood(Likelihood):
         dEobs_dr = np.zeros(dim_n)
 
         # Jumps -Eq(31)- NOT IN THE PAPER.
-        dEobs_dm[obs_t] = - W / rn
+        dEobs_dm[obs_t] = - W / self.noise
 
         # Jumps -Eq(32)- NOT IN THE PAPER.
-        dEobs_ds[obs_t] = 0.5 / rn
+        dEobs_ds[obs_t] = 0.5 / self.noise
 
         # Calculate the gradient at 'M' observation times.
-        dEobs_dr[obs_t] = -0.5 * ((obs_y ** 2) - 2.0 * obs_y * m[obs_t] + Ex2 + 1.0) / rn
+        dEobs_dr[obs_t] = -0.5 * ((obs_y ** 2) - 2.0 * obs_y * m[obs_t] + Ex2 + 1.0) / self.noise
 
         # Gradients of energy Eobs.
         return dEobs_dm, dEobs_ds, dEobs_dr
     # _end_def
 
-    def gradients_nD(self, m, s, rn):
+    def gradients_nD(self, m):
         """
         nD gradients of Eobs.
 
         :param m: marginal means m(t), (dim_n x dim_d).
-
-        :param s: marginal variances s(t), (dim_n x dim_d x dim_d).
-
-        :param rn: observation noise variance R(t), (dim_d x dim_d).
 
         :return: Energy from the observation likelihood, (scalar).
         """
@@ -241,7 +229,7 @@ class GaussianLikelihood(Likelihood):
         W = (obs_y - m[obs_t]).dot(H)
 
         # Inverted Cholesky factor.
-        inv_rn, _ = chol_inv(rn)
+        inv_rn, _ = chol_inv(self.noise)
 
         # Preallocate memory for the gradients.
         dEobs_dm = np.zeros((dim_n, dim_d))

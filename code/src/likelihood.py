@@ -7,9 +7,9 @@ class Likelihood(object):
     retrieving the observation values and times.
     """
 
-    __slots__ = ("obs_v", "obs_t", "obs_h")
+    __slots__ = ("obs_v", "obs_t", "obs_n", "obs_h")
 
-    def __init__(self, values, times, operator=None):
+    def __init__(self, values, times, noise, operator=None):
         """
         Default constructor. No checks are performed
         for the validity of the input data.
@@ -21,6 +21,8 @@ class Likelihood(object):
         vector that contains the discrete times that
         the observations occur.
 
+        :param noise: observation noise co-variance.
+
         :param operator: observation operator. This is
         an object (function or matrix) that maps the
         observation space. It is usually assumed to be
@@ -30,6 +32,7 @@ class Likelihood(object):
         # Store observation times/values.
         self.obs_t = np.asarray(times)
         self.obs_v = np.asarray(values)
+        self.obs_n = np.asarray(noise)
 
         # Default operator is identity matrix.
         if operator is None:
@@ -57,6 +60,28 @@ class Likelihood(object):
         :return: the observation times.
         """
         return self.obs_t
+    # _end_def_
+
+    @property
+    def noise(self):
+        """
+        Accessor method.
+
+        :return: the observation noise.
+        """
+        return self.obs_n
+    # _end_def_
+
+    @noise.setter
+    def noise(self, new_value):
+        """
+        Accessor method.
+
+        :param new_value: for the noise parameter.
+
+        :return: None.
+        """
+        self.obs_n = new_value
     # _end_def_
 
     @property
