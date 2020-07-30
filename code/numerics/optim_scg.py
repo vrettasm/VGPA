@@ -161,7 +161,9 @@ class SCG(object):
                 xplus = x + sigma * d
 
                 # We evaluate the df(xplus).
-                gplus = self.df(xplus, *args)
+                # Because we evaluate only the gradient at a new point
+                # we set the flag eval_function = True.
+                gplus = self.df(xplus, eval_fun=True)
 
                 # Increase function/gradients evaluations by one.
                 self.stats['f_eval'] += 1
@@ -172,7 +174,7 @@ class SCG(object):
             # _end_if_
 
             # Increase effective curvature and evaluate step size alpha.
-            delta = theta + beta * kappa
+            delta = theta + (beta * kappa)
             if delta <= 0.0:
                 delta = beta * kappa
                 beta = beta - (theta / kappa)
