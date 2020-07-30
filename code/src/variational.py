@@ -4,7 +4,7 @@ from scipy import interpolate
 
 class VarGP(object):
     """
-    TBD
+    Variational Gaussian Process Approximation class.
     """
 
     __slots__ = ("model", "fwd_ode", "bwd_ode", "kl0", "likelihood",
@@ -16,23 +16,25 @@ class VarGP(object):
         """
         Default constructor of VGPA object.
 
-        :param model:
+        :param model: objects represents the dynamical system.
 
-        :param m0:
+        :param m0: initial marginal mean m(t=0). For the moment
+        this is kept fixed, but it can also be optimized.
 
-        :param s0:
+        :param s0: initial marginal co-variance s(t=0). For the
+        moment this is kept fixed, but it can also be optimized.
 
-        :param fwd_ode:
+        :param fwd_ode: forward ode solver.
 
-        :param bwd_ode:
+        :param bwd_ode: backward ode solver.
 
-        :param likelihood:
+        :param likelihood: likelihood object.
 
-        :param kl0:
+        :param kl0: Kullback-Liebler at initial moment KL(t=0).
 
-        :param obs_y:
+        :param obs_y: observation values (including noise).
 
-        :param obs_t:
+        :param obs_t: observation times (discrete).
         """
         # Stochastic model.
         self.model = model
@@ -156,7 +158,7 @@ class VarGP(object):
             linear_a = x[:self.dim_tot].reshape(self.dim_n,
                                                 self.dim_d, self.dim_d)
             offset_b = x[self.dim_tot:].reshape(self.dim_n, self.dim_d)
-        # _end_if
+        # _end_if_
 
         # Initial posterior moments.
         # For the moment are not optimized.
@@ -198,9 +200,130 @@ class VarGP(object):
         return np.asscalar(E0 + Esde + Eobs)
     # _end_def_
 
-    def gradient(self, x):
-        # return grad
-        pass
+    def gradient(self, x, eval_fun=False):
+        """
+        Returns the gradient of the Lagrangian w.r.t.
+        the variational parameters a(t) (linear) and
+        b(t) (offset).
+
+        :param x: variational linear + offset parameters
+        (dim_n * dim_d * (dim_d + 1)).
+
+        :param eval_fun: it determines whether we have to
+        evaluate first the variational free energy to update
+        the parameters before the gradients.
+
+        :return: grouped gradient of the Lagrangian w.r.t.
+        the variational linear parameters 'a(t)' (dim_n x dim_d x dim_d)
+        and the variational offset parameters 'b(t)' (dim_n x dim_d).
+        """
+
+        # Occasionally we have to  evaluate the gradient
+        # at different input parameters. In this case we
+        # need to  make sure that  all the  marginal and
+        # Lagrangian parameters are consistent.
+        if eval_fun:
+            _ = self.free_energy(x)
+        # _end_if_
+
+        # Switch to single dimension.
+        if self.model.single_dim:
+            # Unpack data.
+            at = x[:self.dim_tot]
+            bt = x[self.dim_tot:]
+
+            # Preallocate the return arrays.
+            gLa = np.zeros(self.dim_n)
+            gLb = np.zeros(self.dim_n)
+        else:
+            # Unpack data.
+            at = x[:self.dim_tot].reshape(self.dim_n, self.dim_d, self.dim_d)
+            bt = x[self.dim_tot:].reshape(self.dim_n, self.dim_d)
+
+            # Preallocate the return arrays.
+            gLa = np.zeros((self.dim_n, self.dim_d, self.dim_d))
+            gLb = np.zeros((self.dim_n, self.dim_d))
+        # _end_if_
+
+        # Posterior moments: m(t), S(t).
+        mt = self.output["mt"]
+        st = self.output["St"]
+
+        # Lagrange multipliers: lam(t), psi(t).
+        lamt = self.output["lamt"]
+        psit = self.output["psit"]
+
+        # Expectation values.
+        Efx = self.output["Efx"]
+        Edf = self.output["Edf"]
+
+        # Inverse of Sigma noise.
+        inv_sigma = self.model.inverse_sigma
+
+        # Main loop.
+        for k in range(self.dim_n):
+            # Get the values at time 'tk'.
+            ak = at[k]
+            sk = st[k]
+            mk = mt[k]
+            lamk = lamt[k]
+
+            # Gradient of Esde w.r.t. 'b' -Eq(29)-
+            dEsde_dbt = self._dEsde_db(inv_sigma, Efx[k], mk, ak, bt[k])
+
+            # Gradient of Esde w.r.t. 'A' -Eq(28)-
+            dEsde_dat = self._dEsde_da(inv_sigma, ak, mk, sk, Edf[k], dEsde_dbt)
+
+            # Gradient of Lagrangian w.r.t. 'a(t)' -Eq(12)-
+            gLa[k] = self._grad_at(dEsde_dat, lamk, mk, psit[k], sk)
+
+            # Gradient of Lagrangian w.r.t. 'b(t)' -Eq(13)-
+            gLb[k] = dEsde_dbt + lamk
+        # _end_for_
+
+        # Scale the results with the time increment.
+        gLa = self.dt * gLa
+        gLb = self.dt * gLb
+
+        # Group the gradients together and exit.
+        return np.concatenate((gLa.ravel()[:, np.newaxis],
+                               gLb.ravel()[:, np.newaxis]))
     # _end_def_
 
-# _end_def_
+    def _grad_at(self, dEsde_dak, lamk, mk, psik, sk):
+        """
+        Auxiliary function. Return automatically the 1D or nD
+        version of the calculation.
+        """
+        if self.model.single_dim:
+            return dEsde_dak - (lamk * mk) - (2.0 * psik * sk)
+        else:
+            return dEsde_dak - lamk.T.dot(mk) - 2.0 * psik.dot(sk)
+        # _end_if_
+    # _end_def_
+
+    def _dEsde_da(self, inv_sigma, at, mt, st, Edf, dEsde_dbt):
+        """
+        Auxiliary function. Return automatically the 1D or nD
+        version of the calculation.
+        """
+        if self.model.single_dim:
+            return inv_sigma * (Edf + at) * st - dEsde_dbt * mt
+        else:
+            return inv_sigma.dot(Edf + at).dot(st) - dEsde_dbt.T.dot(mt)
+        # _end_if_
+    # _end_def_
+
+    def _dEsde_db(self, inv_sigma, Efx, mt, at, bt):
+        """
+        Auxiliary function. Return automatically the 1D
+        or nD version of the calculation.
+        """
+        if self.model.single_dim:
+            return (-Efx - at * mt + bt) * inv_sigma
+        else:
+            return (-Efx - mt.dot(at.T) + bt).dot(inv_sigma.T)
+        # _end_if_
+    # _end_def_
+
+# _end_class_
