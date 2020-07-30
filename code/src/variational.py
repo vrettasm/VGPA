@@ -132,7 +132,7 @@ class VarGP(object):
             b0[-1] = a0[-1].diagonal() * mt0[-1]
         # _end_if_
 
-        # Concatenate the results into one (large) array.
+        # Concatenate the results into one (big) array.
         return np.concatenate((a0.ravel(), b0.ravel()))
     # _end_def_
 
