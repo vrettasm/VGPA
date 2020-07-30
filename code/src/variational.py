@@ -133,8 +133,7 @@ class VarGP(object):
         # _end_if_
 
         # Concatenate the results into one (large) array.
-        return np.concatenate((a0.ravel()[:, np.newaxis],
-                               b0.ravel()[:, np.newaxis]))
+        return np.concatenate((a0.ravel(), b0.ravel()))
     # _end_def_
 
     def free_energy(self, x):
@@ -286,8 +285,7 @@ class VarGP(object):
         gLb = self.dt * gLb
 
         # Group the gradients together and exit.
-        return np.concatenate((gLa.ravel()[:, np.newaxis],
-                               gLb.ravel()[:, np.newaxis]))
+        return np.concatenate((gLa.ravel(), gLb.ravel()))
     # _end_def_
 
     def _grad_at(self, dEsde_dak, lamk, mk, psik, sk):
