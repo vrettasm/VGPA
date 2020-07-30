@@ -290,8 +290,8 @@ class VarGP(object):
 
     def _grad_at(self, dEsde_dak, lamk, mk, psik, sk):
         """
-        Auxiliary function. Return automatically the
-        1D or nD version of the calculation.
+        Auxiliary function. Return automatically
+        the 1D or nD version of the calculation.
         """
         if self.model.single_dim:
             return dEsde_dak - (lamk * mk) - (2.0 * psik * sk)
@@ -302,8 +302,8 @@ class VarGP(object):
 
     def _dEsde_da(self, inv_sigma, at, mt, st, Edf, dEsde_dbt):
         """
-        Auxiliary function. Return automatically the 1D or nD
-        version of the calculation.
+        Auxiliary function. Return automatically
+        the 1D or nD version of the calculation.
         """
         if self.model.single_dim:
             return inv_sigma * (Edf + at) * st - dEsde_dbt * mt
