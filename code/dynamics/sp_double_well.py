@@ -107,6 +107,16 @@ class DoubleWell(StochasticProcess):
 
     # _end_def_
 
+    @property
+    def inverse_sigma(self):
+        """
+        Accessor method.
+
+        :return: the inverse of diffusion noise parameter.
+        """
+        return self.sig_inv
+    # _end_def_
+
     def make_trajectory(self, t0, tf, dt=0.01):
         """
         Generates a realizations of the double well (DW)
