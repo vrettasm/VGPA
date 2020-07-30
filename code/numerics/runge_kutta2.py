@@ -43,7 +43,7 @@ class RungeKutta2(OdeSolver):
         # Pre-allocate memory according to single_dim.
         if self.single_dim:
             # Number of discrete time points.
-            dim_n = off_b.shape[0]
+            dim_n = off_b.size
 
             # Return arrays.
             mt = np.zeros(dim_n)
