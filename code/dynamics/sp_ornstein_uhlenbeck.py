@@ -179,8 +179,8 @@ class OrnsteinUhlenbeck(StochasticProcess):
             Edf        : average differentiated drift (dim_n x 1).
             dEsde_dm   : gradient of Esde w.r.t. the means (dim_n x 1).
             dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_n x 1).
-            dEsde_dth  : gradient of Esde w.r.t. the parameter theta.
-            dEsde_dSig : gradient of Esde w.r.t. the parameter Sigma.
+            dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
+            dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
 
         # Gaussian Moments object.
@@ -197,29 +197,30 @@ class OrnsteinUhlenbeck(StochasticProcess):
         Q2 = linear_a * offset_b
 
         # Energy from the sDyn: Eq(7)
-        var_q = Ex2 * Q1 + 2 * m * (self.theta_ - linear_a) * offset_b + offset_b ** 2
-        Esde = 0.5 * self.sig_inv * my_trapz(var_q, dt, obs_t)
+        var_q = Ex2 * Q1 + 2.0 * m * (self.theta_ - linear_a) * offset_b + (offset_b ** 2)
+        Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self.sigma_
 
         # Average drift.
-        Ef = -self.theta_ * m
+        Ef = - self.theta_ * m
 
         # Average gradient of drift.
-        Edf = -self.theta_ * np.ones(m.shape)
+        Edf = - self.theta_ * np.ones(m.shape)
 
         # Gradients of Esde w.r.t. 'means'.
-        dEsde_dm = self.sig_inv * (m * (self.theta_ - linear_a) ** 2 + self.theta_ * offset_b - Q2)
+        dEsde_dm = (m * (self.theta_ - linear_a) ** 2 +
+                    self.theta_ * offset_b - Q2) / self.sigma_
 
         # Gradients of Esde w.r.t. 'variances'.
-        dEsde_dS = 0.5 * self.sig_inv * Q1
+        dEsde_dS = 0.5 * Q1 / self.sigma_
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = self.sig_inv * my_trapz(Ex2 * (self.theta_ - linear_a) + m * offset_b, dt, obs_t)
+        dEsde_dth = my_trapz(Ex2 * (self.theta_ - linear_a) + m * offset_b, dt, obs_t) / self.sigma_
 
         # Gradients of Esde w.r.t. 'sigma'.
-        dEsde_dSig = -self.sig_inv * Esde
+        dEsde_dSig = - Esde / self.sigma_
 
         # --->
-        return Esde, Ef, Edf, dEsde_dm, dEsde_dS, dEsde_dth, dEsde_dSig
+        return Esde, (Ef, Edf), (dEsde_dm, dEsde_dS, dEsde_dth, dEsde_dSig)
     # _end_def_
 
 # _end_class_

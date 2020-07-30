@@ -240,8 +240,8 @@ class Lorenz63(StochasticProcess):
                  Edf        : average differentiated drift (dim_t x 3).
                  dEsde_dm   : gradient of Esde w.r.t. the means (dim_t x 3).
                  dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_t x 3 x 3).
-                 dEsde_dth  : gradient of Esde w.r.t. the parameter theta.
-                 dEsde_dSig : gradient of Esde w.r.t. the parameter Sigma.
+                 dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
+                 dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
 
         # Number of discrete time points.
@@ -320,13 +320,13 @@ class Lorenz63(StochasticProcess):
         Esde = my_trapz(Esde, dt, obs_t)
 
         # Final adjustments for the (hyper)-parameters.
-        dEsde_dth = diag_sig_inv * my_trapz(dEsde_dth, dt, obs_t)
+        dEsde_dtheta = diag_sig_inv * my_trapz(dEsde_dth, dt, obs_t)
 
         # Final adjustments for the System noise.
-        dEsde_dSig = -0.5 * SigInv.dot(np.diag(my_trapz(dEsde_dSig, dt, obs_t))).dot(SigInv)
+        dEsde_dsigma = - 0.5 * SigInv.dot(np.diag(my_trapz(dEsde_dSig, dt, obs_t))).dot(SigInv)
 
         # --->
-        return Esde, Ef, Edf, dEsde_dm, dEsde_ds, dEsde_dth, dEsde_dSig
+        return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dtheta, dEsde_dsigma)
     # _end_def_
 
     def energy_dm_ds(self, at, bt, mt, st, diag_sig_inv):

@@ -175,16 +175,16 @@ class DoubleWell(StochasticProcess):
             Ef         : average drift (dim_n x 1).
             Edf        : average differentiated drift (dim_n x 1).
             dEsde_dm   : gradient of Esde w.r.t. the means (dim_n x 1).
-            dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_n x 1).
-            dEsde_dth  : gradient of Esde w.r.t. the parameter theta.
-            dEsde_dSig : gradient of Esde w.r.t. the parameter Sigma.
+            dEsde_ds   : gradient of Esde w.r.t. the covariance (dim_n x 1).
+            dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
+            dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
 
         # Gaussian Moments object.
         gauss_mom = GaussianMoments(m, s)
 
         # Constant value.
-        c = 4.0 * self.theta_ + linear_a
+        c = (4.0 * self.theta_) + linear_a
 
         # Get the time step from the parent class.
         dt = self.time_step
@@ -200,10 +200,10 @@ class DoubleWell(StochasticProcess):
 
         # Auxiliary variable.
         var_q = 8.0 * (Ex6 - c * Ex4 + offset_b * Ex3) + \
-                c2 * Ex2 - 2.0 * offset_b * c * m + offset_b ** 2
+                (c2 * Ex2) - (2.0 * offset_b * c * m) + (offset_b ** 2)
 
         # Energy from the sDyn: Eq(7)
-        Esde = 0.5 * self.sig_inv * my_trapz(var_q, dt, obs_t)
+        Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self.sigma_
 
         # Average drift: Eq(20) -> f(t,x) = 4*x*(theta -x^2).
         Ef = 4.0 * (self.theta_ * m - Ex3)
@@ -213,34 +213,36 @@ class DoubleWell(StochasticProcess):
 
         # Derivatives of higher order Gaussian moments w.r.t. 'm' and 's'.
         Dm2 = gauss_mom.dM(order=2)
-        DS2 = gauss_mom.dS(order=2)
+        Ds2 = gauss_mom.dS(order=2)
 
         # ---
         Dm3 = gauss_mom.dM(order=3)
-        DS3 = gauss_mom.dS(order=3)
+        Ds3 = gauss_mom.dS(order=3)
 
         # ---
         Dm4 = gauss_mom.dM(order=4)
-        DS4 = gauss_mom.dS(order=4)
+        Ds4 = gauss_mom.dS(order=4)
 
         # ---
         Dm6 = gauss_mom.dM(order=6)
-        DS6 = gauss_mom.dS(order=6)
+        Ds6 = gauss_mom.dS(order=6)
 
         # Gradients of Esde w.r.t. 'means'.
-        dEsde_dm = 0.5 * self.sig_inv * (16 * Dm6 - 8 * c * Dm4 + 8 * offset_b * Dm3 + c2 * Dm2 - 2 * offset_b * c)
+        dEsde_dm = 0.5 * (16.0 * Dm6 - 8.0 * c * Dm4 +
+                          8.0 * offset_b * Dm3 + c2 * Dm2 - 2.0 * offset_b * c) / self.sigma_
 
         # Gradients of Esde w.r.t. 'variances'.
-        dEsde_dS = 0.5 * self.sig_inv * (16 * DS6 - 8 * c * DS4 + 8 * offset_b * DS3 + c2 * DS2)
+        dEsde_ds = 0.5 * (16.0 * Ds6 - 8.0 * c * Ds4 +
+                          8.0 * offset_b * Ds3 + c2 * Ds2) / self.sigma_
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = 4.0 * self.sig_inv * my_trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t)
+        dEsde_dtheta = 4.0 * my_trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t) / self.sigma_
 
         # Gradients of Esde w.r.t. 'sigma'.
-        dEsde_dSig = -Esde * self.sig_inv
+        dEsde_dsigma = - Esde / self.sigma_
 
         # --->
-        return Esde, Ef, Edf, dEsde_dm, dEsde_dS, dEsde_dth, dEsde_dSig
+        return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dtheta, dEsde_dsigma)
     # _end_def_
 
 # _end_class_
