@@ -171,22 +171,28 @@ class Simulation(object):
 
     def run(self):
         """
-        TBD
+        Optimizes the VGPA model in time. All the output information
+        is store in self.output dictionary, where we can later save
+        it to the disk for further analysis.
 
         :return: None.
         """
 
         # Forward ODE solver.
         fwd_ode = FwdOde(self.m_data["time_window"]["dt"],
-                         self.m_data["ode_solver"], self.m_data["single_dim"])
+                         self.m_data["ode_solver"],
+                         self.m_data["single_dim"])
 
         # Backward ODE solver.
         bwd_ode = BwdOde(self.m_data["time_window"]["dt"],
-                         self.m_data["ode_solver"], self.m_data["single_dim"])
+                         self.m_data["ode_solver"],
+                         self.m_data["single_dim"])
 
         # Likelihood object.
-        likelihood = GaussianLikelihood(self.m_data["obs_y"], self.m_data["obs_t"],
-                                        self.m_data["noise"]["obs"], self.m_data["obs_H"],
+        likelihood = GaussianLikelihood(self.m_data["obs_y"],
+                                        self.m_data["obs_t"],
+                                        self.m_data["noise"]["obs"],
+                                        self.m_data["obs_H"],
                                         self.m_data["single_dim"])
         # Prior moments.
         kl0 = PriorKL0(self.m_data["prior"]["mu0"],
@@ -194,14 +200,15 @@ class Simulation(object):
                        self.m_data["single_dim"])
 
         # Variational GP model.
-        vgpa = VarGP(self.m_data["model"], self.m_data["m0"], self.m_data["s0"],
-                     fwd_ode, bwd_ode, likelihood, kl0, self.m_data["obs_y"],
-                     self.m_data["obs_t"])
+        vgpa = VarGP(self.m_data["model"],
+                     self.m_data["m0"], self.m_data["s0"],
+                     fwd_ode, bwd_ode, likelihood, kl0,
+                     self.m_data["obs_y"], self.m_data["obs_t"])
 
         # Setup SCG options.
         options = {'max_it': 500, 'x_tol': 1.0e-6, 'f_tol': 1.0e-8}
 
-        # SCG optimization.
+        # Create an SCG optimization object.
         optimize = SCG(vgpa.free_energy, vgpa.gradient, options)
 
         # Start the timer.
