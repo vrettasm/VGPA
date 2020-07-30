@@ -1,4 +1,5 @@
 import h5py
+import time
 import numpy as np
 from pathlib import Path
 
@@ -163,6 +164,9 @@ class Simulation(object):
             self.m_data["obs_y"] = obs_y
         # _end_if_
 
+        # Initial (marginal) moments.
+        self.m_data["m0"] = 0
+        self.m_data["s0"] = 0
     # _end_def_
 
     def run(self):
@@ -171,23 +175,18 @@ class Simulation(object):
 
         :return: None.
         """
-        # Extract the stochastic model.
-        model_s = self.m_data["model"]
 
         # Forward ODE solver.
         fwd_ode = FwdOde(self.m_data["time_window"]["dt"],
-                         self.m_data["ode_solver"],
-                         self.m_data["single_dim"])
+                         self.m_data["ode_solver"], self.m_data["single_dim"])
 
         # Backward ODE solver.
         bwd_ode = BwdOde(self.m_data["time_window"]["dt"],
-                         self.m_data["ode_solver"],
-                         self.m_data["single_dim"])
+                         self.m_data["ode_solver"], self.m_data["single_dim"])
 
         # Likelihood object.
-        likelihood = GaussianLikelihood(self.m_data["obs_y"],
-                                        self.m_data["obs_t"],
-                                        self.m_data["obs_H"],
+        likelihood = GaussianLikelihood(self.m_data["obs_y"], self.m_data["obs_t"],
+                                        self.m_data["noise"]["obs"], self.m_data["obs_H"],
                                         self.m_data["single_dim"])
         # Prior moments.
         kl0 = PriorKL0(self.m_data["prior"]["mu0"],
@@ -195,8 +194,9 @@ class Simulation(object):
                        self.m_data["single_dim"])
 
         # Variational GP model.
-        vgpa = VarGP(model_s, fwd_ode, bwd_ode, likelihood, kl0,
-                     self.m_data["obs_y"], self.m_data["obs_t"])
+        vgpa = VarGP(self.m_data["model"], self.m_data["m0"], self.m_data["s0"],
+                     fwd_ode, bwd_ode, likelihood, kl0, self.m_data["obs_y"],
+                     self.m_data["obs_t"])
 
         # Setup SCG options.
         options = {'max_it': 500, 'x_tol': 1.0e-6, 'f_tol': 1.0e-8}
@@ -204,12 +204,24 @@ class Simulation(object):
         # SCG optimization.
         optimize = SCG(vgpa.free_energy, vgpa.gradient, options)
 
+        # Start the timer.
+        time_t0 = time.time()
+
         # Run the optimization procedure.
         x, fx = optimize(vgpa.initialization())
 
-        # Store the results.
+        # Stop the timer.
+        time_tf = time.time()
+
+        # Print duration.
+        print(" Elapsed time: {0:.2f} seconds.\n".format(time_tf - time_t0))
+
+        # Store the results (along with the VGPA output).
         self.output["x"] = x
         self.output["fx"] = fx
+
+        # Merge the outputs in one dict.
+        self.output.update(vgpa.output)
     # _end_def_
 
     def save(self):
