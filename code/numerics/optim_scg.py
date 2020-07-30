@@ -32,11 +32,8 @@ class SCG(object):
         # Check if we have given parameters.
         p_list = args[0] if args else {}
 
-        # Function handle.
-        self.f = f
-
-        # Derivative function.
-        self.df = df
+        # Function handles.
+        self.f, self.df = f, df
 
         # Maximum number of iterations.
         if "max_it" in p_list:
@@ -87,13 +84,13 @@ class SCG(object):
         # Initialization.
         x = x0.copy()
 
-        # Make input 1-D.
-        x = np.atleast_1d(x)
+        # Make sure input is array.
+        x = np.asarray(x)
 
-        # Number of input parameters.
-        dim_x = x.shape[0]
+        # Size of input array.
+        dim_x = x.ravel().size
 
-        # Initial sigma value.
+        # Initial sigma.
         sigma0 = 1.0e-3
 
         # Initial function/gradients value.
@@ -158,12 +155,14 @@ class SCG(object):
 
                 # Update sigma and check the gradient on a new direction.
                 sigma = sigma0 / np.sqrt(kappa)
-                xplus = x + sigma * d
+                xplus = x + (sigma * d)
 
                 # We evaluate the df(xplus).
-                # Because we evaluate only the gradient at a new point
-                # we set the flag eval_function = True.
-                gplus = self.df(xplus, eval_fun=True)
+                # Because we evaluate the gradient at a new point
+                # we run the f(x) too,  so that we get consistent
+                # variational and Lagrangian parameters.
+                _ = self.f(xplus, *args)
+                gplus = self.df(xplus, *args)
 
                 # Increase function/gradients evaluations by one.
                 self.stats['f_eval'] += 1
