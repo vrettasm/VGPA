@@ -285,6 +285,15 @@ class VarGP(object):
         return np.concatenate((gLa.ravel(), gLb.ravel()))
     # _end_def_
 
+    @property
+    def arg_out(self):
+        """
+        Accessor for the output dictionary.
+        :return: the output dictionary.
+        """
+        return self.output
+    # _end_def_
+
     def _grad_at(self, dEsde_dak, lamk, mk, psik, sk):
         """
         Auxiliary function. Return automatically
