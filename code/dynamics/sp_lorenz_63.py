@@ -49,6 +49,10 @@ class Lorenz63(StochasticProcess):
 
         :param r_seed: random seed.
         """
+
+        # Display class info.
+        print(" Creating Lorenz-63 process.")
+
         # Call the constructor of the parent class.
         super().__init__(r_seed, single_dim=False)
 

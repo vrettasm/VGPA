@@ -24,6 +24,10 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         :param r_seed: random seed.
         """
+
+        # Display class info.
+        print(" Creating Ornstein-Uhlenbeck process.")
+
         # Call the constructor of the parent class.
         super().__init__(r_seed, single_dim=True)
 
