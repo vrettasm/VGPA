@@ -253,10 +253,10 @@ class Simulation(object):
         # _end_if_
 
         # Store the optimization minimum.
-        self.output["fx"] = np.asarray(fx)
+        self.output["fx"] = fx
 
         # Merge the outputs in one dict.
-        self.output.update(vgpa.output)
+        self.output.update(vgpa.arg_out)
     # _end_def_
 
     def save(self):
@@ -287,6 +287,11 @@ class Simulation(object):
 
                 # Extract all the data.
                 for key in data:
+                    # Convert scalars before storing.
+                    if np.isscalar(data[key]):
+                        data[key] = np.atleast_1d(data[key])
+                    # _end_if_
+
                     # Default compressions level is '4'.
                     out_file.create_dataset(key, data=data[key], compression='gzip')
                 # _end_for_
