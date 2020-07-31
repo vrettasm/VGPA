@@ -56,9 +56,9 @@ class VarGP(object):
 
         # Get the dimensions.
         if self.model.single_dim:
-            self.dim_n, self.dim_d = self.model.sample_path[0].size, 1
+            self.dim_n, self.dim_d = self.model.sample_path.size, 1
         else:
-            self.dim_n, self.dim_d = self.model.sample_path[0].shape
+            self.dim_n, self.dim_d = self.model.sample_path.shape
         # _end_if_
 
         # Total number of linear variables: a(t).
@@ -82,9 +82,7 @@ class VarGP(object):
         time_window = self.model.time_window
 
         # Replicate the first and last time points.
-        time_x = [time_window[0]]
-        time_x.extend(time_window[self.obs_t])
-        time_x.extend(time_window[-1])
+        time_x = [time_window[0], *time_window[self.obs_t], time_window[-1]]
 
         # Switch according to the dimensionality.
         if self.model.single_dim:
@@ -160,7 +158,6 @@ class VarGP(object):
         # _end_if_
 
         # Initial posterior moments.
-        # For the moment are not optimized.
         m0 = self.output["m0"]
         s0 = self.output["s0"]
 
@@ -246,7 +243,7 @@ class VarGP(object):
 
         # Posterior moments: m(t), S(t).
         mt = self.output["mt"]
-        st = self.output["St"]
+        st = self.output["st"]
 
         # Lagrange multipliers: lam(t), psi(t).
         lamt = self.output["lamt"]
