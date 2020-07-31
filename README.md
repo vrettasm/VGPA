@@ -3,26 +3,25 @@
 **Variational Gaussian Process Approximation**
 
 This project contains a python implementation of the basic VGPA algorithm
-for approximate inference in SDEs. The code refers to the initial algorithms
-as published in:
+for approximate inference in SDEs.
 
-* C. Archambeau, D. Cornford, M. Opper, J. Shawe-Taylor (2007).
+## References
+---
+
+The code refers to the initial algorithms as published in:
+
+1. [C. Archambeau, D. Cornford, M. Opper, J. Shawe-Taylor (2007)](
+http://proceedings.mlr.press/v1/archambeau07a.html).
 "Gaussian process approximations of stochastic differential equations",
 Journal of Machine Learning Research, Workshop and Conference Proceedings.
 vol. 1, 2007, pp. 1–16.
 
-The code can deal with both 1-D and N-D systems. Examples include:
+2. [C. Archambeau, M. Opper, Y. Shen D. Cornford,  J. Shawe-Taylor (2007)](
+https://papers.nips.cc/paper/3282-variational-inference-for-diffusion-processes.pdf).
+"Variational Inference for Diffusion Processes",
+Neural Information Processing Systems (NIPS), vol. 20.
 
-1. Ornstein-Uhlenbeck (1-D)
-2. Double-Well (1-D)
-3. Lorenz-63 (3-D)
-4. Lorenz-98 (40-D)
-
-If someone is interested in applying the algorithm on other dynamical systems
-is fully responsible to rewrite the relevant files for the necessary expectation
-functions.
-
-## Note
+### Note
 
 Some of the optimizations in the are adopted (translated) from NETLAB with the
 following message:
@@ -35,3 +34,9 @@ following message:
 
 All the copyrights of this algorithm remain with the original author of the book
 (Ian T. Nabney).
+
+
+### Contact
+---
+
+For any questions / comments please contact me at: vrettasm@gmail.com
