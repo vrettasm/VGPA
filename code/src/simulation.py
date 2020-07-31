@@ -232,9 +232,28 @@ class Simulation(object):
         # Print duration.
         print(" Elapsed time: {0:.2f} seconds.\n".format(time_tf - time_t0))
 
-        # Store the results (along with the VGPA output).
-        self.output["x"] = x
-        self.output["fx"] = fx
+        # Unpack optimization output data.
+        if self.m_data["model"].single_dim:
+            # Get the dimensions.
+            dim_n = self.m_data["model"].sample_path.size
+
+            # Store to the output.
+            self.output["at"] = x[:dim_n]
+            self.output["bt"] = x[dim_n:]
+        else:
+            # Get the dimensions.
+            dim_n, dim_d = self.m_data["model"].sample_path.shape
+
+            # Total dimensions of the linear parameters.
+            dim_tot = dim_n * dim_d * dim_d
+
+            # Store to the output.
+            self.output["at"] = x[:dim_tot].reshape(dim_n, dim_d, dim_d)
+            self.output["bt"] = x[dim_tot:].reshape(dim_n, dim_d)
+        # _end_if_
+
+        # Store the optimization minimum.
+        self.output["fx"] = np.asarray(fx)
 
         # Merge the outputs in one dict.
         self.output.update(vgpa.output)
