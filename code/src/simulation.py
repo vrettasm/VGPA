@@ -147,26 +147,35 @@ class Simulation(object):
         self.m_data["model"].make_trajectory(self.m_data["time_window"]["t0"],
                                              self.m_data["time_window"]["tf"],
                                              self.m_data["time_window"]["dt"])
-        # Observation operator.
-        self.m_data["obs_H"] = params["obs_setup"]["operator"]
-
         # This needs to be revisited.
         if data is not None:
             self.m_data["obs_t"] = data[0]
             self.m_data["obs_y"] = data[1]
         else:
             # Sample observations from the trajectory.
-            obs_t, obs_y = self.m_data["model"].collect_obs(params["obs_setup"]["density"],
+            obs_t, obs_y = self.m_data["model"].collect_obs(self.m_data["obs_setup"]["density"],
                                                             self.m_data["noise"]["obs"],
-                                                            self.m_data["obs_H"])
+                                                            self.m_data["obs_setup"]["operator"])
             # Add them to the dictionary.
             self.m_data["obs_t"] = obs_t
             self.m_data["obs_y"] = obs_y
         # _end_if_
 
         # Initial (marginal) moments.
-        self.m_data["m0"] = 0
-        self.m_data["s0"] = 0
+        if self.m_data["single_dim"]:
+            self.m_data["m0"] = self.m_data["model"].sample_path[0] +\
+                                0.1 * self.m_data["model"].rng.standard_normal()
+            self.m_data["s0"] = 0.2
+        else:
+            # Get the system dimensions.
+            dim_d = self.m_data["model"].sample_path.shape[-1]
+
+            # Initial (marginal) moments.
+            self.m_data["m0"] = self.m_data["model"].sample_path[0] +\
+                                0.1 * self.m_data["model"].rng.standard_normal(dim_d)
+            self.m_data["s0"] = 0.2 * np.eye(dim_d)
+        # _end_if_
+
     # _end_def_
 
     def run(self):
@@ -192,7 +201,7 @@ class Simulation(object):
         likelihood = GaussianLikelihood(self.m_data["obs_y"],
                                         self.m_data["obs_t"],
                                         self.m_data["noise"]["obs"],
-                                        self.m_data["obs_H"],
+                                        self.m_data["obs_setup"]["operator"],
                                         self.m_data["single_dim"])
         # Prior moments.
         kl0 = PriorKL0(self.m_data["prior"]["mu0"],
