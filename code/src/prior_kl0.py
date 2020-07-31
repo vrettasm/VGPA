@@ -43,7 +43,6 @@ class PriorKL0(object):
             return self.gauss_1D(m0, s0)
         else:
             return self.gauss_nD(m0, s0)
-        # _end_if_
     # _end_def_
 
     def gauss_1D(self, m0, s0):
@@ -112,7 +111,6 @@ class PriorKL0(object):
             return self.gradients_1D(m0, s0, lam0, psi0)
         else:
             return self.gradients_nD(m0, s0, lam0, psi0)
-        # _end_if_
     # _end_def_
 
     def gradients_1D(self, m0, s0, lam0, psi0):
