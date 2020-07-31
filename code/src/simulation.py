@@ -115,7 +115,7 @@ class Simulation(object):
 
             # Create the model.
             self.m_data["model"] = DoubleWell(self.m_data["noise"]["sys"],
-                                              self.m_data["drift"],
+                                              self.m_data["drift"]["theta"],
                                               self.m_data["random_seed"])
             # One-dimensional model.
             self.m_data["single_dim"] = True
@@ -124,7 +124,7 @@ class Simulation(object):
 
             # Create the model.
             self.m_data["model"] = OrnsteinUhlenbeck(self.m_data["noise"]["sys"],
-                                                     self.m_data["drift"],
+                                                     self.m_data["drift"]["theta"],
                                                      self.m_data["random_seed"])
             # One-dimensional model.
             self.m_data["single_dim"] = True
@@ -133,7 +133,7 @@ class Simulation(object):
 
             # Create the model.
             self.m_data["model"] = Lorenz63(self.m_data["noise"]["sys"],
-                                            self.m_data["drift"],
+                                            self.m_data["drift"]["theta"],
                                             self.m_data["random_seed"])
             # Three-dimensional model.
             self.m_data["single_dim"] = False
