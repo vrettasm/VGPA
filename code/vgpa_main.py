@@ -4,7 +4,7 @@ import sys
 import json
 import pandas as pd
 from pathlib import Path
-from .src.simulation import Simulation
+from code.src.simulation import Simulation
 
 # INFO:
 __author__ = "Michail Vrettas, PhD"
@@ -32,9 +32,9 @@ def validateInputParametersFile(filename):
         model_params = json.load(input_file)
 
         # Required keys in the json file.
-        required_keys = ("Data_Filename",  "Output_Name",  "Model",  "Ode-method",
-                         "Time-window", "Noise", "Observations", "Drift", "Prior",
-                         "Random-Seed")
+        required_keys = ("Output_Name",  "Model",  "Ode-method",
+                         "Time-window", "Noise", "Observations",
+                         "Drift", "Prior", "Random-Seed")
 
         # Check the keywords for membership in the file.
         for k in required_keys:
@@ -90,22 +90,27 @@ def main(params_file=None, data_file=None):
         sys.exit(1)
     # _end_if_
 
-    # Check if we got simulation water data. Make sure its a Path object.
+    # Check if we got simulation water data.
+    # Make sure its a Path object.
     if data_file is not None:
         data_file = Path(data_file)
-    else:
-        data_file = Path(params["Data_Filename"])
     # _end_if_
 
     # Display where we got the water data from.
     print(" Simulation observational data file: {0}".format(data_file))
 
     try:
-        # Open the water data in "Read Only" mode.
-        with open(data_file, 'r') as input_file:
-            # The file should have two columns.
-            obs_data = pd.read_csv(input_file, names=["t", "Yt"])
-        # _end_with_
+        # If we have given a data-file.
+        if data_file is not None:
+            # Open the water data in "Read Only" mode.
+            with open(data_file, 'r') as input_file:
+                # The file should have two columns.
+                obs_data = pd.read_csv(input_file, names=["t", "Yt"])
+            # _end_with_
+        else:
+            # Set this to None.
+            obs_data = None
+        # _end_if_
 
         # Get the output name from the file.
         output_name = params["Output_Name"]
