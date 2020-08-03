@@ -273,7 +273,6 @@ def ut_approx(fun, x_bar, x_cov, *args):
     chi = np.concatenate((x_bar[np.newaxis, :],
                           (x_mat + sPxx),
                           (x_mat - sPxx)))
-
     # Compute the weights.
     w_list = [k / (dim_d + k)]
     w_list.extend([1.0 / (2.0 * (dim_d + k))] * (dim_m - 1))
