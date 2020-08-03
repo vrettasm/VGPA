@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 from scipy.integrate import trapz
-from scipy.linalg import cholesky, inv
+from scipy.linalg import cholesky, inv, LinAlgError
 
 
 def finite_diff(fun, x, *args):
@@ -220,4 +220,79 @@ def chol_inv(x):
     x_inv = c_inv.T.dot(c_inv)
 
     return x_inv, c_inv
+# _end_def_
+
+def ut_approx(fun, x_bar, x_cov, *args):
+    """
+    This method computes the approximate values for the mean and
+    the covariance of a multivariate random variable. To achieve
+    that, the "Unscented Transformation" (UT) is used.
+
+    Reference:
+    Simon J. Julier (1999). "The Scaled Unscented Transformation".
+    Conference Proceedings, pp.4555--4559
+
+    :param fun: function of the nonlinear transformation.
+
+    :param x_bar: current mean of the state vector (dim_d x 1).
+
+    :param x_cov: current covariance of the state vector (dim_d x dim_d).
+
+    :param args: additional parameter for the "fun" function.
+
+    :return: 1) y_bar : estimated mean after nonlinear transformation (dim_k x 1)
+             2) y_cov : estimated covariance after nonlinear transformation (dim_k x dim_k).
+    """
+
+    # Make sure input is arrays.
+    x_bar = np.asarray(x_bar)
+    x_cov = np.asarray(x_cov)
+
+    # Get the dimensions of the state vector.
+    dim_d = x_bar.size
+
+    # Total number of sigma points.
+    dim_m = (2.0 * dim_d + 1)
+
+    # Scaling factor.
+    k = 1.05 * dim_d
+
+    # Use Cholesky to get the lower triangular matrix.
+    try:
+        sPxx = cholesky((dim_d + k) * x_cov).T
+    except LinAlgError:
+        # If the original fails, apply only to
+        # the diagonal elements of the covariance.
+        sPxx = cholesky(x_cov * np.eye(dim_d)).T
+    # _end_if_
+
+    # Replicate the array.
+    x_mat = np.tile(x_bar, (dim_d, 1))
+
+    # Put all sigma points together.
+    chi = np.concatenate((x_bar[np.newaxis, :],
+                          (x_mat + sPxx),
+                          (x_mat - sPxx)))
+
+    # Compute the weights.
+    w_list = [k / (dim_d + k)]
+    w_list.extend([1.0 / (2.0 * (dim_d + k))] * (dim_m - 1))
+    weights = np.reshape(np.array(w_list), (1, dim_m))
+
+    # Propagate the new points through
+    # the non-linear transformation.
+    y = fun(chi, *args)
+
+    # Compute the new approximate mean.
+    y_bar = weights.dot(y)
+
+    # Compute the approximate covariance.
+    w_m = np.eye(dim_m) - np.tile(weights, (dim_m, 1))
+    Q = w_m.dot(np.diag(weights.ravel())).dot(w_m.T)
+
+    # Compute the new approximate covariance.
+    y_cov = y.T.dot(Q).dot(y)
+
+    # --->
+    return y_bar, y_cov
 # _end_def_
