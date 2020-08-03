@@ -149,7 +149,7 @@ class Simulation(object):
             self.m_data["model"] = Lorenz96(self.m_data["noise"]["sys"],
                                             self.m_data["drift"]["theta"],
                                             self.m_data["random_seed"])
-            # Three-dimensional model.
+            # Forty-dimensional model.
             self.m_data["single_dim"] = False
 
         else:
