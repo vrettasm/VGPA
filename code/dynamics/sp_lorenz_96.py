@@ -1,5 +1,5 @@
 import numpy as np
-from ..numerics.utilities import my_trapz
+from ..numerics.utilities import my_trapz, ut_approx
 from ..src.variational import grad_Esde_dm_ds
 from .stochastic_process import StochasticProcess
 from scipy.linalg import cholesky, inv, LinAlgError
@@ -313,10 +313,10 @@ class Lorenz96(StochasticProcess):
             mt = m[t]
 
             # Compute: <(f(xt)-g(xt))'*(f(xt)-g(xt))>.
-            mbar, _ = ut_approx(Fx['1'], mt, st, at, bt)
+            m_bar, _ = ut_approx(Fx['1'], mt, st, at, bt)
 
             # Esde energy: Esde(t) = 0.5*<(f(xt)-g(xt))'*SigInv*(f(xt)-g(xt))>.
-            Esde[t] = 0.5 * diag_inv_sig.dot(mbar.T)
+            Esde[t] = 0.5 * diag_inv_sig.dot(m_bar.T)
 
             # Average drift: <f(Xt)>
             Ef[t] = self.E96_drift(mt, st)
@@ -325,21 +325,22 @@ class Lorenz96(StochasticProcess):
             Edf[t] = E96_drift_dx(mt)
 
             # Approximate the expectation of the gradients.
+            # x, fun, mt, st, at, bt, diag_inv_sigma
             dmS, _ = ut_approx(grad_Esde_dm_ds, mt, st,
                                Fx['2'], mt, st, at, bt,
                                diag_inv_sig)
 
             # Gradient w.r.t. mean mt: dEsde(t)_dmt
-            dEsde_dm[t] = dmS[0, :40] - Esde[t] * np.linalg.solve(st, mt)
+            dEsde_dm[t] = dmS[:40] - Esde[t] * np.linalg.solve(st, mt)
 
             #  Gradient w.r.t. covariance St: dEsde(t)_dSt
-            dEsde_ds[t] = 0.5 * (dmS[0, 40:].reshape(40, 40) - Esde[t] * np.linalg.inv(st))
+            dEsde_ds[t] = 0.5 * (dmS[40:].reshape(40, 40) - Esde[t] * np.linalg.inv(st))
 
             # Gradients of Esde w.r.t. 'Theta': dEsde(t)_dtheta
             dEsde_dth[t] = Ef[t] + mt.dot(at.T) - bt
 
             # Gradients of Esde w.r.t. 'Sigma': dEsde(t)_dSigma
-            dEsde_dSig[t] = mbar
+            dEsde_dSig[t] = m_bar
         # _end_for_
 
         # Compute energy using numerical integration.
