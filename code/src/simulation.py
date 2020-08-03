@@ -292,13 +292,15 @@ class Simulation(object):
 
                 # Extract all the data.
                 for key in data:
-                    # Convert scalars before storing.
+                    # Convert scalars to 1D arrays
+                    # before storing them in the file.
                     if np.isscalar(data[key]):
-                        data[key] = np.asarray(data[key])
+                        data[key] = np.atleast_1d(data[key])
                     # _end_if_
 
                     # Default compressions level is '4'.
-                    out_file.create_dataset(key, data=data[key], compression='gzip')
+                    out_file.create_dataset(key, data=data[key],
+                                            compression='gzip')
                 # _end_for_
             # _end_with_
         # _end_if_
