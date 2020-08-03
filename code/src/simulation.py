@@ -45,12 +45,15 @@ class Simulation(object):
         """
         Default constructor of the Simulation class.
 
-        :param name: (string) is optional but it will be used for constructing
-        a meaningful filename to save the results at the end of the simulation.
+        :param name: (string) is optional but it will
+        be used for constructing a meaningful filename
+        to save the results at the end of the simulation.
 
-        :param seed: (int) is used to initialize the random generator. If None,
-        the generator will be initialized at random from the OS.
+        :param seed: (int) is used to initialize the
+        random generator. If None, the generator will
+        be initialized at random from the OS.
         """
+
         # Check if a simulation name has been given.
         if name is not None:
             self.name = name
@@ -58,7 +61,8 @@ class Simulation(object):
             self.name = "ID_None"
         # _end_if_
 
-        # This dictionary will hold all the simulation data.
+        # This dictionary will hold
+        # all the simulation data.
         self.m_data = {}
 
         # Create a random number generator.
@@ -74,13 +78,15 @@ class Simulation(object):
 
     def setup(self, params, data):
         """
-        This method is called BEFORE the run() and sets up all the variables for
-        the simulation.  It is also responsible for checking the validity of the
-        input parameters before use.
+        This method is called BEFORE the run() and sets up
+        all the variables for the simulation. It is also
+        responsible for checking the validity of the input
+        parameters before use.
 
-        :param params: (dict) contains all the given parameters. If None, then it
-        will use the default parameters to initialize object. However this is not
-        recommended since the user will have no control on the parameters.
+        :param params: (dict) contains all the given parameters.
+        If None, then it will use the default parameters to initialize
+        object. However this is not recommended since the user will
+        have no control on the parameters.
 
         :param data: array with observation times and values (t, yt).
 
@@ -175,7 +181,6 @@ class Simulation(object):
                                 0.1 * self.m_data["model"].rng.standard_normal(dim_d)
             self.m_data["s0"] = 0.2 * np.eye(dim_d)
         # _end_if_
-
     # _end_def_
 
     def run(self):
@@ -261,9 +266,11 @@ class Simulation(object):
 
     def save(self):
         """
-        Saves the simulation results to a file. All the data should be stored
-        inside the self.output dictionary and be of type "numpy.ndarray". For
-        the moment the file is saved in the same directory as the main program.
+        Saves the simulation results to a file. All the data should
+        be stored inside the  self.output dictionary and be of type
+        numpy.ndarray. For the moment the file is saved in the same
+        directory as the main program.
+
         :return: None.
         """
 
