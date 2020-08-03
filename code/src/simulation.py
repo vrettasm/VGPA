@@ -84,9 +84,7 @@ class Simulation(object):
         parameters before use.
 
         :param params: (dict) contains all the given parameters.
-        If None, then it will use the default parameters to initialize
-        object. However this is not recommended since the user will
-        have no control on the parameters.
+        If None, then it will use the default parameters.
 
         :param data: array with observation times and values (t, yt).
 
@@ -234,7 +232,7 @@ class Simulation(object):
         # Stop the timer.
         time_tf = time.time()
 
-        # Print duration.
+        # Print final duration in seconds.
         print(" Elapsed time: {0:.2f} seconds.\n".format(time_tf - time_t0))
 
         # Unpack optimization output data.
@@ -296,7 +294,7 @@ class Simulation(object):
                 for key in data:
                     # Convert scalars before storing.
                     if np.isscalar(data[key]):
-                        data[key] = np.atleast_1d(data[key])
+                        data[key] = np.asarray(data[key])
                     # _end_if_
 
                     # Default compressions level is '4'.

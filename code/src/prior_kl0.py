@@ -1,6 +1,7 @@
 import numpy as np
 from ..numerics.utilities import log_det, chol_inv
 
+
 class PriorKL0(object):
     """
     Prior (Gaussian) moments at t=0 - KL0.
@@ -16,6 +17,7 @@ class PriorKL0(object):
 
         :param tau0: prior moment for the co-variance (dim_d x dim_d).
         """
+
         # Prior mean (t=0).
         self.mu0 = np.asarray(mu0)
 
@@ -38,6 +40,7 @@ class PriorKL0(object):
 
         :return: energy of the initial state KL0, (scalar).
         """
+
         # Switch according to the system dimensions.
         if self.single_dim:
             return self.gauss_1D(m0, s0)
@@ -55,6 +58,7 @@ class PriorKL0(object):
 
         :return: energy of the initial state KL0, (scalar).
         """
+
         # Pre-compute once.
         z0 = m0 - self.mu0
 
@@ -76,6 +80,7 @@ class PriorKL0(object):
 
         :return: energy of the initial state KL0, (scalar).
         """
+
         # Inverse of tau0 matrix.
         inv_tau0, _ = chol_inv(self.tau0)
 
@@ -107,6 +112,8 @@ class PriorKL0(object):
 
         :return: Gradient of KL0 w.r.t. the initial mean / variance.
         """
+
+        # Switch according to the system dimensions.
         if self.single_dim:
             return self.gradients_1D(m0, s0, lam0, psi0)
         else:
@@ -127,6 +134,7 @@ class PriorKL0(object):
 
         :return: Gradient of KL0 w.r.t. the initial mean / variance.
         """
+
         # Auxiliary variable.
         z0 = m0 - self.mu0
 
@@ -154,6 +162,7 @@ class PriorKL0(object):
 
         :return: Gradient of KL0 w.r.t. the initial mean / variance.
         """
+
         # Inverse of tau0 matrix.
         inv_tau0, _ = chol_inv(self.tau0)
 

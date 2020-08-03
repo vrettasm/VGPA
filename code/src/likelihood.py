@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Likelihood(object):
     """
     This is a base (parent) class for all the likelihood functions.
@@ -11,22 +12,20 @@ class Likelihood(object):
 
     def __init__(self, values, times, noise, operator=None):
         """
-        Default constructor. No checks are performed
-        for the validity of the input data.
+        Default constructor. No checks are performed for the
+        validity of the input data.
 
-        :param values: observation values. This is a
-        numpy array that contains the observations.
+        :param values: observation values. This is a numpy
+        array that contains the observations.
 
-        :param times: observation times. This is a
-        vector that contains the discrete times that
-        the observations occur.
+        :param times: observation times. This is a vector that
+        contains the discrete times that the observations occur.
 
         :param noise: observation noise co-variance.
 
-        :param operator: observation operator. This is
-        an object (function or matrix) that maps the
-        observation space. It is usually assumed to be
-        the identity matrix (for simplicity).
+        :param operator: observation operator. This is an object
+        (function or matrix) that maps the observation space. It
+        is usually assumed to be the identity matrix (for simplicity).
         """
 
         # Store observation times/values.

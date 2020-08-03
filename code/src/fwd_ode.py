@@ -54,8 +54,9 @@ class FwdOde(object):
 
             self.solver = RungeKutta4(dt, single_dim)
         else:
-            raise ValueError(" {0}: Integration method is unknown"
-                             " -> {1}.".format(self.__class__.__name__, method))
+            raise ValueError(" {0}: Integration method is unknown ->"
+                             " {1}.".format(self.__class__.__name__,
+                                            method))
         # _end_if_
 
         # Get a copy of the method name (for the __str__).
@@ -79,6 +80,7 @@ class FwdOde(object):
 
         :return: the result of the solver (marginal moments).
         """
+
         # Return the solution of the fwd-ode.
         return self.solver.solve_fwd(at, bt, m0, s0, sigma)
     # _end_def_
@@ -86,13 +88,15 @@ class FwdOde(object):
     # Auxiliary.
     def __str__(self):
         """
-        Override to print a readable string presentation of the object.
-        This will include its id(), along with its fields values.
+        Override to print a readable string presentation of
+        the object. This will include its id(), along with
+        its fields values.
 
-        :return: a string representation of a WaterContent object.
+        :return: a string representation of a FwdOde object.
         """
         return " FwdOde Id({0}):"\
-               " dt={1}, method={2}".format(id(self), self.dt, self.method)
+               " dt={1}, method={2}".format(id(self), self.dt,
+                                            self.method)
     # _end_def_
 
 # _end_class_

@@ -2,6 +2,7 @@ import numpy as np
 from .likelihood import Likelihood
 from ..numerics.utilities import log_det, chol_inv
 
+
 class GaussianLikelihood(Likelihood):
     """
     Gaussian likelihood function.
@@ -11,7 +12,7 @@ class GaussianLikelihood(Likelihood):
 
     def __init__(self, values, times, noise, operator, single_dim=True):
         """
-        Default constructor.
+        Default constructor of the Gaussian Likelihood object.
 
         :param values: observation values.
 
@@ -23,6 +24,7 @@ class GaussianLikelihood(Likelihood):
 
         :param single_dim: single dimension flag.
         """
+
         # Call the constructor of the parent class.
         super().__init__(values, times, noise, operator)
 

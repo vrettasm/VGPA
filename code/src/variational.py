@@ -36,6 +36,7 @@ class VarGP(object):
 
         :param obs_t: observation times (discrete).
         """
+
         # Stochastic model.
         self.model = model
 

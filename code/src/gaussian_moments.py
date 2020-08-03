@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class GaussianMoments(object):
     """
     This class creates an object that returns the higher order
@@ -13,7 +14,8 @@ class GaussianMoments(object):
 
     def __init__(self, m_arr, v_arr):
         """
-        Constructs an object that holds the marginal means and variances.
+        Constructs an object that holds the marginal means
+        and variances at all times (t).
 
         :param m_arr: marginal means array (N x 1).
 
@@ -92,12 +94,13 @@ class GaussianMoments(object):
 
     def dM(self, order=1):
         """
-        Compute the derivative with respect to the marginal means,
-        of the non-central moment, up to 8-th order.
+        Compute the derivative with respect to the marginal
+        means, of the non-central moment, up to 8-th order.
 
         :param order: of the un-centered Gaussian moment.
 
-        :return: the derivative with respect to the marginal means.
+        :return: the derivative with respect to the marginal
+        means.
 
         :raises ValueError: if the input order is out of bounds.
         """
@@ -139,12 +142,13 @@ class GaussianMoments(object):
 
     def dS(self, order=1):
         """
-        Compute the derivative with respect to the marginal variances,
-        of the un-centered moment, up to 8-th order.
+        Compute the derivative with respect to the marginal
+        variances, of the un-centered moment, up to 8-th order.
 
         :param order: of the un-centered Gaussian moment.
 
-        :return: the derivative with respect to the marginal variances.
+        :return: the derivative with respect to the marginal
+        variances.
 
         :raises ValueError: if the input order is out of bounds.
         """
