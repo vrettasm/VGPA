@@ -7,6 +7,7 @@ from .fwd_ode import FwdOde
 from .bwd_ode import BwdOde
 
 from ..dynamics.sp_lorenz_63 import Lorenz63
+from ..dynamics.sp_lorenz_96 import Lorenz96
 from ..dynamics.sp_double_well import DoubleWell
 from ..dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
 
@@ -137,6 +138,15 @@ class Simulation(object):
 
             # Create the model.
             self.m_data["model"] = Lorenz63(self.m_data["noise"]["sys"],
+                                            self.m_data["drift"]["theta"],
+                                            self.m_data["random_seed"])
+            # Three-dimensional model.
+            self.m_data["single_dim"] = False
+
+        elif params["Model"].upper() == "L96":
+
+            # Create the model.
+            self.m_data["model"] = Lorenz96(self.m_data["noise"]["sys"],
                                             self.m_data["drift"]["theta"],
                                             self.m_data["random_seed"])
             # Three-dimensional model.
