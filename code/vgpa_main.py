@@ -18,11 +18,14 @@ def validateInputParametersFile(filename):
     validate the values of the keys.
 
     :param filename: Is a "Path" object that
-    contains the input model parameters for the simulation.
+    contains the input model parameters for the
+    simulation.
 
-    :return: A dictionary loaded from the input file.
+    :return: A dictionary loaded from the input
+    file.
 
-    :raises ValueError: if a keyword is missing from the file.
+    :raises ValueError: if a keyword is missing
+    from the file.
     """
 
     # Open the file in "Read Only" mode.
@@ -36,7 +39,7 @@ def validateInputParametersFile(filename):
                          "Time-window", "Noise", "Observations",
                          "Drift", "Prior", "Random-Seed")
 
-        # Check the keywords for membership in the file.
+        # Check the keywords for membership.
         for k in required_keys:
 
             # The order in here doesn't matter.
@@ -50,7 +53,8 @@ def validateInputParametersFile(filename):
         print(" Model parameters are given correctly.")
     # _end_with_
 
-    # The dictionary will contain all the input parameters.
+    # The dictionary will contain
+    # all the input parameters.
     return model_params
 # _end_def_
 
@@ -58,12 +62,14 @@ def validateInputParametersFile(filename):
 # Main function.
 def main(params_file=None, data_file=None):
     """
-    As the name suggests, this is the main function that is called to initiate the
-    simulation run.
+    As the name suggests, this is the main function
+    that is called to initiate the simulation run.
 
-    :param params_file: (string) that points to the input file for the parameters.
+    :param params_file: (string) that points to the
+    input file for the parameters.
 
-    :param data_file: (string) that points to the input file for the observations.
+    :param data_file: (string) that points to the
+    input file for the observations (optional).
 
     :return: None.
     """
@@ -90,19 +96,18 @@ def main(params_file=None, data_file=None):
         sys.exit(1)
     # _end_if_
 
-    # Check if we got simulation water data.
     # Make sure its a Path object.
     if data_file is not None:
         data_file = Path(data_file)
     # _end_if_
 
-    # Display where we got the water data from.
+    # Display if/where we got the observational data.
     print(" Simulation observational data file: {0}".format(data_file))
 
     try:
         # If we have given a data-file.
         if data_file is not None:
-            # Open the water data in "Read Only" mode.
+            # Open the data in "Read Only" mode.
             with open(data_file, 'r') as input_file:
                 # The file should have two columns.
                 obs_data = pd.read_csv(input_file, names=["t", "Yt"])
@@ -158,7 +163,7 @@ if __name__ == "__main__":
 
         # Input file with simulation data.
         parser.add_argument("--data",
-                            help=" Input file (.csv) with simulation data.")
+                            help=" Input file (.csv) with observational data.")
 
         # Parse the arguments.
         args = parser.parse_args()
