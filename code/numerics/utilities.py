@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
+from scipy.integrate import trapz
 from scipy.linalg import cholesky, inv
-from scipy.integrate import trapz as sp_trapz
 
 
 def finite_diff(fun, x, *args):
@@ -99,9 +99,11 @@ def log_det(x):
 @njit(fastmath=True)
 def safe_log(x):
     """
-    This (helper) function prevents the computation of very small, or very large
-    values of logarithms that would lead to -/+ inf, by setting predefined LOWER
-    and UPPER bounds. The bounds are set as follows:
+    This function prevents the computation of very small,
+    or very large values of logarithms that would lead to
+    -/+ inf, by setting predefined LOWER and UPPER bounds.
+
+    The bounds are set as follows:
 
         - LOWER = 1.0E-300
         - UPPER = 1.0E+300
@@ -117,7 +119,8 @@ def safe_log(x):
 
     :param x: input array (dim_n x dim_m).
 
-    :return: the log(x) after the values of x have been filtered (dim_n x dim_m).
+    :return: the log(x) after the values of x have been
+    filtered (dim_n x dim_m).
     """
 
     # Make sure input is an array.
@@ -130,22 +133,25 @@ def safe_log(x):
     return np.log(x)
 # _end_def_
 
-
 def my_trapz(fx, dx=1.0, obs_t=None):
     """
-    This method computes the numerical integral of the discrete function
-    values 'fx', with space increment dt, using the composite trapezoidal
-    rule.
+    This method computes the numerical integral
+    of the discrete function values 'fx', with
+    space increment dt, using the composite
+    trapezoidal rule.
 
-    This code applies the function: scipy.integrate.trapz() between the
-    times of the observations 'obs_t'. This is because the function 'fx'
-    is very rough (it jumps at observation times), therefore computing the
-    integral incrementally we achieve better numerical results.
+    This code applies the function: scipy.integrate.trapz()
+    between the times of the observations 'obs_t'. This is
+    because the function 'fx' is very rough (it jumps at
+    observation times), therefore computing the integral
+    incrementally we achieve better numerical results.
 
     If no 'obs_t' is given, then we call directly trapz().
 
-    NOTE: to allow easy vectorization the input values 'fx', assume that
-    the first dimension is the one we are integrating over. So:
+    NOTE: to allow easy vectorization the input values 'fx',
+    assume that the first dimension is the one we are integrating
+    over. So:
+
     1) if 'fx' is scalar (dim_n),
     2) if 'fx' is vector (dim_n x dim_d),
     3) if 'fx' is matrix (dim_n x dim_d x dim_d).
@@ -162,8 +168,8 @@ def my_trapz(fx, dx=1.0, obs_t=None):
 
     # Check if there are observation times (indexes).
     if obs_t is None:
-        return sp_trapz(fx, dx=dx, axis=0)
-    # _end_id_
+        return trapz(fx, dx=dx, axis=0)
+    # _end_if_
 
     # Total integral.
     tot_area = 0.0
@@ -174,7 +180,7 @@ def my_trapz(fx, dx=1.0, obs_t=None):
     # Compute the integral partially.
     for k, l in enumerate(obs_t):
         # Compute the integral incrementally.
-        tot_area += sp_trapz(fx[f:l+1], dx=dx, axis=0)
+        tot_area += trapz(fx[f:l+1], dx=dx, axis=0)
 
         # Set the next first index.
         f = obs_t[k]
@@ -182,7 +188,7 @@ def my_trapz(fx, dx=1.0, obs_t=None):
 
     # Final interval.
     if f != fx.shape[0] - 1:
-        tot_area += sp_trapz(fx[f:], dx=dx, axis=0)
+        tot_area += trapz(fx[f:], dx=dx, axis=0)
     # _end_if_
 
     # Return the total integral.
@@ -191,7 +197,8 @@ def my_trapz(fx, dx=1.0, obs_t=None):
 
 def chol_inv(x):
     """
-    Inverts an input array (matrix) using Cholesky decomposition.
+    Inverts an input array (matrix) using Cholesky
+    decomposition.
 
     :param x: input array (dim_d x dim_d)
 

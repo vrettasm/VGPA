@@ -13,6 +13,7 @@ class OdeSolver(object):
 
         :param single_dim: flags the ode as 1D or nD.
         """
+
         # Check if time step is positive.
         if dt > 0.0:
             self.dt = dt
@@ -37,6 +38,7 @@ class OdeSolver(object):
 
         :return: - (A * m.T) + B
         """
+
         # Switch according to single_dim.
         if self.single_dim:
             return -at * mt + bt
@@ -56,6 +58,7 @@ class OdeSolver(object):
 
         :return: - (A * S) - (S * A.T) + Sigma
         """
+
         # Switch according to single_dim.
         if self.single_dim:
             return -2.0 * at * st + sn
@@ -75,6 +78,7 @@ class OdeSolver(object):
 
         :return: - dEf_dm + (lam * A.T)
         """
+
         # Switch according to single_dim.
         if self.single_dim:
             return -df_dm + lamt * at
@@ -94,6 +98,7 @@ class OdeSolver(object):
 
         :return: - dEf_dS + (psi * A) + (A.T * psi).
         """
+
         # Switch according to single_dim.
         if self.single_dim:
             return -df_ds + 2.0 * psit * at

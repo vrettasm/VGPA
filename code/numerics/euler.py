@@ -20,6 +20,7 @@ class Euler(OdeSolver):
 
         :param single_dim: flags the ode as 1D or nD.
         """
+
         # Call the constructor of the parent class.
         super().__init__(dt, single_dim)
     # _end_def_
@@ -111,7 +112,7 @@ class Euler(OdeSolver):
         # Pre-allocate memory according to single_dim.
         if self.single_dim:
             # Number of discrete points.
-            dim_n = dEsde_dm.shape[0]
+            dim_n = dEsde_dm.size
 
             # Return arrays.
             lam = np.zeros(dim_n)

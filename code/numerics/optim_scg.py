@@ -81,14 +81,11 @@ class SCG(object):
                  2) fx: the function value (at the minimum point).
         """
 
-        # Initialization.
-        x = x0.copy()
-
         # Make sure input is array.
-        x = np.asarray(x)
+        x = np.asarray(x0.copy())
 
         # Size of input array.
-        dim_x = x.ravel().size
+        dim_x = x.size
 
         # Initial sigma.
         sigma0 = 1.0e-3
@@ -131,7 +128,8 @@ class SCG(object):
         # Main optimization loop.
         for j in range(self.nit):
 
-            # Calculate first and second directional derivatives.
+            # Calculate 1st and 2nd
+            # directional derivatives.
             if success == 1:
                 # Inner-product.
                 mu = d.T.dot(gradnew)
@@ -179,10 +177,11 @@ class SCG(object):
                 beta = beta - (theta / kappa)
             # _end_if_
 
+            # Update 'alpha'.
             alpha = -(mu / delta)
 
             # Evaluate the function at a new point.
-            xnew = x + alpha * d
+            xnew = x + (alpha * d)
             fnew = self.f(xnew, *args)
             self.stats['f_eval'] += 1
 
@@ -219,14 +218,14 @@ class SCG(object):
                     return x, fx
                 else:
                     # Update variables for new position.
-                    fold = fnew.copy()
+                    fold = fnew
                     gradold = gradnew.copy()
 
                     # Evaluate function/gradient at the new point.
                     fnow = self.f(x, *args)
                     gradnew = self.df(x, *args)
 
-                    #  Increase function/gradients evaluations by one.
+                    # Increase function/gradients evaluations by one.
                     self.stats['f_eval'] += 1
                     self.stats['df_eval'] += 1
 
@@ -247,7 +246,7 @@ class SCG(object):
                 beta = np.maximum(0.5 * beta, beta_min)
             # _end_if_
 
-            # Update search direction using Polak-Ribiere formula,
+            # Update search direction using Polak-Ribiere formula
             # or re-start in direction of negative gradient after
             # 'dim_x' steps.
             if nsuccess == dim_x:
@@ -256,7 +255,7 @@ class SCG(object):
             else:
                 if success == 1:
                     gamma = np.maximum(gradnew.T.dot(gradold - gradnew) / mu, 0.0)
-                    d = gamma * d - gradnew
+                    d = (gamma * d) - gradnew
                 # _end_if_
             # _end_if_
         # _end_for_
@@ -284,16 +283,17 @@ class SCG(object):
     # Auxiliary.
     def __str__(self):
         """
-        Override to print a readable string presentation of the object.
-        This will include its id(), along with its fields values.
+        Override to print a readable string presentation
+        of the object. This will include its id(), along
+        with its fields values.
 
         :return: a string representation of a SCG object.
         """
 
         return " SCG Id({0}):" \
                " Function={1}, Gradient={2}, Max-It={3}," \
-               " x_tol={4}, f_tol={5}".format(id(self), self.f, self.df, self.nit,
-                                              self.x_tol, self.f_tol)
+               " x_tol={4}, f_tol={5}".format(id(self), self.f, self.df,
+                                              self.nit, self.x_tol, self.f_tol)
     # _end_def_
 
 # _end_class_
