@@ -128,16 +128,19 @@ class StochasticProcess(object):
 
     def collect_obs(self, n_obs, rn, h_mask=None):
         """
-        This function collects a number of noisy observations from a sample path
-        (trajectory). The observations are collected at equidistant time points.
+        This function collects a number of noisy observations
+        from a sample path (trajectory). The observations are
+        collected at equidistant time points.
 
-        :param n_obs: Observations density (# of observations per time unit).
+        :param n_obs: Observations density (# of observations
+        per time unit).
 
         :param rn: Observation noise (co)-variance.
 
         :param h_mask: boolean that masks only the observed values.
 
-        :return: observation times / observation values (with i.i.d. white noise).
+        :return: observation times / observation values
+        (with i.i.d. white noise).
         """
 
         # Check if the sample path is created.
