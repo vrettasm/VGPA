@@ -332,3 +332,67 @@ class VarGP(object):
     # _end_def_
 
 # _end_class_
+
+# Auxiliary function.
+def grad_Esde_dm_ds(x, fun, mt, st, at, bt, diag_inv_sigma):
+    """
+    Returns the gradient of the -SDE- energy function with respect
+    to the marginal means and variances.  This method is used when
+    the analytic expressions for the gradients are difficult to be
+    computed, hence we use approximations such as the unscented
+    transformation.
+
+    :param x: input state samples (dim_n x dim_d).
+
+    :param fun: drift function.
+
+    :param mt: marginal mean at time 't' (dim_d).
+
+    :param st: marginal covar. at time 't' (dim_d x dim_d).
+
+    :param at: linear parameter (dim_d x dim_d).
+
+    :param bt: offset parameter (dim_d).
+
+    :param diag_inv_sigma: diagonal elements of inverse system
+    noise (dim_d)
+
+    :return: gradients w.r.t. to 'mt' and 'st' with dimensions:
+    [dim_n x dim_d * (dim_d + 1)].
+    """
+
+    # Get the dimensions of the input array.
+    dim_n, dim_d = x.shape
+
+    # Preallocate array: [dim_n x dim_d^2].
+    dst = np.zeros((dim_n, dim_d * dim_d))
+
+    # Compute auxiliary quantity:
+    x_mat = (fun(x) + x.dot(at.T) - np.tile(bt, (dim_n, 1))) ** 2
+    var = diag_inv_sigma.dot(x_mat.T)
+
+    # Gradient w.r.t. 'mt': [dim_n x dim_d]
+    dmt = np.linalg.solve(st, (np.tile(var, (dim_d, 1)) * x.T)).T
+
+    # Inverse of marginal covariance.
+    inv_st = np.linalg.inv(st)
+
+    # Calculate the gradients w.r.t. 'st'.
+    for k in range(dim_n):
+        # Take the values at sample 'k'.
+        zt = np.reshape(x[k] - mt, (1, dim_d))
+
+        # Square matrix.
+        zk = zt.T.dot(zt)
+
+        # Gradient w.r.t. 'st'.
+        dst[k] = var[k] * np.linalg.solve(st, zk).dot(inv_st).ravel()
+    # _end_for_
+
+    # Scale the results.
+    dmt = 0.5 * dmt
+    dst = 0.5 * dst
+
+    # Group the gradients together and exit.
+    return np.concatenate((dmt, dst), axis=1)
+# _end_def_
