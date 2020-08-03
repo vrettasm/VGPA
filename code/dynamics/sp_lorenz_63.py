@@ -193,7 +193,7 @@ class Lorenz63(StochasticProcess):
         dim_t = tk.size
 
         # Default starting point.
-        x0 = np.array([1.0, 1.0, 1.0])
+        x0 = np.ones(3)
 
         # Initial conditions time step.
         delta_t = 1.0e-3
