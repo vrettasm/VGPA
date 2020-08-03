@@ -130,7 +130,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, mu=0.0, dt=0.01):
+    def make_trajectory(self, t0, tf, dt=0.01, mu=0.0):
         """
         Generates a realizations of the Ornstein - Uhlenbeck
         (OU) dynamical system, within a specified time-window.
@@ -139,9 +139,9 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         :param tf: final time point.
 
-        :param mu: default mean value is zero.
-
         :param dt: discrete time-step.
+
+        :param mu: default mean value is zero.
 
         :return: None.
         """

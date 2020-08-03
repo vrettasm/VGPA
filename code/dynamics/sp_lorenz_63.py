@@ -140,10 +140,12 @@ class Lorenz63(StochasticProcess):
 
         :return: None.
         """
+
         # Check the dimensionality.
         if new_value.shape != (3, 3):
             raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__, new_value.shape))
+                             " {1}".format(self.__class__.__name__,
+                                           new_value.shape))
         # _end_if_
 
         # Check for positive definiteness.
@@ -184,7 +186,7 @@ class Lorenz63(StochasticProcess):
         :return: None.
         """
 
-        # Create a time-window (for inference).
+        # Create a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
         # Number of actual trajectory samples.
@@ -250,8 +252,10 @@ class Lorenz63(StochasticProcess):
         :param obs_t: observation times.
 
         :return: Esde       : total energy of the sde.
+
                  Ef         : average drift (dim_t x 3).
                  Edf        : average differentiated drift (dim_t x 3).
+
                  dEsde_dm   : gradient of Esde w.r.t. the means (dim_t x 3).
                  dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_t x 3 x 3).
                  dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
@@ -345,9 +349,10 @@ class Lorenz63(StochasticProcess):
 
     def energy_dm_ds(self, at, bt, mt, st, diag_sig_inv):
         """
-        Returns the Energy of the Lorenz 3D system and related gradients.
-        More specifically, it returns the gradient of the Esde(t) with
-        respect to the marginal mean m(t) and the marginal covariance S(t).
+        Returns the Energy of the Lorenz 3D system and related
+        gradients. More specifically, it returns the gradient
+        of the Esde(t) with respect to the marginal mean m(t)
+        and the marginal covariance S(t).
 
         :param at: variational linear parameter (3 x 3).
 
@@ -357,7 +362,8 @@ class Lorenz63(StochasticProcess):
 
         :param st: marginal covariance (3 x 3).
 
-        :param diag_sig_inv: diagonal elements of inverted system noise covariance (3 x 1).
+        :param diag_sig_inv: diagonal elements of inverted system
+        noise covariance (3 x 1).
 
         :return: 1) Efg: <(f-g)(f-g)'> (3 x 1).
                  2) dEsde_dm: dEsde(t)/dm(t) (3 x 1).
@@ -401,10 +407,10 @@ class Lorenz63(StochasticProcess):
         Exyz = Sxy * mz + Sxz * my + Syz * mx + mx * my * mz
 
         # Compute forth (4th) order expectations.
-        Exxyy = Sxx * (my ** 2 + Syy) +\
-                Syy * (mx ** 2) + 4 * Sxy * mx * my + (mx * my) ** 2 + 2 * (Sxy ** 2)
-        Exxzz = Sxx * (mz ** 2 + Szz) +\
-                Szz * (mx ** 2) + 4 * Sxz * mx * mz + (mx * mz) ** 2 + 2 * (Sxz ** 2)
+        Exxyy = Sxx * (my ** 2 + Syy) + Syy * (mx ** 2) +\
+                4.0 * Sxy * mx * my + (mx * my) ** 2 + 2 * (Sxy ** 2)
+        Exxzz = Sxx * (mz ** 2 + Szz) + Szz * (mx ** 2) +\
+                4.0 * Sxz * mx * mz + (mx * mz) ** 2 + 2 * (Sxz ** 2)
 
         # Compute the expectation for the Energy.
         EX = (vS ** 2) * (Eyy + Exx - 2 * Exy) + (A11 ** 2) * Exx + (A12 ** 2) * Eyy +\
@@ -423,7 +429,8 @@ class Lorenz63(StochasticProcess):
         # ---
         EZ = Exxyy + (vB ** 2) * Ezz + (A31 ** 2) * Exx + (A32 ** 2) * Eyy + (A33 ** 2) * Ezz +\
              b3 ** 2 + 2 * (A31 * Exxy + A32 * Exyy + A33 * Exyz + A31 * A32 * Exy +
-                            A31 * A33 * Exz + A32 * A33 * Eyz - vB * (Exyz + A31 * Exz + A32 * Eyz + A33 * Ezz) -
+                            A31 * A33 * Exz + A32 * A33 * Eyz -
+                            vB * (Exyz + A31 * Exz + A32 * Eyz + A33 * Ezz) -
                             b3 * (Exy - vB * mz + A31 * mx + A32 * my + A33 * mz))
 
         # Expectation of the distance between the drift
@@ -614,12 +621,14 @@ class Lorenz63(StochasticProcess):
 
         # Compute the expectation.
         V1 = Eyy * (vS + A12) + Exx * (vS - A11) +\
-             Exy * (A11 - 2 * vS - A12) + A13 * (Eyz - Exz) + b1 * (mx - my)
+             Exy * (A11 - 2 * vS - A12) +\
+             A13 * (Eyz - Exz) + b1 * (mx - my)
         # ---
-        V2 = vR * Exx - Exy - Exxz + A21 * Exx + A22 * Exy + A23 * Exz - b2 * mx
+        V2 = vR * Exx - Exy - Exxz + A21 * Exx +\
+             A22 * Exy + A23 * Exz - b2 * mx
         # ---
-        V3 = -Exyz + vB * Ezz - A31 * Exz - A32 * Eyz - A33 * Ezz + b3 * mz
-
+        V3 = -Exyz + vB * Ezz - A31 * Exz - A32 * Eyz -\
+             A33 * Ezz + b3 * mz
         # --->
         return np.array([V1, V2, V3])
     # _end_def_
