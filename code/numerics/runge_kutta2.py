@@ -152,6 +152,11 @@ class RungeKutta2(OdeSolver):
         dEmk_mid = 0.5 * (dEsde_dm[0:-1] + dEsde_dm[1:])
         dEsk_mid = 0.5 * (dEsde_ds[0:-1] + dEsde_ds[1:])
 
+        # Correct dimensions, by adding a zero at the end.
+        ak_mid = np.array([*ak_mid, 0.0])
+        dEmk_mid = np.array([*dEmk_mid, 0.0])
+        dEsk_mid = np.array([*dEsk_mid, 0.0])
+
         # Run through all time points.
         for t in range(dim_n - 1, 0, -1):
             # Get the values at time 't'.
@@ -160,9 +165,9 @@ class RungeKutta2(OdeSolver):
             psit = psi[t]
 
             # Get the midpoints at time 't - 0.5*dt'.
-            ak = ak_mid[t]
-            dEmk = dEmk_mid[t]
-            dEsk = dEsk_mid[t]
+            ak = ak_mid[t-1]
+            dEmk = dEmk_mid[t-1]
+            dEsk = dEsk_mid[t-1]
 
             # Lambda (backward) propagation.
             lamk = lamt - h * fun_lam(dEsde_dm[t], at, lamt)
