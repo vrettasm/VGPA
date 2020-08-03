@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.random import default_rng, SeedSequence
+
 
 class StochasticProcess(object):
     """
@@ -18,9 +20,9 @@ class StochasticProcess(object):
 
         # Create a random number generator.
         if r_seed is not None:
-            self.rand_g = np.random.default_rng(r_seed)
+            self.rand_g = default_rng(SeedSequence(r_seed))
         else:
-            self.rand_g = np.random.default_rng()
+            self.rand_g = default_rng()
         # _end_if_
 
         # Single dimensional process.
