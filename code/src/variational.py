@@ -380,10 +380,10 @@ def grad_Esde_dm_ds(x, fun, mt, st, at, bt, diag_inv_sigma):
     # Calculate the gradients w.r.t. 'st'.
     for k in range(dim_n):
         # Take the values at sample 'k'.
-        zt = np.reshape(x[k] - mt, (1, dim_d))
+        zt = x[k] - mt
 
         # Square matrix.
-        zk = zt.T.dot(zt)
+        zk = np.outer(zt, zt)
 
         # Gradient w.r.t. 'st'.
         dst[k] = var[k] * np.linalg.solve(st, zk).dot(inv_st).ravel()
