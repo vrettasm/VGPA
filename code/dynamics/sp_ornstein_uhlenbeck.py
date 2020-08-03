@@ -146,7 +146,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         :return: None.
         """
 
-        # Create a time-window (for inference).
+        # Create a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
         # Number of actual trajectory samples.
@@ -158,7 +158,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         # The first value X(t=0) = 0 or X(t=0) ~ N(mu,K)
         x[0] = mu
 
-        # Random variables.
+        # Random variables (notice the scale of noise with the 'dt').
         ek = np.sqrt(self.sigma_ * dt) * self.rng.standard_normal(dim_t)
 
         # Create the sample path.
@@ -189,8 +189,10 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         :return:
             Esde       : total energy of the sde.
+
             Ef         : average drift (dim_n x 1).
             Edf        : average differentiated drift (dim_n x 1).
+
             dEsde_dm   : gradient of Esde w.r.t. the means (dim_n x 1).
             dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_n x 1).
             dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
@@ -210,8 +212,10 @@ class OrnsteinUhlenbeck(StochasticProcess):
         Q1 = (self.theta_ - linear_a) ** 2
         Q2 = linear_a * offset_b
 
-        # Energy from the sDyn: Eq(7)
+        # Auxiliary variable.
         var_q = Ex2 * Q1 + 2.0 * m * (self.theta_ - linear_a) * offset_b + (offset_b ** 2)
+
+        # Energy from the sDyn: Eq(7)
         Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self.sigma_
 
         # Average drift.
@@ -228,7 +232,8 @@ class OrnsteinUhlenbeck(StochasticProcess):
         dEsde_dS = 0.5 * Q1 / self.sigma_
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = my_trapz(Ex2 * (self.theta_ - linear_a) + m * offset_b, dt, obs_t) / self.sigma_
+        dEsde_dth = my_trapz(Ex2 * (self.theta_ - linear_a) +
+                             m * offset_b, dt, obs_t) / self.sigma_
 
         # Gradients of Esde w.r.t. 'sigma'.
         dEsde_dSig = - Esde / self.sigma_

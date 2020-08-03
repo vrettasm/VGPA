@@ -135,7 +135,7 @@ class DoubleWell(StochasticProcess):
         :return: None.
         """
 
-        # Create a time-window (for inference).
+        # Create a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
         # Number of actual trajectory samples.
@@ -154,13 +154,13 @@ class DoubleWell(StochasticProcess):
                    np.sqrt(0.5 * self.sigma_ * dt) * self.rng.standard_normal()
         # _end_if_
 
-        # Random variables.
+        # Random variables (notice the scale of noise with the 'dt').
         ek = np.sqrt(self.sigma_ * dt) * self.rng.standard_normal(dim_t)
 
         # Create the sample path.
         for t in range(1, dim_t):
             x[t] = x[t - 1] + \
-                   4 * x[t - 1] * (self.theta_ - x[t - 1] ** 2) * dt + ek[t]
+                   4.0 * x[t - 1] * (self.theta_ - x[t - 1] ** 2) * dt + ek[t]
         # _end_for_
 
         # Store the sample path (trajectory).
@@ -172,7 +172,7 @@ class DoubleWell(StochasticProcess):
 
     def energy(self, linear_a, offset_b, m, s, obs_t):
         """
-        Energy for the Double-Well SDE and related quantities (including gradients).
+        Energy for the Double-Well SDE and related quantities.
 
         :param linear_a: variational linear parameters (dim_n x 1).
 
@@ -186,8 +186,10 @@ class DoubleWell(StochasticProcess):
 
         :return:
             Esde       : total energy of the sde.
+
             Ef         : average drift (dim_n x 1).
             Edf        : average differentiated drift (dim_n x 1).
+
             dEsde_dm   : gradient of Esde w.r.t. the means (dim_n x 1).
             dEsde_ds   : gradient of Esde w.r.t. the covariance (dim_n x 1).
             dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
@@ -213,8 +215,8 @@ class DoubleWell(StochasticProcess):
         Ex6 = gauss_mom(order=6)
 
         # Auxiliary variable.
-        var_q = 8.0 * (Ex6 - c * Ex4 + offset_b * Ex3) + \
-                (c2 * Ex2) - (2.0 * offset_b * c * m) + (offset_b ** 2)
+        var_q = 8.0 * (Ex6 - c * Ex4 + offset_b * Ex3) + (c2 * Ex2) -\
+                (2.0 * offset_b * c * m) + (offset_b ** 2)
 
         # Energy from the sDyn: Eq(7)
         Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self.sigma_
@@ -225,7 +227,8 @@ class DoubleWell(StochasticProcess):
         # Average gradient of drift: -> df(t,x)_dx = 4*theta - 12*x^2.
         Edf = 4.0 * (self.theta_ - 3.0 * Ex2)
 
-        # Derivatives of higher order Gaussian moments w.r.t. 'm' and 's'.
+        # Derivatives of higher order Gaussian moments
+        # w.r.t. marginal moments 'm(t)' and 's(t)'.
         Dm2 = gauss_mom.dM(order=2)
         Ds2 = gauss_mom.dS(order=2)
 
@@ -243,14 +246,16 @@ class DoubleWell(StochasticProcess):
 
         # Gradients of Esde w.r.t. 'means'.
         dEsde_dm = 0.5 * (16.0 * Dm6 - 8.0 * c * Dm4 +
-                          8.0 * offset_b * Dm3 + c2 * Dm2 - 2.0 * offset_b * c) / self.sigma_
+                          8.0 * offset_b * Dm3 + c2 * Dm2 -
+                          2.0 * offset_b * c) / self.sigma_
 
         # Gradients of Esde w.r.t. 'variances'.
         dEsde_ds = 0.5 * (16.0 * Ds6 - 8.0 * c * Ds4 +
                           8.0 * offset_b * Ds3 + c2 * Ds2) / self.sigma_
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dtheta = 4.0 * my_trapz(c * Ex2 - 4.0 * Ex4 - offset_b * m, dt, obs_t) / self.sigma_
+        dEsde_dtheta = 4.0 * my_trapz(c * Ex2 - 4.0 * Ex4 -
+                                      offset_b * m, dt, obs_t) / self.sigma_
 
         # Gradients of Esde w.r.t. 'sigma'.
         dEsde_dsigma = - Esde / self.sigma_
