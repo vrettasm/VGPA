@@ -189,6 +189,7 @@ class Simulation(object):
                                 0.1 * self.m_data["model"].rng.standard_normal(dim_d)
             self.m_data["s0"] = 0.2 * np.eye(dim_d)
         # _end_if_
+
     # _end_def_
 
     def run(self):
