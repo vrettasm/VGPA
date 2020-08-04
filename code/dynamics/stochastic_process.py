@@ -192,8 +192,11 @@ class StochasticProcess(object):
 
         # Add noise according to the observation dimensions.
         if dim_d == 1:
+            # Scalar value.
+            sq_rn = np.sqrt(rn)
+
             # Fixed Gaussian noise.
-            obs_y += np.sqrt(rn) * self.rand_g.standard_normal(dim_m)
+            obs_y += sq_rn * self.rand_g.standard_normal(dim_m)
 
         else:
             # Multidimensional case.
@@ -215,8 +218,8 @@ class StochasticProcess(object):
             obs_y += sq_rn.dot(self.rand_g.standard_normal((dim_d, dim_m))).T
         # _end_if_
 
-        # Observation (times / values).
-        return obs_t, obs_y
+        # Observation (times / values / sqrt(noise)).
+        return obs_t, obs_y, sq_rn
     # _end_def_
 
 # _end_class_
