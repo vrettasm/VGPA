@@ -120,7 +120,7 @@ class GaussianLikelihood(Likelihood):
         obs_y, obs_t = self.values, self.times
 
         # Total number of observations.
-        dim_m, dim_o = obs_y.size
+        dim_m, dim_o = obs_y.shape
 
         # Observation operator.
         H = self.operator
