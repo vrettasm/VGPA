@@ -187,25 +187,29 @@ class StochasticProcess(object):
             obs_y = obs_y[:, h_mask]
         # _end_if_
 
-        # Check if (co)-variance vector/matrix is given.
-        if rn.ndim == 0:
-            # Add fixed Gaussian noise.
+        # Dimensionality of observations.
+        dim_d = 1 if obs_y.ndim == 1 else obs_y.shape[-1]
+
+        # Add noise according to the observation dimensions.
+        if dim_d == 1:
+            # Fixed Gaussian noise.
             obs_y += np.sqrt(rn) * self.rand_g.standard_normal(dim_m)
+
         else:
-            # Dimensionality of observations.
-            dim_d = 1 if obs_y.ndim == 1 else obs_y.shape[-1]
+            # Multidimensional case.
+            if rn.ndim == 0:
+                # Diagonal matrix (from scalar).
+                sq_rn = np.sqrt(rn) * np.eye(dim_d)
 
-            # For the moment consider only diagonal matrices.
-            if rn.ndim == 1:
-                # Vector.
-                rn = np.diag(rn)
+            elif rn.ndim == 1:
+                # Diagonal matrix (from vector).
+                sq_rn = np.sqrt(np.diag(rn))
+
             else:
-                # Square matrix.
-                rn *= np.eye(dim_d)
-            # _end_if_
+                # Diagonal matrix (from matrix).
+                sq_rn = np.sqrt(rn * np.eye(dim_d))
 
-            # Get the square root of the noise matrix.
-            sq_rn = np.sqrt(rn)
+            # _end_if_
 
             # Add fixed Gaussian noise.
             obs_y += sq_rn.dot(self.rand_g.standard_normal((dim_d, dim_m))).T
