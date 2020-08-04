@@ -67,6 +67,42 @@ class Simulation(object):
         self.output = {}
     # _end_def_
 
+    @classmethod
+    def _stochastic_model(cls, model, *args):
+        """
+        Auxiliary (class) method that returns
+        an instance of the requested stochastic
+        model.
+
+        :param model: (string) type of the model.
+
+        :param args: additional parameters for the
+        constructors. (noise, drift, random seed).
+
+        :return: an instance of the model.
+        """
+        # Make input string upper-case.
+        model_upper = str(model).upper()
+
+        # Create the model.
+        if model_upper == "DW":
+            return DoubleWell(*args)
+
+        elif model_upper == "OU":
+            return OrnsteinUhlenbeck(*args)
+
+        elif model_upper == "L63":
+            return Lorenz63(*args)
+
+        elif model_upper == "L96":
+            return Lorenz96(*args)
+
+        else:
+            raise ValueError(" {0}: Unknown stochastic model ->"
+                             " {1}".format(cls.__name__, model_upper))
+        # _end_if_
+    # _end_def_
+
     def setup(self, params, data):
         """
         This method is called BEFORE the run() and sets up
@@ -106,47 +142,18 @@ class Simulation(object):
         self.m_data["mu0"] = params["Prior"]["mu0"]
         self.m_data["tau0"] = params["Prior"]["tau0"]
 
+        # Stochastic model parameters.
+        system_noise = self.m_data["noise"]["sys"]
+        drift_vector = self.m_data["drift"]["theta"]
+        random_seed_ = self.m_data["random_seed"]
+
         # Stochastic model.
-        if params["Model"].upper() == "DW":
-
-            # Create the model.
-            self.m_data["model"] = DoubleWell(self.m_data["noise"]["sys"],
-                                              self.m_data["drift"]["theta"],
-                                              self.m_data["random_seed"])
-            # One-dimensional model.
-            self.m_data["single_dim"] = True
-
-        elif params["Model"].upper() == "OU":
-
-            # Create the model.
-            self.m_data["model"] = OrnsteinUhlenbeck(self.m_data["noise"]["sys"],
-                                                     self.m_data["drift"]["theta"],
-                                                     self.m_data["random_seed"])
-            # One-dimensional model.
-            self.m_data["single_dim"] = True
-
-        elif params["Model"].upper() == "L63":
-
-            # Create the model.
-            self.m_data["model"] = Lorenz63(self.m_data["noise"]["sys"],
-                                            self.m_data["drift"]["theta"],
-                                            self.m_data["random_seed"])
-            # Three-dimensional model.
-            self.m_data["single_dim"] = False
-
-        elif params["Model"].upper() == "L96":
-
-            # Create the model.
-            self.m_data["model"] = Lorenz96(self.m_data["noise"]["sys"],
-                                            self.m_data["drift"]["theta"],
-                                            self.m_data["random_seed"])
-            # Forty-dimensional model.
-            self.m_data["single_dim"] = False
-
-        else:
-            raise ValueError(" {0}: Unknown stochastic model ->"
-                             " {1}".format(self.__class__.__name__, params["Model"]))
-        # _end_if_
+        self.m_data["model"] = Simulation._stochastic_model(params["Model"],
+                                                            system_noise,
+                                                            drift_vector,
+                                                            random_seed_)
+        # Get the dimensionality flag from the "model".
+        self.m_data["single_dim"] = self.m_data["model"].single_dim
 
         # Make the trajectory (of the stochastic process).
         self.m_data["model"].make_trajectory(self.m_data["time_window"]["t0"],
