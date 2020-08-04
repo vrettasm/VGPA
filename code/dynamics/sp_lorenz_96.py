@@ -130,12 +130,11 @@ class Lorenz96(StochasticProcess):
 
         :param r_seed: random seed (default = None).
         """
+        # Call the constructor of the parent class.
+        super().__init__(r_seed, single_dim=False)
 
         # Display class info.
         print(" Creating Lorenz-96 (D={0)) process.".format(dim_d))
-
-        # Call the constructor of the parent class.
-        super().__init__(r_seed, single_dim=False)
 
         # Make sure the inputs are arrays.
         sigma = np.asarray(sigma)
