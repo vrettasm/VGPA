@@ -53,8 +53,7 @@ def validateInputParametersFile(filename):
         print(" Model parameters are given correctly.")
     # _end_with_
 
-    # The dictionary will contain
-    # all the input parameters.
+    # Dictionary will contain all the input parameters.
     return model_params
 # _end_def_
 
@@ -96,39 +95,40 @@ def main(params_file=None, data_file=None):
         sys.exit(1)
     # _end_if_
 
-    # Make sure its a Path object.
+    # Set this to None.
+    obs_data = None
+
+    # Check if we have given data separately.
     if data_file is not None:
+        # Make sure its a Path object.
         data_file = Path(data_file)
+
+        # Display where we got the observational data.
+        print(" Simulation observational data file:"
+              " {0}".format(data_file))
+
+        # Open the data in "Read Only" mode.
+        with open(data_file, 'r') as input_file:
+            # The file should have two columns.
+            obs_data = pd.read_csv(input_file,
+                                   names=["t", "Yt"])
+        # _end_with_
     # _end_if_
 
-    # Display if/where we got the observational data.
-    print(" Simulation observational data file: {0}".format(data_file))
+    # Get the output name from the file.
+    output_name = params["Output_Name"]
+
+    # If nothing has been given set a
+    # default name.
+    if output_name is None:
+        output_name = "Sim_00"
+    # _end_if_
 
     try:
-        # If we have given a data-file.
-        if data_file is not None:
-            # Open the data in "Read Only" mode.
-            with open(data_file, 'r') as input_file:
-                # The file should have two columns.
-                obs_data = pd.read_csv(input_file, names=["t", "Yt"])
-            # _end_with_
-        else:
-            # Set this to None.
-            obs_data = None
-        # _end_if_
-
-        # Get the output name from the file.
-        output_name = params["Output_Name"]
-
-        # If nothing has been given set a default name.
-        if output_name is None:
-            output_name = "Sim_00"
-        # _end_if_
-
         # Create a simulation object.
         sim_vgpa = Simulation(output_name)
 
-        # Setup its parameters (initialization).
+        # Setup parameters (initialization).
         sim_vgpa.setup(params, obs_data)
 
         # Run the simulation (smoothing).
