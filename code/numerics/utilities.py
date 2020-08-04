@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 from scipy.integrate import trapz
-from scipy.linalg import cholesky, inv, LinAlgError
+from scipy.linalg import cholesky, LinAlgError
 
 
 def finite_diff(fun, x, *args):
@@ -195,6 +195,23 @@ def my_trapz(fx, dx=1.0, obs_t=None):
     return tot_area
 # _end_def_
 
+@njit
+def chol_inv_fast(x):
+    """
+    Helper function implemented with numba.
+
+    :param x: array to be inverted.
+    """
+
+    # Invert the Cholesky decomposition.
+    c_inv = np.linalg.inv(np.linalg.cholesky(x))
+
+    # Invert input matrix.
+    x_inv = c_inv.T.dot(c_inv)
+
+    return x_inv, c_inv
+# _end_def_
+
 def chol_inv(x):
     """
     Inverts an input array (matrix) using Cholesky
@@ -211,15 +228,8 @@ def chol_inv(x):
     # Check if the input is scalar.
     if x.ndim == 0:
         return 1.0 / x, 1.0 / np.sqrt(x)
-    # _end_if_
-
-    # Invert the Cholesky decomposition.
-    c_inv = inv(cholesky(x))
-
-    # Invert input matrix.
-    x_inv = c_inv.T.dot(c_inv)
-
-    return x_inv, c_inv
+    else:
+        return chol_inv_fast(x)
 # _end_def_
 
 def ut_approx(fun, x_bar, x_cov, *args):
