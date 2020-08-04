@@ -1,10 +1,10 @@
 import numpy as np
-from ..numerics.utilities import my_trapz
+from numba import njit
 from .stochastic_process import StochasticProcess
+from ..numerics.utilities import my_trapz, chol_inv
 from scipy.linalg import cholesky, inv, LinAlgError
 
-
-# Helper function.
+@njit
 def l63(x, u):
     """
     Lorenz63 function.
@@ -88,7 +88,7 @@ class Lorenz63(StochasticProcess):
         if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
 
             # This is not the best way to invert.
-            self.sig_inv = inv(self.sigma_)
+            self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
                                " positive definite.".format(self.__class__.__name__,
@@ -154,7 +154,7 @@ class Lorenz63(StochasticProcess):
             self.sigma_ = new_value
 
             # Update the inverse value.
-            self.sig_inv = inv(self.sigma_)
+            self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
                                " positive definite.".format(self.__class__.__name__,

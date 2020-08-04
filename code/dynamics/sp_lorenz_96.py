@@ -397,8 +397,9 @@ class Lorenz96(StochasticProcess):
             # Get the values at time 't'.
             at = linear_a[t]
             bt = offset_b[t]
-            st = s[t]
-            mt = m[t]
+
+            # Marginal Moments.
+            mt, st = m[t], s[t]
 
             # Compute: <(f(xt)-g(xt))'*(f(xt)-g(xt))>.
             m_bar, _ = ut_approx(Fx['1'], mt, st, at, bt)
