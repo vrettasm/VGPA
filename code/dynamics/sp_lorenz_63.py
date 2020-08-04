@@ -204,7 +204,7 @@ class Lorenz63(StochasticProcess):
         # _end_for_
 
         # Preallocate array.
-        x = np.zeros(dim_t, 3)
+        x = np.zeros((dim_t, 3))
 
         # Start with the new point.
         x[0] = x0

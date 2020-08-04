@@ -293,7 +293,7 @@ class Lorenz96(StochasticProcess):
         # _end_for_
 
         # Preallocate array.
-        x = np.zeros(dim_t, self.dim_d)
+        x = np.zeros((dim_t, self.dim_d))
 
         # Start with the new point.
         x[0] = x0
