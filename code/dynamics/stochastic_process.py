@@ -208,7 +208,7 @@ class StochasticProcess(object):
             sq_rn = np.sqrt(rn)
 
             # Add fixed Gaussian noise.
-            obs_y += sq_rn.dot(self.rand_g.standard_normal(dim_d, dim_m)).T
+            obs_y += sq_rn.dot(self.rand_g.standard_normal((dim_d, dim_m))).T
         # _end_if_
 
         # Observation (times / values).
