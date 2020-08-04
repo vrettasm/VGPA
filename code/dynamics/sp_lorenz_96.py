@@ -311,7 +311,7 @@ class Lorenz96(StochasticProcess):
         # _end_try_
 
         # Random variables.
-        ek *= self.rng.standard_normal((dim_t, self.dim_d))
+        ek = ek.dot(self.rng.standard_normal((self.dim_d, dim_t))).T
 
         # Create the path by solving the "stochastic" Diff.Eq. iteratively.
         for t in range(1, dim_t):
