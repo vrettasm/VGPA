@@ -1,15 +1,95 @@
 import numpy as np
-from ..numerics.utilities import my_trapz, ut_approx
+from numba import njit
 from ..src.variational import grad_Esde_dm_ds
+from scipy.linalg import cholesky, LinAlgError
 from .stochastic_process import StochasticProcess
-from scipy.linalg import cholesky, inv, LinAlgError
+from ..numerics.utilities import my_trapz, ut_approx, chol_inv
 
-# Generates the shifted state vectors.
-fwd_1 = lambda x: np.roll(x, -1)
-bwd_1 = lambda x: np.roll(x, +1)
-bwd_2 = lambda x: np.roll(x, +2)
 
-# Helper function.
+@njit
+def fwd_1(x):
+    # Shift forward by one.
+    return np.roll(x, -1)
+# _end_def_
+
+
+@njit
+def bwd_1(x):
+    # Shift backward by one.
+    return np.roll(x, +1)
+# _end_def_
+
+
+@njit
+def bwd_2(x):
+    # Shift backward by two.
+    return np.roll(x, +2)
+# _end_def
+
+
+@njit
+def shift_vectors(x):
+    # Return ALL the shifted
+    # vectors: (-1, +1, +2).
+    return np.roll(x, -1),\
+           np.roll(x, +1),\
+           np.roll(x, +2)
+# _end_def_
+
+
+@njit
+def E96_drift_dx(x):
+    """
+    Returns the mean value of the gradient of the drift
+    function with respect to the state vector: <df(x)/dx>.
+
+    :param x: input state samples (dim_d x 1).
+
+    :return: mean gradient w.r.t. 'x' (dim_d x dim_d).
+    """
+
+    # Size of the state vector.
+    dim_d = x.size
+
+    # Preallocate return matrix.
+    Ex = np.zeros((dim_d, dim_d))
+
+    # Local index array: [0, 1, 2, ... , dim_d-1]
+    idx = np.arange(0, dim_d)
+
+    # Get the shifted indices.
+    fwd_1i, bwd_1i, bwd_2i = shift_vectors(idx)
+
+    # Get the shifted vector.
+    fwd_1x, bwd_1x, bwd_2x = shift_vectors(x)
+
+    # Compute the k-th gradient of the
+    # state vector at each dimension.
+    for k in range(dim_d):
+        # Generate zeros.
+        Gx = np.zeros(dim_d)
+
+        # Diff: x_{i}
+        Gx[k] = -1
+
+        # Diff: x_{i+1}
+        Gx[fwd_1i[k]] = bwd_1x[k]
+
+        # Diff: x_{i-2}
+        Gx[bwd_2i[k]] = -bwd_1x[k]
+
+        # Diff: x_{i-1}
+        Gx[bwd_1i[k]] = fwd_1x[k] - bwd_2x[k]
+
+        # Store i-th gradient.
+        Ex[k] = Gx
+    # _end_for_
+
+    # Return: <df(x)/dx>
+    return Ex
+# _end_def_
+
+@njit
 def l96(x, u):
     """
     The Lorenz 96 model function.
@@ -21,11 +101,11 @@ def l96(x, u):
     :return: One step ahead in the equation.
     """
 
-    # Differential equations.
-    dx = (fwd_1(x) - bwd_2(x)) * bwd_1(x) - x + u
+    # Get the shifted values.
+    fwd_1x, bwd_1x, bwd_2x = shift_vectors(x)
 
-    # Return dx.
-    return dx
+    # Return one step ahead Diff.Eq.
+    return (fwd_1x - bwd_2x) * bwd_1x - x + u
 # _end_def_
 
 
@@ -36,9 +116,9 @@ class Lorenz96(StochasticProcess):
     https://en.wikipedia.org/wiki/Lorenz_96_model
     """
 
-    __slots__ = ("sigma_", "theta_", "sig_inv")
+    __slots__ = ("sigma_", "theta_", "sig_inv", "dim_d")
 
-    def __init__(self, sigma, theta, r_seed=None):
+    def __init__(self, sigma, theta, dim_d=40, r_seed=None):
         """
         Default constructor of the L96 object.
 
@@ -46,11 +126,13 @@ class Lorenz96(StochasticProcess):
 
         :param theta: drift model vector.
 
-        :param r_seed: random seed.
+        :param dim_d: dimensionality of the model (default = 40).
+
+        :param r_seed: random seed (default = None).
         """
 
         # Display class info.
-        print(" Creating Lorenz-96 process.")
+        print(" Creating Lorenz-96 (D={0)) process.".format(dim_d))
 
         # Call the constructor of the parent class.
         super().__init__(r_seed, single_dim=False)
@@ -59,10 +141,13 @@ class Lorenz96(StochasticProcess):
         sigma = np.asarray(sigma)
         theta = np.asarray(theta)
 
+        # Store the model dimensions.
+        self.dim_d = dim_d
+
         # Check the dimensions of the input.
         if sigma.ndim == 0:
             # Create a diagonal matrix.
-            self.sigma_ = sigma * np.eye(40)
+            self.sigma_ = sigma * np.eye(dim_d)
 
         elif sigma.ndim == 1:
             # Create a diagonal matrix.
@@ -74,20 +159,22 @@ class Lorenz96(StochasticProcess):
 
         else:
             raise ValueError(" {0}: Wrong input dimensions:"
-                             " {1}".format(self.__class__.__name__, sigma.ndim))
+                             " {1}".format(self.__class__.__name__,
+                                           sigma.ndim))
         # _end_if_
 
         # Check the dimensionality.
-        if self.sigma_.shape != (40, 40):
+        if self.sigma_.shape != (dim_d, dim_d):
             raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__, self.sigma_.shape))
+                             " {1}".format(self.__class__.__name__,
+                                           self.sigma_.shape))
         # _end_if_
 
         # Check for positive definiteness.
         if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
 
             # This is not the best way to invert.
-            self.sig_inv = inv(self.sigma_)
+            self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
                                " positive definite.".format(self.__class__.__name__,
@@ -106,7 +193,6 @@ class Lorenz96(StochasticProcess):
         :return: the drift parameter.
         """
         return self.theta_
-
     # _end_def_
 
     @theta.setter
@@ -129,7 +215,6 @@ class Lorenz96(StochasticProcess):
         :return: the system noise parameter.
         """
         return self.sigma_
-
     # _end_def_
 
     @sigma.setter
@@ -143,7 +228,7 @@ class Lorenz96(StochasticProcess):
         """
 
         # Check the dimensionality.
-        if new_value.shape != (40, 40):
+        if new_value.shape != (self.dim_d, self.dim_d):
             raise ValueError(" {0}: Wrong matrix dimensions:"
                              " {1}".format(self.__class__.__name__,
                                            new_value.shape))
@@ -155,7 +240,7 @@ class Lorenz96(StochasticProcess):
             self.sigma_ = new_value
 
             # Update the inverse value.
-            self.sig_inv = inv(self.sigma_)
+            self.sig_inv = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
                                " positive definite.".format(self.__class__.__name__,
@@ -194,13 +279,13 @@ class Lorenz96(StochasticProcess):
         dim_t = tk.size
 
         # Default starting point.
-        x0 = self.theta_ * np.ones(40)
+        x0 = self.theta_ * np.ones(self.dim_d)
 
         # Initial conditions time step.
         delta_t = 1.0e-3
 
-        # Perturb the one dimension by dt.
-        x0[20] += delta_t
+        # Perturb the middle of the vector by "dt".
+        x0[int(self.dim_d / 2.0)] += delta_t
 
         # BURN IN:
         for t in range(5000):
@@ -208,7 +293,7 @@ class Lorenz96(StochasticProcess):
         # _end_for_
 
         # Preallocate array.
-        x = np.zeros(dim_t, 40)
+        x = np.zeros(dim_t, self.dim_d)
 
         # Start with the new point.
         x[0] = x0
@@ -222,11 +307,11 @@ class Lorenz96(StochasticProcess):
                   " The diagonal elements will be used instead.")
 
             # If it fails use the diagonal only.
-            ek = np.sqrt(np.eye(40) * self.sigma_ * dt)
+            ek = np.sqrt(np.eye(self.dim_d) * self.sigma_ * dt)
         # _end_try_
 
         # Random variables.
-        ek *= self.rng.standard_normal(dim_t, 40)
+        ek *= self.rng.standard_normal(dim_t, self.dim_d)
 
         # Create the path by solving the "stochastic" Diff.Eq. iteratively.
         for t in range(1, dim_t):
@@ -242,34 +327,37 @@ class Lorenz96(StochasticProcess):
 
     def energy(self, linear_a, offset_b, m, s, obs_t):
         """
-        Energy for the stochastic Lorenz 96 DE (40 dimensional)
+        Energy for the stochastic Lorenz 96 DE (dim_d = 40)
         and related quantities (including gradients).
 
-        :param linear_a: variational linear parameters (dim_t x 40 x 40).
+        :param linear_a: variational linear parameters (dim_t x dim_d x dim_d).
 
-        :param offset_b: variational offset parameters (dim_t x 40).
+        :param offset_b: variational offset parameters (dim_t x dim_d).
 
-        :param m: marginal means (dim_t x 40).
+        :param m: marginal means (dim_t x dim_d).
 
-        :param s: marginal variances (dim_t x 40 x 40).
+        :param s: marginal variances (dim_t x dim_d x dim_d).
 
         :param obs_t: observation times.
 
         :return: Esde       : total energy of the sde.
 
-                 Ef         : average drift (dim_t x 40).
-                 Edf        : average differentiated drift (dim_t x 40).
+                 Ef         : average drift (dim_t x dim_d).
+                 Edf        : average differentiated drift (dim_t x dim_d).
 
-                 dEsde_dm   : gradient of Esde w.r.t. the means (dim_t x 40).
-                 dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_t x 40 x 40).
+                 dEsde_dm   : gradient of Esde w.r.t. the means (dim_t x dim_d).
+                 dEsde_dS   : gradient of Esde w.r.t. the covariance (dim_t x dim_d x dim_d).
                  dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
                  dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
 
+        # System dimensions.
+        dim_d = self.dim_d
+
         # Number of discrete time points.
         dim_t = self.time_window.size
 
-        # Get the time step from the parent class.
+        # Get the time step.
         dt = self.time_step
 
         # Inverse System Noise.
@@ -285,20 +373,20 @@ class Lorenz96(StochasticProcess):
         Esde = np.zeros(dim_t)
 
         # Average drift.
-        Ef = np.zeros((dim_t, 40))
+        Ef = np.zeros((dim_t, dim_d))
 
         # Average gradient of drift.
-        Edf = np.zeros((dim_t, 40, 40))
+        Edf = np.zeros((dim_t, dim_d, dim_d))
 
         # Gradients of Esde w.r.t. 'm' and 'S'.
-        dEsde_dm = np.zeros((dim_t, 40))
-        dEsde_ds = np.zeros((dim_t, 40, 40))
+        dEsde_dm = np.zeros((dim_t, dim_d))
+        dEsde_ds = np.zeros((dim_t, dim_d, dim_d))
 
         # Gradients of Esde w.r.t. 'Theta'.
-        dEsde_dth = np.zeros((dim_t, 40))
+        dEsde_dth = np.zeros((dim_t, dim_d))
 
         # Gradients of Esde w.r.t. 'Sigma'.
-        dEsde_dSig = np.zeros((dim_t, 40))
+        dEsde_dSig = np.zeros((dim_t, dim_d))
 
         # Define lambda functions:
         Fx = {'1': lambda x, at, bt: (l96(x, theta) + x.dot(at.T) - np.tile(bt, (x.shape[0], 1))) ** 2,
@@ -331,10 +419,10 @@ class Lorenz96(StochasticProcess):
                                diag_inv_sig)
 
             # Gradient w.r.t. mean mt: dEsde(t)_dmt
-            dEsde_dm[t] = dmS[:40] - Esde[t] * np.linalg.solve(st, mt)
+            dEsde_dm[t] = dmS[:dim_d] - Esde[t] * np.linalg.solve(st, mt)
 
             #  Gradient w.r.t. covariance St: dEsde(t)_dSt
-            dEsde_ds[t] = 0.5 * (dmS[40:].reshape(40, 40) - Esde[t] * np.linalg.inv(st))
+            dEsde_ds[t] = 0.5 * (dmS[dim_d:].reshape(dim_d, dim_d) - Esde[t] * np.linalg.inv(st))
 
             # Gradients of Esde w.r.t. 'Theta': dEsde(t)_dtheta
             dEsde_dth[t] = Ef[t] + mt.dot(at.T) - bt
@@ -360,56 +448,24 @@ class Lorenz96(StochasticProcess):
         """
         Returns the mean value of the drift function <f(x)>.
 
-        :param mt: mean vector (40 x 1).
+        :param mt: mean vector (dim_d x 1).
 
-        :param st: covariance matrix (40 x 40).
+        :param st: covariance matrix (dim_d x dim_d).
 
-        :return: mean of the drift function (40 x 1).
+        :return: mean of the drift function (dim_d x 1).
         """
 
-        # Local index array: [0, 1, 2, ... , 39]
-        idx = np.arange(0, 40)
+        # Local index array: [0, 1, 2, ... , dim_d-1]
+        idx = np.arange(0, self.dim_d)
+
+        # Get the shifted indices.
+        fwd_1i, bwd_1i, bwd_2i = shift_vectors(idx)
 
         # Get access to the covariances at the desired points.
-        Cxx = st[fwd_1(idx), bwd_1(idx)] - st[bwd_2(idx), bwd_1(idx)]
+        Cxx = st[fwd_1i, bwd_1i] - st[bwd_2i, bwd_1i]
 
         # Compute the expected value.
         return Cxx + (fwd_1(mt) - bwd_2(mt)) * bwd_1(mt) - mt + self.theta
     # _end_def_
 
 # _end_class_
-
-# Helper function.
-def E96_drift_dx(x):
-    """
-    Returns the mean value of the gradient of the drift
-    function with respect to the state vector: <df(x)/dx>.
-
-    :param x: input state samples (40 x 1).
-
-    :return: mean gradient w.r.t. to x (40 x 40).
-    """
-    
-    # Preallocate return matrix.
-    Ex = np.zeros((40, 40))
-    
-    # Local index array: [0, 1, 2, ... , 39]
-    idx = np.arange(0, 40)
-    
-    # Compute the gradient of the state vector
-    # at each time point.
-    for i in range(40):
-        # Generate zeros.
-        Gx = np.zeros(40)
-        
-        # Compute the i-th ODE gradient.
-        Gx[i] = -1
-        Gx[fwd_1(idx)[i]] = +bwd_1(x)[i]
-        Gx[bwd_2(idx)[i]] = -bwd_1(x)[i]
-        Gx[bwd_1(idx)[i]] = +fwd_1(x)[i] - bwd_2(x)[i]
-        
-        # Store i-th gradient.
-        Ex[i] = Gx
-    # --->
-    return Ex
-# _end_def_
