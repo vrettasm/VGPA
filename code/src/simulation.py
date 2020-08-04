@@ -167,12 +167,13 @@ class Simulation(object):
             self.m_data["obs_y"] = data[1]
         else:
             # Sample observations from the trajectory.
-            obs_t, obs_y = self.m_data["model"].collect_obs(self.m_data["obs_setup"]["density"],
-                                                            self.m_data["noise"]["obs"],
-                                                            self.m_data["obs_setup"]["operator"])
+            obs_t, obs_y, obs_noise = self.m_data["model"].collect_obs(self.m_data["obs_setup"]["density"],
+                                                                       self.m_data["noise"]["obs"],
+                                                                       self.m_data["obs_setup"]["operator"])
             # Add them to the dictionary.
             self.m_data["obs_t"] = obs_t
             self.m_data["obs_y"] = obs_y
+            self.m_data["obs_noise"] = obs_noise
         # _end_if_
 
         # Initial (marginal) moments.
@@ -188,6 +189,10 @@ class Simulation(object):
             self.m_data["m0"] = self.m_data["model"].sample_path[0] +\
                                 0.1 * self.m_data["model"].rng.standard_normal(dim_d)
             self.m_data["s0"] = 0.2 * np.eye(dim_d)
+
+            # Adjust the prior values.
+            self.m_data["mu0"] = self.m_data["prior"]["mu0"] * np.ones(dim_d)
+            self.m_data["tau0"] = self.m_data["prior"]["tau0"] * np.eye(dim_d)
         # _end_if_
 
     # _end_def_
@@ -214,12 +219,11 @@ class Simulation(object):
         # Likelihood object.
         likelihood = GaussianLikelihood(self.m_data["obs_y"],
                                         self.m_data["obs_t"],
-                                        self.m_data["noise"]["obs"],
+                                        self.m_data["obs_noise"],
                                         self.m_data["obs_setup"]["operator"],
                                         self.m_data["single_dim"])
         # Prior moments.
-        kl0 = PriorKL0(self.m_data["prior"]["mu0"],
-                       self.m_data["prior"]["tau0"],
+        kl0 = PriorKL0(self.m_data["mu0"], self.m_data["tau0"],
                        self.m_data["single_dim"])
 
         # Variational GP model.
