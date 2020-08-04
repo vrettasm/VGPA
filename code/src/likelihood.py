@@ -35,7 +35,16 @@ class Likelihood(object):
 
         # Default operator is identity matrix.
         if operator is None:
-            self.obs_h = np.asarray(1)
+            # Get the first observation.
+            y0 = self.obs_v[0]
+
+            # If it is scalar.
+            if y0.ndim == 0:
+                self.obs_h = np.asarray(1)
+            else:
+                # Otherwise create identity matrix.
+                self.obs_h = np.eye(y0.size)
+            # _end_if_
         else:
             self.obs_h = np.asarray(operator)
         # _end_if_
