@@ -141,8 +141,7 @@ class StochasticProcess(object):
 
         :param h_mask: boolean that masks only the observed values.
 
-        :return: observation times / observation values
-        (with i.i.d. white noise).
+        :return: observation times / noisy values / noise (matrix).
         """
 
         # Check if the sample path is created.
@@ -193,7 +192,10 @@ class StochasticProcess(object):
         # Add noise according to the observation dimensions.
         if dim_d == 1:
             # Scalar value.
-            sq_rn = np.sqrt(rn)
+            obs_noise = rn
+
+            # Sqrt(Rn).
+            sq_rn = np.sqrt(obs_noise)
 
             # Fixed Gaussian noise.
             obs_y += sq_rn * self.rand_g.standard_normal(dim_m)
@@ -202,24 +204,32 @@ class StochasticProcess(object):
             # Multidimensional case.
             if rn.ndim == 0:
                 # Diagonal matrix (from scalar).
-                sq_rn = np.sqrt(rn) * np.eye(dim_d)
+                obs_noise = rn * np.eye(dim_d)
+
+                # Sqrt(Rn).
+                sq_rn = np.sqrt(obs_noise)
 
             elif rn.ndim == 1:
                 # Diagonal matrix (from vector).
-                sq_rn = np.sqrt(np.diag(rn))
+                obs_noise = np.diag(rn)
+
+                # Sqrt(Rn).
+                sq_rn = np.sqrt(obs_noise)
 
             else:
                 # Diagonal matrix (from matrix).
-                sq_rn = np.sqrt(rn * np.eye(dim_d))
+                obs_noise = rn * np.eye(dim_d)
 
+                # Sqrt(Rn).
+                sq_rn = np.sqrt(obs_noise)
             # _end_if_
 
             # Add fixed Gaussian noise.
             obs_y += sq_rn.dot(self.rand_g.standard_normal((dim_d, dim_m))).T
         # _end_if_
 
-        # Observation (times / values / sqrt(noise)).
-        return obs_t, obs_y, sq_rn
+        # Observation (times / values / noise).
+        return obs_t, obs_y, obs_noise
     # _end_def_
 
 # _end_class_
