@@ -80,6 +80,8 @@ class Simulation(object):
         constructors. (noise, drift, random seed).
 
         :return: an instance of the model.
+
+        :raises ValueError: if the model is unknown.
         """
         # Make input string upper-case.
         model_upper = str(model).upper()
@@ -116,8 +118,6 @@ class Simulation(object):
         :param data: array with observation times and values (t, yt).
 
         :return: None.
-
-        :raises ValueError: if some data are wrong.
         """
 
         # Extract drift parameters.
