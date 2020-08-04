@@ -1,7 +1,6 @@
 import numpy as np
 from numba import njit
-from scipy.integrate import trapz
-from scipy.linalg import cholesky, LinAlgError
+from numpy.linalg import cholesky, LinAlgError
 
 
 def finite_diff(fun, x, *args):
@@ -140,7 +139,7 @@ def my_trapz(fx, dx=1.0, obs_t=None):
     space increment dt, using the composite
     trapezoidal rule.
 
-    This code applies the function: scipy.integrate.trapz()
+    This code applies the function: numpy.trapz()
     between the times of the observations 'obs_t'. This is
     because the function 'fx' is very rough (it jumps at
     observation times), therefore computing the integral
@@ -168,7 +167,7 @@ def my_trapz(fx, dx=1.0, obs_t=None):
 
     # Check if there are observation times (indexes).
     if obs_t is None:
-        return trapz(fx, dx=dx, axis=0)
+        return np.trapz(fx, dx=dx, axis=0)
     # _end_if_
 
     # Total integral.
@@ -180,7 +179,7 @@ def my_trapz(fx, dx=1.0, obs_t=None):
     # Compute the integral partially.
     for k, l in enumerate(obs_t):
         # Compute the integral incrementally.
-        tot_area += trapz(fx[f:l+1], dx=dx, axis=0)
+        tot_area += np.trapz(fx[f:l+1], dx=dx, axis=0)
 
         # Set the next first index.
         f = obs_t[k]
@@ -188,7 +187,7 @@ def my_trapz(fx, dx=1.0, obs_t=None):
 
     # Final interval.
     if f != fx.shape[0] - 1:
-        tot_area += trapz(fx[f:], dx=dx, axis=0)
+        tot_area += np.trapz(fx[f:], dx=dx, axis=0)
     # _end_if_
 
     # Return the total integral.
@@ -262,7 +261,7 @@ def ut_approx(fun, x_bar, x_cov, *args):
     dim_d = x_bar.size
 
     # Total number of sigma points.
-    dim_m = (2.0 * dim_d + 1)
+    dim_m = int(2 * dim_d + 1)
 
     # Scaling factor.
     k = 1.05 * dim_d
