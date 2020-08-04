@@ -219,7 +219,7 @@ class GaussianLikelihood(Likelihood):
         obs_y, obs_t = self.values, self.times
 
         # Dimensions of observations.
-        dim_o = obs_y.size[-1]
+        dim_o, _ = obs_y.shape
 
         # Dimensions of input array.
         dim_n, dim_d = m.shape
