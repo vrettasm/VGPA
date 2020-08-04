@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit
 from .stochastic_process import StochasticProcess
 from ..numerics.utilities import my_trapz, chol_inv
-from scipy.linalg import cholesky, inv, LinAlgError
+from scipy.linalg import cholesky, LinAlgError
 
 @njit
 def l63(x, u):
@@ -13,7 +13,7 @@ def l63(x, u):
 
     :param x: state vector (x, y, z).
 
-    :param u: model parameters (theta=10, rho=28, beta=8/3).
+    :param u: model parameters (sigma=10, rho=28, beta=8/3).
 
     :return: One step ahead in the equation.
     """
