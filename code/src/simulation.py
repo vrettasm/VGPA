@@ -40,19 +40,15 @@ class Simulation(object):
         >> sim_vgpa.save()
     """
 
-    __slots__ = ("name", "m_data", "rng", "output")
+    __slots__ = ("name", "m_data", "output")
 
-    def __init__(self, name=None, seed=None):
+    def __init__(self, name=None):
         """
         Default constructor of the Simulation class.
 
         :param name: (string) is optional but it will
         be used for constructing a meaningful filename
         to save the results at the end of the simulation.
-
-        :param seed: (int) is used to initialize the
-        random generator. If None, the generator will
-        be initialized at random from the OS.
         """
 
         # Check if a simulation name has been given.
@@ -62,16 +58,8 @@ class Simulation(object):
             self.name = "ID_None"
         # _end_if_
 
-        # This dictionary will hold
-        # all the simulation data.
+        # This dictionary will hold all the simulation data.
         self.m_data = {}
-
-        # Create a random number generator.
-        if seed is not None:
-            self.rng = np.random.default_rng(seed)
-        else:
-            self.rng = np.random.default_rng()
-        # _end_if_
 
         # Place holder for the output storage.
         self.output = {}
@@ -181,6 +169,10 @@ class Simulation(object):
             self.m_data["m0"] = self.m_data["model"].sample_path[0] +\
                                 0.1 * self.m_data["model"].rng.standard_normal()
             self.m_data["s0"] = 0.2
+
+            # Adjust the prior values.
+            self.m_data["mu0"] = self.m_data["prior"]["mu0"]
+            self.m_data["tau0"] = self.m_data["prior"]["tau0"]
         else:
             # Get the system dimensions.
             dim_d = self.m_data["model"].sample_path.shape[-1]
