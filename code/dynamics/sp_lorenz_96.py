@@ -140,6 +140,12 @@ class Lorenz96(StochasticProcess):
         sigma = np.asarray(sigma)
         theta = np.asarray(theta)
 
+        # Check the number of input dimensions.
+        if dim_d < 10:
+            raise ValueError(" {0}: Insufficient state vector dimensions:"
+                             " {1}".format(self.__class__.__name__, dim_d))
+        # _end_if_
+
         # Store the model dimensions.
         self.dim_d = dim_d
 
