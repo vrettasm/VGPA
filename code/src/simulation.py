@@ -46,9 +46,9 @@ class Simulation(object):
         """
         Default constructor of the Simulation class.
 
-        :param name: (string) is optional but it will
-        be used for constructing a meaningful filename
-        to save the results at the end of the simulation.
+        :param name: (string) is optional but it will be
+        used for constructing a meaningful filename to
+        save the results at the end of the simulation.
         """
 
         # Check if a simulation name has been given.
@@ -58,10 +58,12 @@ class Simulation(object):
             self.name = "ID_None"
         # _end_if_
 
-        # This dictionary will hold all the simulation data.
+        # This dictionary will hold
+        # all the simulation data.
         self.m_data = {}
 
-        # Place holder for the output storage.
+        # Place holder for the output
+        # storage.
         self.output = {}
     # _end_def_
 
@@ -101,7 +103,8 @@ class Simulation(object):
         self.m_data["obs_setup"] = params["Observations"]
 
         # Extract prior parameters.
-        self.m_data["prior"] = params["Prior"]
+        self.m_data["mu0"] = params["Prior"]["mu0"]
+        self.m_data["tau0"] = params["Prior"]["tau0"]
 
         # Stochastic model.
         if params["Model"].upper() == "DW":
@@ -169,10 +172,6 @@ class Simulation(object):
             self.m_data["m0"] = self.m_data["model"].sample_path[0] +\
                                 0.1 * self.m_data["model"].rng.standard_normal()
             self.m_data["s0"] = 0.2
-
-            # Adjust the prior values.
-            self.m_data["mu0"] = self.m_data["prior"]["mu0"]
-            self.m_data["tau0"] = self.m_data["prior"]["tau0"]
         else:
             # Get the system dimensions.
             dim_d = self.m_data["model"].sample_path.shape[-1]
@@ -225,7 +224,7 @@ class Simulation(object):
                      self.m_data["obs_y"], self.m_data["obs_t"])
 
         # Setup SCG options.
-        options = {'max_it': 500, 'x_tol': 1.0e-6, 'f_tol': 1.0e-8}
+        options = {"max_it": 500, "x_tol": 1.0e-6, "f_tol": 1.0e-8}
 
         # Create an SCG optimization object.
         optimize = SCG(vgpa.free_energy, vgpa.gradient, options)
