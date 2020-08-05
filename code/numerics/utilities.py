@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-from numpy.linalg import cholesky, LinAlgError
+from numpy.linalg import inv, cholesky, LinAlgError
 
 
 def finite_diff(fun, x, *args):
@@ -203,7 +203,7 @@ def chol_inv_fast(x):
     """
 
     # Invert the Cholesky decomposition.
-    c_inv = np.linalg.inv(np.linalg.cholesky(x))
+    c_inv = inv(cholesky(x))
 
     # Invert input matrix.
     x_inv = c_inv.T.dot(c_inv)
