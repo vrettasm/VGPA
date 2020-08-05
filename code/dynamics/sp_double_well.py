@@ -134,24 +134,26 @@ class DoubleWell(StochasticProcess):
         :return: None.
         """
 
-        # Create a time-window.
+        # Create locally a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
-        # Number of actual trajectory samples.
+        # Number of actual time points.
         dim_t = tk.size
 
         # Preallocate array.
         x = np.zeros(dim_t)
 
-        # The first value X(t=0), is chosen from the
-        # "Equilibrium Distribution": x0 = 0.5*N(+mu,K) + 0.5*N(-mu,K)
+        # The first value is chosen from the
+        #    "Equilibrium Distribution":
+        # x0 = 0.5*N(+mu,K) + 0.5*N(-mu,K)
         if self.rng.random() > 0.5:
-            x[0] = +self.theta_ + \
-                   np.sqrt(0.5 * self.sigma_ * dt) * self.rng.standard_normal()
+            x[0] = +self.theta_
         else:
-            x[0] = -self.theta_ + \
-                   np.sqrt(0.5 * self.sigma_ * dt) * self.rng.standard_normal()
+            x[0] = -self.theta_
         # _end_if_
+
+        # Add Gaussian noise.
+        x[0] += np.sqrt(0.5 * self.sigma_ * dt) * self.rng.standard_normal()
 
         # Random variables (notice the scale of noise with the 'dt').
         ek = np.sqrt(self.sigma_ * dt) * self.rng.standard_normal(dim_t)
