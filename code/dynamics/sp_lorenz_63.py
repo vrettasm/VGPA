@@ -5,26 +5,29 @@ from ..numerics.utilities import my_trapz, chol_inv
 from scipy.linalg import cholesky, LinAlgError
 
 @njit
-def l63(x, u):
+def l63(state, u):
     """
     Lorenz63 function.
 
     https://en.wikipedia.org/wiki/Lorenz_system
 
-    :param x: state vector (x, y, z).
+    :param state: (x, y, z).
 
     :param u: model parameters (sigma=10, rho=28, beta=8/3).
 
     :return: One step ahead in the equation.
     """
 
+    # Unpack state.
+    x, y, z = state
+
     # Unpack parameters.
     sigma, rho, beta = u
 
     # Differential equations.
-    dx = np.array([-sigma * (x[0] - x[1]),
-                   (rho - x[2]) * x[0] - x[1],
-                   x[0] * x[1] - beta * x[2]])
+    dx = np.array([sigma * (y - x),
+                   (rho - z) * x - y,
+                   x * y - beta * z])
     # Return dx.
     return dx
 # _end_def_
@@ -61,32 +64,34 @@ class Lorenz63(StochasticProcess):
 
         # Check the dimensions of the input.
         if sigma.ndim == 0:
-            # Create a diagonal matrix.
+            # Diagonal matrix (from scalar).
             self.sigma_ = sigma * np.eye(3)
 
         elif sigma.ndim == 1:
-            # Create a diagonal matrix.
+            # Diagonal matrix (from vector).
             self.sigma_ = np.diag(sigma)
 
         elif sigma.ndim == 2:
-            # Store the array.
+            # Full Matrix.
             self.sigma_ = sigma
 
         else:
             raise ValueError(" {0}: Wrong input dimensions:"
-                             " {1}".format(self.__class__.__name__, sigma.ndim))
+                             " {1}".format(self.__class__.__name__,
+                                           sigma.ndim))
         # _end_if_
 
         # Check the dimensionality.
         if self.sigma_.shape != (3, 3):
             raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__, self.sigma_.shape))
+                             " {1}".format(self.__class__.__name__,
+                                           self.sigma_.shape))
         # _end_if_
 
         # Check for positive definiteness.
         if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
 
-            # This is not the best way to invert.
+            # This is a better way to invert Sigma.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
@@ -152,7 +157,7 @@ class Lorenz63(StochasticProcess):
             # Make the change.
             self.sigma_ = new_value
 
-            # Update the inverse value.
+            # Update the inverse matrix.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
@@ -202,7 +207,7 @@ class Lorenz63(StochasticProcess):
             x0 = x0 + l63(x0, self.theta_) * delta_t
         # _end_for_
 
-        # Preallocate array.
+        # Allocate array.
         x = np.zeros((dim_t, 3))
 
         # Start with the new point.
@@ -268,10 +273,10 @@ class Lorenz63(StochasticProcess):
         dt = self.time_step
 
         # Inverse System Noise.
-        SigInv = self.sig_inv
+        inv_Sigma = self.sig_inv
 
         # Diagonal elements of inverse Sigma.
-        diag_sig_inv = np.diag(SigInv)
+        diag_sig_inv = np.diag(inv_Sigma)
 
         # Energy from the sde.
         Esde = np.zeros(dim_t)
@@ -293,7 +298,7 @@ class Lorenz63(StochasticProcess):
         dEsde_dSig = np.zeros((dim_t, 3))
 
         # Drift parameters.
-        vS, vR, vB = self.theta_
+        v_sigma, v_rho, v_beta = self.theta_
 
         # Compute the quantities iteratively.
         for t in range(dim_t):
@@ -317,14 +322,14 @@ class Lorenz63(StochasticProcess):
             dEsde_ds[t] = Eds
 
             # Average drift: <f(Xt)>
-            Ef[t] = np.array([vS * (mt[1] - mt[0]),
-                              vR * mt[0] - mt[1] - st[2, 0] - mt[0] * mt[2],
-                              st[1, 0] + mt[0] * mt[1] - vB * mt[2]])
+            Ef[t] = np.array([v_sigma * (mt[1] - mt[0]),
+                              v_rho * mt[0] - mt[1] - st[2, 0] - mt[0] * mt[2],
+                              st[1, 0] + mt[0] * mt[1] - v_beta * mt[2]])
 
             # Average gradient of drift: <Df(Xt)>
-            Edf[t] = np.array([[-vS, vS, 0],
-                               [vR - mt[2], -1, -mt[0]],
-                               [mt[1], mt[0], -vB]])
+            Edf[t] = np.array([[-v_sigma, v_sigma, 0],
+                               [v_rho - mt[2], -1, -mt[0]],
+                               [mt[1], mt[0], -v_beta]])
 
             # Gradients of Esde w.r.t. 'Theta'.
             dEsde_dth[t] = self.Efg_drift_theta(at, bt, mt, st)
@@ -340,7 +345,7 @@ class Lorenz63(StochasticProcess):
         dEsde_dtheta = diag_sig_inv * my_trapz(dEsde_dth, dt, obs_t)
 
         # Final adjustments for the System noise.
-        dEsde_dsigma = - 0.5 * SigInv.dot(np.diag(my_trapz(dEsde_dSig, dt, obs_t))).dot(SigInv)
+        dEsde_dsigma = - 0.5 * inv_Sigma.dot(np.diag(my_trapz(dEsde_dSig, dt, obs_t))).dot(inv_Sigma)
 
         # --->
         return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dtheta, dEsde_dsigma)
