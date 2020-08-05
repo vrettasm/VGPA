@@ -151,15 +151,15 @@ class Lorenz96(StochasticProcess):
 
         # Check the dimensions of the input.
         if sigma.ndim == 0:
-            # Create a diagonal matrix.
+            # Diagonal matrix (from scalar).
             self.sigma_ = sigma * np.eye(dim_d)
 
         elif sigma.ndim == 1:
-            # Create a diagonal matrix.
+            # Diagonal matrix (from vector).
             self.sigma_ = np.diag(sigma)
 
         elif sigma.ndim == 2:
-            # Store the array.
+            # Full matrix.
             self.sigma_ = sigma
 
         else:
@@ -178,7 +178,7 @@ class Lorenz96(StochasticProcess):
         # Check for positive definiteness.
         if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
 
-            # This is not the best way to invert.
+            # This is a better way to invert Sigma.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
@@ -244,8 +244,8 @@ class Lorenz96(StochasticProcess):
             # Make the change.
             self.sigma_ = new_value
 
-            # Update the inverse value.
-            self.sig_inv = chol_inv(self.sigma_)
+            # Update the inverse matrix.
+            self.sig_inv, _ = chol_inv(self.sigma_)
         else:
             raise RuntimeError(" {0}: Noise matrix is not"
                                " positive definite.".format(self.__class__.__name__,
@@ -289,7 +289,7 @@ class Lorenz96(StochasticProcess):
         # Initial conditions time step.
         delta_t = 1.0e-3
 
-        # Perturb the middle of the vector by "dt".
+        # Perturb the middle of the vector by "+dt".
         x0[int(self.dim_d / 2.0)] += delta_t
 
         # BURN IN:
@@ -297,7 +297,7 @@ class Lorenz96(StochasticProcess):
             x0 = x0 + l96(x0, self.theta_) * delta_t
         # _end_for_
 
-        # Preallocate array.
+        # Allocate array.
         x = np.zeros((dim_t, self.dim_d))
 
         # Start with the new point.
