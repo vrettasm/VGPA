@@ -81,8 +81,8 @@ class SCG(object):
                  2) fx: the function value (at the minimum point).
         """
 
-        # Make sure input is array.
-        x = np.asarray(x0.copy())
+        # Make sure input is flat.
+        x = x0.flatten()
 
         # Size of input array.
         dim_x = x.size
