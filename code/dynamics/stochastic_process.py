@@ -159,9 +159,9 @@ class StochasticProcess(object):
         # Check if the required number of observations
         # per time unit exceeds the available capacity
         # of samples.
-        if n_obs > (1.0 / dt):
-            raise ValueError(" {0}: Observation density"
-                             " exceeds the number of samples.".format(self.__class__.__name__))
+        if n_obs > int(1.0 / dt):
+            raise ValueError(" {0}: Observation density exceeds"
+                             " the number of samples.".format(self.__class__.__name__))
         # _end_def_
 
         # Total number of observations.
