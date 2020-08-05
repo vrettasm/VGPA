@@ -54,8 +54,8 @@ class StochasticProcess(object):
         """
         # Check if the sample path is created.
         if self.xt is None:
-            raise NotImplementedError(" {0}:"
-                                      " Sample path is not created.".format(self.__class__.__name__))
+            raise NotImplementedError(" {0}: Sample path has not been"
+                                      " created.".format(self.__class__.__name__))
         # _end_def_
 
         return self.xt
@@ -82,8 +82,8 @@ class StochasticProcess(object):
         """
         # Check if the sample path is created.
         if self.tk is None:
-            raise NotImplementedError(" {0}: Time window"
-                                      " is not created yet.".format(self.__class__.__name__))
+            raise NotImplementedError(" {0}: Time window has not been"
+                                      " created yet.".format(self.__class__.__name__))
         # _end_def_
 
         return self.tk
@@ -110,8 +110,8 @@ class StochasticProcess(object):
         """
         # Check if the sample path is created.
         if self.tk is None:
-            raise NotImplementedError(" {0}: Time window"
-                                      " is not created yet.".format(self.__class__.__name__))
+            raise NotImplementedError(" {0}: Time window has not been"
+                                      " created yet.".format(self.__class__.__name__))
         # _end_def_
 
         # Return the 'dt'.
@@ -146,8 +146,8 @@ class StochasticProcess(object):
 
         # Check if the sample path is created.
         if self.tk is None or self.xt is None:
-            raise NotImplementedError(" {0}: Sample path or time window"
-                                      " are not created.".format(self.__class__.__name__))
+            raise NotImplementedError(" {0}: Sample path or time window have"
+                                      " not been created.".format(self.__class__.__name__))
         # _end_def_
 
         # Make sure input is numpy array.
