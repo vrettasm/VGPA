@@ -118,7 +118,7 @@ class Lorenz96(StochasticProcess):
 
     __slots__ = ("sigma_", "theta_", "sig_inv", "dim_d")
 
-    def __init__(self, sigma, theta, dim_d=40, r_seed=None):
+    def __init__(self, sigma, theta, r_seed=None, dim_d=40):
         """
         Default constructor of the L96 object.
 
@@ -126,9 +126,9 @@ class Lorenz96(StochasticProcess):
 
         :param theta: drift model vector.
 
-        :param dim_d: dimensionality of the model (default = 40).
-
         :param r_seed: random seed (default = None).
+
+        :param dim_d: dimensionality of the model (default = 40).
         """
         # Call the constructor of the parent class.
         super().__init__(r_seed, single_dim=False)
