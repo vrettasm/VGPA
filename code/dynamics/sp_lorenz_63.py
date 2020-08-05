@@ -190,7 +190,7 @@ class Lorenz63(StochasticProcess):
         :return: None.
         """
 
-        # Create a time-window.
+        # Create locally a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
         # Number of actual trajectory samples.
