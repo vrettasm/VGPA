@@ -101,7 +101,7 @@ class SCG(object):
         self.stats["df_eval"] += 1
 
         # Store the current values (fx / dfx).
-        f_old, grad_old = np.copy((f_now, grad_new))
+        f_old, grad_old = f_now, np.copy(grad_new)
 
         # Setup the initial search direction.
         d = -grad_new
@@ -194,7 +194,7 @@ class SCG(object):
                 x, f_now, g_now = np.copy((x_new, f_new, grad_new))
             else:
                 success = 0
-                f_now, g_now = np.copy((f_old, grad_old))
+                f_now, g_now = f_old, np.copy(grad_old)
             # _end_if_
 
             # Total gradient.
@@ -224,8 +224,8 @@ class SCG(object):
                     # Exit.
                     return x, fx
                 else:
-                    # Update variables for new position.
-                    f_old, grad_old = np.copy((f_new, grad_new))
+                    # Update variables for the new position.
+                    f_old, grad_old = f_new, np.copy(grad_new)
 
                     # Evaluate function/gradient at the new point.
                     f_now = self.f(x, *args)
@@ -236,7 +236,7 @@ class SCG(object):
                     self.stats["df_eval"] += 1
 
                     # If the gradient is zero then exit.
-                    if grad_new.T.dot(grad_new) == 0.0:
+                    if np.isclose(grad_new.T.dot(grad_new), 0.0):
                         # Copy the new value.
                         fx = f_now
 
