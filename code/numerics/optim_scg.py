@@ -161,8 +161,7 @@ class SCG(object):
                 # Because we evaluate the gradient at a new point
                 # we run the f(x) too,  so that we get consistent
                 # variational and Lagrangian parameters.
-                _ = self.f(x_plus, *args)
-                g_plus = self.df(x_plus, *args)
+                g_plus = self.df(x_plus, eval_fun=True)
 
                 # Increase function/gradients evaluations by one.
                 self.stats["f_eval"] += 1
