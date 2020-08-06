@@ -207,8 +207,8 @@ class SCG(object):
             self.stats["dfx"][j] = tot_grad
 
             # Used in debugging mode.
-            if self.display:
-                print(" {0}:\tfx={1:.3f}\tsum(gx)={2:.3f}".format(j, fnow, tot_grad))
+            if self.display and (np.mod(j, 10) == 0):
+                print(" {0}: fx={1:.3f}\tsum(gx)={2:.3f}".format(j, fnow, tot_grad))
             # _end_if_
 
             # TBD:
