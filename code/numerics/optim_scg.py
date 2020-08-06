@@ -315,13 +315,13 @@ class SCG(object):
         norm_N = np.linalg.norm(grad_N)
 
         # Get their relative difference.
-        diff_rel = np.linalg.norm(grad_A - grad_N) / (norm_A + norm_N)
+        rel_diff = np.linalg.norm(grad_A - grad_N) / (norm_A + norm_N)
 
         # Display info.
-        print("\n Relative difference is: {0:.4}.".format(diff_rel))
+        print("\n Relative difference is: {0:.4}.".format(rel_diff))
 
         # Get the outcome.
-        outcome = "PASSED" if (diff_rel <= r_tol) else "FAILED"
+        outcome = "PASSED" if (rel_diff <= r_tol) else "FAILED"
 
         # Display info.
         print(" Gradient test {0}, with tol={1}.\n".format(outcome, r_tol))
