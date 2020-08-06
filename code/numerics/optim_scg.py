@@ -1,4 +1,5 @@
 import numpy as np
+from .utilities import finite_diff
 
 class SCG(object):
     """
@@ -289,6 +290,37 @@ class SCG(object):
         :return: the statistics dictionary.
         """
         return self.stats
+    # _end_def_
+
+    def eval_gradient_function(self, x, tol=1.0e-4):
+        """
+        Tests whether the gradient function is accurate,
+        compared to the numerical differentiation value.
+
+        :param x: State vector to test the gradient.
+
+        :param tol: tolerance value.
+
+        :return: None.
+        """
+
+        # Analytical gradient calculation.
+        grad_a = self.df(x.copy(), eval_fun=True)
+
+        # Numerical gradient calculation.
+        grad_n = finite_diff(self.f, x.copy())
+
+        # Get the mean absolute error.
+        mae = np.mean(np.abs(grad_a - grad_n))
+
+        # Display info.
+        print("\n Mean absolute error is: {0:.4}.".format(mae))
+
+        # Outcome.
+        outcome = "PASSED" if (mae <= tol) else "FAILED"
+
+        # Display info.
+        print(" Gradient test {0}, with tol={1}.\n".format(outcome, tol))
     # _end_def_
 
     # Auxiliary.
