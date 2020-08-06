@@ -232,7 +232,7 @@ class Simulation(object):
 
         # Setup SCG options.
         options = {"max_it": 500, "x_tol": 1.0e-6, "f_tol": 1.0e-8,
-                   "display": False}
+                   "display": True}
 
         # Create an SCG optimization object.
         optimize = SCG(vgpa.free_energy, vgpa.gradient, options)
