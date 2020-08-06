@@ -292,14 +292,14 @@ class SCG(object):
         return self.stats
     # _end_def_
 
-    def eval_gradient_function(self, x, tol=1.0e-4):
+    def check_gradient_function(self, x, r_tol=1.0e-4):
         """
         Tests whether the gradient function is accurate,
         compared to the numerical differentiation value.
 
         :param x: State vector to test the gradient.
 
-        :param tol: tolerance value.
+        :param r_tol: relative tolerance value.
 
         :return: None.
         """
@@ -316,11 +316,15 @@ class SCG(object):
         # Display info.
         print("\n Mean absolute error is: {0:.4}.".format(mae))
 
-        # Outcome.
-        outcome = "PASSED" if (mae <= tol) else "FAILED"
+        # Test if they are close enough ...
+        if np.allclose(grad_a, grad_n, rtol=r_tol):
+            outcome = "PASSED"
+        else:
+            outcome = "FAILED"
+        # _end_if_
 
         # Display info.
-        print(" Gradient test {0}, with tol={1}.\n".format(outcome, tol))
+        print(" Gradient test {0}, with tol={1}.\n".format(outcome, r_tol))
     # _end_def_
 
     # Auxiliary.
