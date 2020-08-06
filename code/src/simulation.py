@@ -14,7 +14,6 @@ from ..dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
 from ..src.variational import VarGP
 from ..src.prior_kl0 import PriorKL0
 from ..src.gaussian_like import GaussianLikelihood
-
 from ..numerics.optim_scg import SCG
 
 
@@ -237,14 +236,23 @@ class Simulation(object):
         # Create an SCG optimization object.
         optimize = SCG(vgpa.free_energy, vgpa.gradient, options)
 
+        # Get the initial vector.
+        x0 = vgpa.initialization()
+
+        # Initial gradient test.
+        # optimize.eval_gradient_function(x0.copy(), tol=0.001)
+
         # Start the timer.
         time_t0 = time.time()
 
         # Run the optimization procedure.
-        x, fx = optimize(vgpa.initialization())
+        x, fx = optimize(x0.copy())
 
         # Stop the timer.
         time_tf = time.time()
+
+        # Final gradient test.
+        # optimize.eval_gradient_function(x.copy(), tol=0.001)
 
         # Print final duration in seconds.
         print(" Elapsed time: {0:.2f} seconds.\n".format(time_tf - time_t0))
