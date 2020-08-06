@@ -313,7 +313,7 @@ class VarGP(object):
         the 1D or nD version of the calculation.
         """
         if self.model.single_dim:
-            return inv_sigma * (Edf + at) * st - dEsde_dbt * mt
+            return inv_sigma * (Edf + at) * st - (dEsde_dbt * mt)
         else:
             return inv_sigma.dot(Edf + at).dot(st) - dEsde_dbt.T.dot(mt)
         # _end_if_
@@ -325,7 +325,7 @@ class VarGP(object):
         the 1D or nD version of the calculation.
         """
         if self.model.single_dim:
-            return (-Efx - at * mt + bt) * inv_sigma
+            return (-Efx - (at * mt) + bt) * inv_sigma
         else:
             return (-Efx - mt.dot(at.T) + bt).dot(inv_sigma.T)
         # _end_if_
