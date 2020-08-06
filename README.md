@@ -13,7 +13,7 @@ namely:
 4. [Lorenz96](https://en.wikipedia.org/wiki/Lorenz_96_model)
 
 For any other dynamical system, one has to write the required code
-(and inherit from the stochastic_process.py) to generate the sample
+(and inherit from the *stochastic_process.py*) to generate the sample
 paths and compute the required energy terms.
 
 The forward-backward ODEs can be solved with four different solvers:
@@ -23,10 +23,45 @@ The forward-backward ODEs can be solved with four different solvers:
 3. [Runge-Kutta 2](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods): 2nd order
 4. [Runge-Kutta 4](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods): 4th order
 
-The implementation is independent from third-party libraries since all the
-optimization (SCG) and integration routines (Fwd / Bwd) are custom made.
-However, you need to have installed basic packages such as: numpy, scipy,
-numbda, h5py, etc. 
+### Required packages
+---
+
+The recommended version is **Python3.7**. The implementation is independent from
+third-party libraries since all the optimization (SCG) and integration routines
+(Fwd / Bwd) are custom made. However, you need to have installed basic packages
+such as:
+
+> 
+> numpy, scipy, numba, h5py, json 
+>
+
+## How to run
+---
+
+To execute the program, first navigate to the main directory of the project
+(i.e. where the vgpa_main.py is located), and then run the following command:
+
+    $ python3 vgpa_main.py --params path/to/sim_params.json
+
+The models parameters should be given in the 'sim_params.json' file as follows:
+
+```
+{ ...
+
+  "Time-window": {
+    "t0": 0.00,
+    "tf": 10.0,
+    "dt": 0.01
+  },
+
+  "Noise": {
+    "sys": 0.80,
+    "obs": 0.04
+  },
+
+  ...
+}
+```
 
 ## References
 ---
@@ -57,7 +92,6 @@ following message:
 
 All the copyrights of this algorithm remain with the original author of the book
 (Ian T. Nabney).
-
 
 ### Contact
 ---
