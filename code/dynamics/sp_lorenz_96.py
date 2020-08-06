@@ -395,7 +395,7 @@ class Lorenz96(StochasticProcess):
 
         # Define lambda functions:
         Fx = {'1': lambda x, at, bt: (l96(x, theta) + x.dot(at.T) - np.tile(bt, (x.shape[0], 1))) ** 2,
-              '2': lambda x, _: l96(x, theta)}
+              '2': lambda x: l96(x, theta)}
 
         # Compute the quantities iteratively.
         for t in range(dim_t):
@@ -419,7 +419,6 @@ class Lorenz96(StochasticProcess):
             Edf[t] = E96_drift_dx(mt)
 
             # Approximate the expectation of the gradients.
-            # x, fun, mt, st, at, bt, diag_inv_sigma
             dmS, _ = ut_approx(grad_Esde_dm_ds, mt, st,
                                Fx['2'], mt, st, at, bt,
                                diag_inv_sig)
@@ -428,7 +427,8 @@ class Lorenz96(StochasticProcess):
             dEsde_dm[t] = dmS[:dim_d] - Esde[t] * np.linalg.solve(st, mt)
 
             #  Gradient w.r.t. covariance St: dEsde(t)_dSt
-            dEsde_ds[t] = 0.5 * (dmS[dim_d:].reshape(dim_d, dim_d) - Esde[t] * np.linalg.inv(st))
+            dEsde_ds[t] = 0.5 * (dmS[dim_d:].reshape(dim_d, dim_d) -
+                                 Esde[t] * np.linalg.inv(st))
 
             # Gradients of Esde w.r.t. 'Theta': dEsde(t)_dtheta
             dEsde_dth[t] = Ef[t] + mt.dot(at.T) - bt
