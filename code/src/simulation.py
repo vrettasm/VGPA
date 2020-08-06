@@ -189,8 +189,8 @@ class Simulation(object):
             self.m_data["s0"] = 0.2 * np.eye(dim_d)
 
             # Adjust the prior values.
-            self.m_data["mu0"] = self.m_data["prior"]["mu0"] * np.ones(dim_d)
-            self.m_data["tau0"] = self.m_data["prior"]["tau0"] * np.eye(dim_d)
+            self.m_data["mu0"] *= np.ones(dim_d)
+            self.m_data["tau0"] *= np.eye(dim_d)
         # _end_if_
 
     # _end_def_
