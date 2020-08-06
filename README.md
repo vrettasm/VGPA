@@ -81,7 +81,7 @@ Neural Information Processing Systems (NIPS), vol. 20.
 
 ### Note
 
-Some of the optimizations in are adopted (translated) from NETLAB with the
+Some of the optimizations are adopted (translated) from NETLAB with the
 following message:
 
     NOTE: This code is adopted from NETLAB (a free MATLAB library)
@@ -90,8 +90,8 @@ following message:
     (1) Ian T. Nabney (2001): Netlab: Algorithms for Pattern Recognition.
     Advances in Pattern Recognition, Springer.
 
-All the copyrights of this algorithm remain with the original author of the book
-(Ian T. Nabney).
+All the copyrights of this algorithm remain with the original author of the
+book (Ian T. Nabney).
 
 ### Contact
 ---
