@@ -140,16 +140,19 @@ class GaussianLikelihood(Likelihood):
         # Energy term from the observations.
         Eobs = 0.0
 
+        # Get the diagonal elements.
+        # NOTE: Array s is 3-dimensional. The following command
+        # returns the diagonal elements on the first dimensions.
+        # I.e. np.diag(s[0, :, :]), ... , np.diag(s[n-1, :, :])
+        sn_diag = np.diagonal(s, axis1=1, axis2=2)
+
         # Sum the energy iteratively.
         for n, tn in enumerate(obs_t):
-            # Self explained.
-            Zn = Z[n]
-
-            # Self explained.
-            sn_diag = s[tn].diagonal()
+            # Inner product: z * z.T
+            zn_sq = np.inner(Z[n], Z[n])
 
             # Energy term.
-            Eobs += Zn.T.dot(Zn) + diag_inv_rn.dot(sn_diag.T)
+            Eobs += zn_sq + np.inner(diag_inv_rn, sn_diag[n])
         # _end_for_
 
         # Compute the final including the constants.
