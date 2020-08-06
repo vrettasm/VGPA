@@ -18,14 +18,15 @@ paths and compute the required energy terms.
 
 The forward-backward ODEs can be solved with four different solvers:
 
-1. [Euler's method](https://en.wikipedia.org/wiki/Euler_method) 1st order
-2. [Heun's method](https://en.wikipedia.org/wiki/Heun%27s_method) 1st order (predictor-corrector)
-3. [Runge-Kutta 2](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) 2nd order
-4. [Runge-Kutta 4](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) 4th order
+1. [Euler's method](https://en.wikipedia.org/wiki/Euler_method): 1st order
+2. [Heun's method](https://en.wikipedia.org/wiki/Heun%27s_method): 1st order (predictor-corrector)
+3. [Runge-Kutta 2](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods): 2nd order
+4. [Runge-Kutta 4](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods): 4th order
 
 The implementation is independent from third-party libraries since all the
-optimization (SCG) and integration routines (Fwd/Bwd) are custom made.
-However, we need to have installed numpy, scipy, numbda, etc. 
+optimization (SCG) and integration routines (Fwd / Bwd) are custom made.
+However, you need to have installed basic packages such as: numpy, scipy,
+numbda, h5py, etc. 
 
 ## References
 ---
