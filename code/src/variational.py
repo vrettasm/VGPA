@@ -180,9 +180,8 @@ class VarGP(object):
         # Backward sweep to ensure constraints are satisfied.
         lamt, psit = self.bwd_ode(linear_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds)
 
-        # Energy from the initial moment (t=0).
-        # If m0 and s0 are not optimized, this
-        # value is going to be constant in time.
+        # Energy from the initial moment (t=0). If "m0" and "s0" are
+        # not optimized, this value is going to be constant in time.
         E0 = self.kl0(m0, s0)
 
         # Store the parameters that will be
