@@ -1,5 +1,6 @@
 import numpy as np
-from scipy import interpolate
+from scipy.interpolate import CubicSpline
+from ..numerics.utilities import chol_inv
 
 
 class VarGP(object):
@@ -93,8 +94,9 @@ class VarGP(object):
             # Linear variational parameters.
             a0 = 0.5 * (self.model.sigma / 0.25) * np.ones(self.dim_n)
 
-            # Build a uni-variate extrapolation (with cubic splines).
-            fb0 = interpolate.CubicSpline(time_x, obs_z)
+            # Build a uni-variate extrapolation
+            # (with cubic splines).
+            fb0 = CubicSpline(time_x, obs_z)
 
             # Generate the offset parameters on the whole time window.
             b0 = fb0(time_window)
@@ -102,8 +104,9 @@ class VarGP(object):
             # Replicate the first and last observations.
             obs_z = np.vstack((self.obs_y[0], self.obs_y, self.obs_y[-1]))
 
-            # Cubic spline extrapolation for each dimension separately.
-            fb0 = interpolate.CubicSpline(time_x, obs_z)
+            # Cubic spline extrapolation for
+            # each dimension separately.
+            fb0 = CubicSpline(time_x, obs_z)
             mt0 = fb0(time_window)
 
             # Preallocate variational parameters.
@@ -375,7 +378,7 @@ def grad_Esde_dm_ds(x, fun, mt, st, at, bt, diag_inv_sigma):
     dmt = np.linalg.solve(st, (np.tile(var, (dim_d, 1)) * x.T)).T
 
     # Inverse of marginal covariance.
-    inv_st = np.linalg.inv(st)
+    inv_st, _ = chol_inv(st)
 
     # Calculate the gradients w.r.t. 'st'.
     for k in range(dim_n):
