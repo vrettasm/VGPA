@@ -393,9 +393,14 @@ class Lorenz96(StochasticProcess):
         # Gradients of Esde w.r.t. 'Sigma'.
         dEsde_dSig = np.zeros((dim_t, dim_d))
 
-        # Define lambda functions:
-        Fx = {'1': lambda x, at, bt: (l96(x, theta) + x.dot(at.T) - np.tile(bt, (x.shape[0], 1))) ** 2,
-              '2': lambda x: l96(x, theta)}
+        # Define lambda function.
+        fun_1 = lambda xt, at, bt: (l96(xt, theta) + xt.dot(at.T) -
+                                    np.tile(bt, (xt.shape[0], 1))) ** 2
+        # Define lambda function.
+        fun_2 = lambda xt: l96(xt, theta)
+
+        # Identity matrix.
+        iD = np.eye(dim_d)
 
         # Compute the quantities iteratively.
         for t in range(dim_t):
@@ -407,7 +412,7 @@ class Lorenz96(StochasticProcess):
             mt, st = m[t], s[t]
 
             # Compute: <(f(xt)-g(xt))'*(f(xt)-g(xt))>.
-            m_bar, _ = ut_approx(Fx['1'], mt, st, at, bt)
+            m_bar, _ = ut_approx(fun_1, mt, st, at, bt)
 
             # Esde energy: Esde(t) = 0.5*<(f(xt)-g(xt))'*SigInv*(f(xt)-g(xt))>.
             Esde[t] = 0.5 * diag_inv_sig.dot(m_bar.T)
@@ -420,15 +425,14 @@ class Lorenz96(StochasticProcess):
 
             # Approximate the expectation of the gradients.
             dmS, _ = ut_approx(grad_Esde_dm_ds, mt, st,
-                               Fx['2'], mt, st, at, bt,
-                               diag_inv_sig)
+                               fun_2, mt, st, at, bt, diag_inv_sig)
 
             # Gradient w.r.t. mean mt: dEsde(t)_dmt
             dEsde_dm[t] = dmS[:dim_d] - Esde[t] * np.linalg.solve(st, mt)
 
-            #  Gradient w.r.t. covariance St: dEsde(t)_dSt
+            #  Gradient w.r.t. covariance St: dEsde(t)_dSt.
             dEsde_ds[t] = 0.5 * (dmS[dim_d:].reshape(dim_d, dim_d) -
-                                 Esde[t] * np.linalg.inv(st))
+                                 Esde[t] * np.linalg.solve(st, iD))
 
             # Gradients of Esde w.r.t. 'Theta': dEsde(t)_dtheta
             dEsde_dth[t] = Ef[t] + mt.dot(at.T) - bt
