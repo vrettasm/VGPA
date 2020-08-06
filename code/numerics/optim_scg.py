@@ -305,23 +305,23 @@ class SCG(object):
         """
 
         # Analytical gradient calculation.
-        grad_a = self.df(x.copy(), eval_fun=True)
+        grad_A = self.df(x.copy(), eval_fun=True)
 
         # Numerical gradient calculation.
-        grad_n = finite_diff(self.f, x.copy())
+        grad_N = finite_diff(self.f, x.copy())
 
-        # Get the mean absolute error.
-        mae = np.mean(np.abs(grad_a - grad_n))
+        # Get their norms (L2).
+        norm_A = np.linalg.norm(grad_A)
+        norm_N = np.linalg.norm(grad_N)
+
+        # Get their relative difference.
+        diff_rel = np.linalg.norm(grad_A - grad_N) / (norm_A + norm_N)
 
         # Display info.
-        print("\n Mean absolute error is: {0:.4}.".format(mae))
+        print("\n Relative difference is: {0:.4}.".format(diff_rel))
 
-        # Test if they are close enough ...
-        if np.allclose(grad_a, grad_n, rtol=r_tol):
-            outcome = "PASSED"
-        else:
-            outcome = "FAILED"
-        # _end_if_
+        # Get the outcome.
+        outcome = "PASSED" if (diff_rel <= r_tol) else "FAILED"
 
         # Display info.
         print(" Gradient test {0}, with tol={1}.\n".format(outcome, r_tol))
