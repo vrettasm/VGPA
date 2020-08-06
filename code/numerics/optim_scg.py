@@ -10,6 +10,8 @@ class SCG(object):
     The point at which 'f' has a local minimum is returned as 'x'. The
     function value at that point (the minimum) is returned in "fx".
 
+    NOTE: This code is adopted from NETLAB (a free MATLAB library).
+
     Reference Book:
     Ian T. Nabney (2001). "Netlab: Algorithms for Pattern Recognition."
     Advances in Pattern Recognition, Springer.
