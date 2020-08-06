@@ -291,8 +291,8 @@ def ut_approx(fun, x_bar, x_cov, *args):
     # the non-linear transformation.
     y = fun(chi, *args)
 
-    # Compute the new approximate mean.
-    y_bar = weights.dot(y)
+    # Compute the approximate mean.
+    y_bar = weights.dot(y).ravel()
 
     # Compute the approximate covariance.
     w_m = np.eye(dim_m) - np.tile(weights, (dim_m, 1))
@@ -301,6 +301,6 @@ def ut_approx(fun, x_bar, x_cov, *args):
     # Compute the new approximate covariance.
     y_cov = y.T.dot(Q).dot(y)
 
-    # --->
+    # New (mean / covariance).
     return y_bar, y_cov
 # _end_def_
