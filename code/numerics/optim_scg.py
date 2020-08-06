@@ -93,27 +93,24 @@ class SCG(object):
         sigma0 = 1.0e-3
 
         # Initial function/gradients value.
-        fnow = self.f(x, *args)
-        gradnew = self.df(x, *args)
+        f_now = self.f(x, *args)
+        grad_new = self.df(x, *args)
 
         # Increase function / gradient evaluations by one.
-        self.stats['f_eval'] += 1
-        self.stats['df_eval'] += 1
+        self.stats["f_eval"] += 1
+        self.stats["df_eval"] += 1
 
-        # Store the current values.
-        fold = fnow
-
-        # Store the current gradient.
-        gradold = gradnew
+        # Store the current values (fx / dfx).
+        f_old, grad_old = np.copy((f_now, grad_new))
 
         # Setup the initial search direction.
-        d = -gradnew
+        d = -grad_new
 
         # Force calculation of directional derivatives.
         success = 1
 
         # Counts the number of successes.
-        nsuccess = 0
+        count_success = 0
 
         # Initial scale parameter.
         beta = 1.0
@@ -134,11 +131,11 @@ class SCG(object):
             # directional derivatives.
             if success == 1:
                 # Inner-product.
-                mu = d.T.dot(gradnew)
+                mu = d.T.dot(grad_new)
 
                 if mu >= 0.0:
-                    d = -gradnew
-                    mu = d.T.dot(gradnew)
+                    d = -grad_new
+                    mu = d.T.dot(grad_new)
                 # _end_if_
 
                 # Compute kappa.
@@ -146,8 +143,11 @@ class SCG(object):
 
                 # And check for termination.
                 if kappa < eps_float:
-                    fx = fnow
-                    self.stats['MaxIt'] = j
+                    # Copy the value.
+                    fx = f_now
+
+                    # Update the statistic.
+                    self.stats["MaxIt"] = j+1
 
                     # Exit from here.
                     return x, fx
@@ -155,21 +155,21 @@ class SCG(object):
 
                 # Update sigma and check the gradient on a new direction.
                 sigma = sigma0 / np.sqrt(kappa)
-                xplus = x + (sigma * d)
+                x_plus = x + (sigma * d)
 
-                # We evaluate the df(xplus).
+                # We evaluate the df(x_plus).
                 # Because we evaluate the gradient at a new point
                 # we run the f(x) too,  so that we get consistent
                 # variational and Lagrangian parameters.
-                _ = self.f(xplus, *args)
-                gplus = self.df(xplus, *args)
+                _ = self.f(x_plus, *args)
+                g_plus = self.df(x_plus, *args)
 
                 # Increase function/gradients evaluations by one.
-                self.stats['f_eval'] += 1
-                self.stats['df_eval'] += 1
+                self.stats["f_eval"] += 1
+                self.stats["df_eval"] += 1
 
                 # Compute theta.
-                theta = (d.T.dot(gplus - gradnew)) / sigma
+                theta = (d.T.dot(g_plus - grad_new)) / sigma
             # _end_if_
 
             # Increase effective curvature and evaluate step size alpha.
@@ -183,58 +183,68 @@ class SCG(object):
             alpha = -(mu / delta)
 
             # Evaluate the function at a new point.
-            xnew = x + (alpha * d)
-            fnew = self.f(xnew, *args)
-            self.stats['f_eval'] += 1
+            x_new = x + (alpha * d)
+            f_new = self.f(x_new, *args)
+            self.stats["f_eval"] += 1
 
             # Calculate the new comparison ratio.
-            Delta = 2.0 * (fnew - fold) / (alpha * mu)
+            Delta = 2.0 * (f_new - f_old) / (alpha * mu)
             if Delta >= 0.0:
                 success = 1
-                nsuccess += 1
-                x, fnow, gnow = xnew, fnew, gradnew
+                count_success += 1
+                x, f_now, g_now = np.copy((x_new, f_new, grad_new))
             else:
                 success = 0
-                fnow, gnow = fold, gradold
+                f_now, g_now = np.copy((f_old, grad_old))
             # _end_if_
 
             # Total gradient.
-            tot_grad = np.math.fsum(np.abs(gnow))
+            total_grad = np.sum(np.abs(g_now))
 
             # Store statistics.
-            self.stats["fx"][j] = fnow
+            self.stats["fx"][j] = f_now
             self.stats["beta"][j] = beta
-            self.stats["dfx"][j] = tot_grad
+            self.stats["dfx"][j] = total_grad
 
             # Used in debugging mode.
             if self.display and (np.mod(j, 10) == 0):
-                print(" {0}: fx={1:.3f}\tsum(gx)={2:.3f}".format(j, fnow, tot_grad))
+                print(" {0}: fx={1:.3f}\tsum(gx)={2:.3f}".format(j, f_now, total_grad))
             # _end_if_
 
             # TBD:
             if success == 1:
                 # Check for termination.
-                if (np.abs(alpha * d).max() <= self.x_tol) and (np.abs(fnew - fold) <= self.f_tol):
-                    fx = fnew
-                    self.stats["MaxIt"] = j
+                if (np.abs(alpha * d).max() <= self.x_tol) and\
+                        (np.abs(f_new - f_old) <= self.f_tol):
+                    # Copy the new value.
+                    fx = f_new
+
+                    # Update the statistic.
+                    self.stats["MaxIt"] = j + 1
+
+                    # Exit.
                     return x, fx
                 else:
                     # Update variables for new position.
-                    fold = fnew
-                    gradold = gradnew.copy()
+                    f_old, grad_old = np.copy((f_new, grad_new))
 
                     # Evaluate function/gradient at the new point.
-                    fnow = self.f(x, *args)
-                    gradnew = self.df(x, *args)
+                    f_now = self.f(x, *args)
+                    grad_new = self.df(x, *args)
 
                     # Increase function/gradients evaluations by one.
-                    self.stats['f_eval'] += 1
-                    self.stats['df_eval'] += 1
+                    self.stats["f_eval"] += 1
+                    self.stats["df_eval"] += 1
 
-                    # If the gradient is zero then we are done.
-                    if gradnew.T.dot(gradnew) == 0.0:
-                        fx = fnow
-                        self.stats["MaxIt"] = j
+                    # If the gradient is zero then exit.
+                    if grad_new.T.dot(grad_new) == 0.0:
+                        # Copy the new value.
+                        fx = f_now
+
+                        # Update the statistic.
+                        self.stats["MaxIt"] = j + 1
+
+                        # Exit.
                         return x, fx
                 # _end_if_
             # _end_if_
@@ -251,13 +261,13 @@ class SCG(object):
             # Update search direction using Polak-Ribiere formula
             # or re-start in direction of negative gradient after
             # 'dim_x' steps.
-            if nsuccess == dim_x:
-                d = -gradnew
-                nsuccess = 0
+            if count_success == dim_x:
+                d = -grad_new
+                count_success = 0
             else:
                 if success == 1:
-                    gamma = np.maximum(gradnew.T.dot(gradold - gradnew) / mu, 0.0)
-                    d = (gamma * d) - gradnew
+                    gamma = np.maximum(grad_new.T.dot(grad_old - grad_new) / mu, 0.0)
+                    d = (gamma * d) - grad_new
                 # _end_if_
             # _end_if_
         # _end_for_
@@ -266,7 +276,7 @@ class SCG(object):
         print(" SGC: Maximum number of iterations has been reached.")
 
         # Here we have reached the maximum number of iterations.
-        fx = fold
+        fx = f_old
 
         # Exit from here.
         return x, fx
