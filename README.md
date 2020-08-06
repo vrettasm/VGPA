@@ -81,7 +81,7 @@ Neural Information Processing Systems (NIPS), vol. 20.
 
 ### Note
 
-Some of the optimizations in the are adopted (translated) from NETLAB with the
+Some of the optimizations in are adopted (translated) from NETLAB with the
 following message:
 
     NOTE: This code is adopted from NETLAB (a free MATLAB library)
