@@ -1,3 +1,4 @@
+
 class OdeSolver(object):
     """
     Parent class of all ODE solvers.
@@ -41,7 +42,7 @@ class OdeSolver(object):
 
         # Switch according to single_dim.
         if self.single_dim:
-            return -at * mt + bt
+            return -(at * mt) + bt
         else:
             return -at.dot(mt.T) + bt
     # _end_def_
@@ -61,7 +62,7 @@ class OdeSolver(object):
 
         # Switch according to single_dim.
         if self.single_dim:
-            return -2.0 * at * st + sn
+            return -(2.0 * at * st) + sn
         else:
             return -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
@@ -81,7 +82,7 @@ class OdeSolver(object):
 
         # Switch according to single_dim.
         if self.single_dim:
-            return -df_dm + lamt * at
+            return -df_dm + (lamt * at)
         else:
             return -df_dm + lamt.dot(at.T)
     # _end_def_
@@ -101,7 +102,7 @@ class OdeSolver(object):
 
         # Switch according to single_dim.
         if self.single_dim:
-            return -df_ds + 2.0 * psit * at
+            return -df_ds + (2.0 * psit * at)
         else:
             return -df_ds + psit.dot(at) + at.T.dot(psit)
     # _end_def_
