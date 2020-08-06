@@ -3,7 +3,20 @@
 **Variational Gaussian Process Approximation**
 
 This project contains a python implementation of the basic VGPA algorithm
-for approximate inference in SDEs.
+for approximate inference in SDEs. It can directly be applied to solve
+for (stochastic) dynamical systems, namely:
+
+1. [Double Well](https://en.wikipedia.org/wiki/Double-well_potential)
+2. [Ornstein-Uhlenbeck](https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process)
+3. [Lorenz63 (3D)](https://en.wikipedia.org/wiki/Lorenz_system)
+4. [Lorenz96](https://en.wikipedia.org/wiki/Lorenz_96_model)
+
+The forward-backward ODEs can be solved with four different solvers:
+
+1. [Euler's method](https://en.wikipedia.org/wiki/Euler_method)
+2. [Heun's method](https://en.wikipedia.org/wiki/Heun%27s_method)
+3. [Runge-Kutta 2](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods)
+4. [Runge-Kutta 4](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods)
 
 ## References
 ---
