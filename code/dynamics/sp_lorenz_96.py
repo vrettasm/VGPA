@@ -134,7 +134,7 @@ class Lorenz96(StochasticProcess):
         super().__init__(r_seed, single_dim=False)
 
         # Display class info.
-        print(" Creating Lorenz-96 (D={0)) process.".format(dim_d))
+        print(" Creating Lorenz-96 (D={0}) process.".format(dim_d))
 
         # Make sure the inputs are arrays.
         sigma = np.asarray(sigma)
