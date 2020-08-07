@@ -240,7 +240,7 @@ class Simulation(object):
         x0 = vgpa.initialization()
 
         # Initial gradient test.
-        optimize.check_gradient_function(x0.copy())
+        # optimize.check_gradient_function(x0.copy())
 
         # Start the timer.
         time_t0 = time.time()
@@ -252,7 +252,7 @@ class Simulation(object):
         time_tf = time.time()
 
         # Final gradient test.
-        optimize.check_gradient_function(x.copy())
+        # optimize.check_gradient_function(x.copy())
 
         # Print final duration in seconds.
         print(" Elapsed time: {0:.2f} seconds.\n".format(time_tf - time_t0))
