@@ -44,7 +44,7 @@ class OdeSolver(object):
         if self.single_dim:
             return -(at * mt) + bt
         else:
-            return -at.dot(mt.T) + bt
+            return -at.dot(mt) + bt
     # _end_def_
 
     def fun_st(self, st, at, sn):
