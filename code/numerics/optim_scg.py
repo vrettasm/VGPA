@@ -292,39 +292,52 @@ class SCG(object):
         return self.stats
     # _end_def_
 
-    def check_gradient_function(self, x, r_tol=1.0e-4):
+    def check_gradient_function(self, x, tol=1.0e-4):
         """
         Tests whether the gradient function is accurate,
         compared to the numerical differentiation value.
 
         :param x: State vector to test the gradient.
 
-        :param r_tol: relative tolerance value.
+        :param tol: tolerance value.
 
         :return: None.
         """
 
+        # Display info.
+        print(" GRAD_CHECK_STARTED: ")
+
         # Analytical gradient calculation.
+        print(" > Calculating gradient(s) analytically ...", end="")
         grad_A = self.df(x.copy(), eval_fun=True)
+        print(" done.")
 
         # Numerical gradient calculation.
+        print(" > Calculating gradient(s) numerically  ...", end="")
         grad_N = finite_diff(self.f, x.copy())
+        print(" done.")
 
         # Get their norms (L2).
         norm_A = np.linalg.norm(grad_A)
         norm_N = np.linalg.norm(grad_N)
 
+        # Norm(A-N)
+        norm_diff = np.linalg.norm(grad_A - grad_N)
+
         # Get their relative difference.
-        rel_diff = np.linalg.norm(grad_A - grad_N) / (norm_A + norm_N)
+        rel_diff = norm_diff / (norm_A + norm_N)
 
         # Display info.
-        print("\n Relative difference is: {0:.4}.".format(rel_diff))
+        print(" > Relative difference is: {0:.4}.".format(rel_diff))
 
         # Get the outcome.
-        outcome = "PASSED" if (rel_diff <= r_tol) else "FAILED"
+        outcome = "PASSED" if (norm_diff/x.size <= tol) else "FAILED"
 
         # Display info.
-        print(" Gradient test {0}, with tol={1}.\n".format(outcome, r_tol))
+        print(" > Gradient test {0}.".format(outcome))
+
+        # Display info.
+        print(" GRAD_CHECK_FINISHED:\n")
     # _end_def_
 
     # Auxiliary.
