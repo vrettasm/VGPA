@@ -185,7 +185,7 @@ class VarGP(object):
         E0 = self.kl0(m0, s0)
 
         # Store the parameters that will be
-        # used later from the gradient method.
+        # used later in the gradient method.
         self.output["mt"] = mt
         self.output["st"] = st
 
@@ -285,7 +285,7 @@ class VarGP(object):
         gLb = self.dt * gLb
 
         # Group the gradients together and exit.
-        return np.concatenate((gLa.ravel(), gLb.ravel()))
+        return np.concatenate((gLa.flatten(), gLb.flatten()))
     # _end_def_
 
     @property
@@ -305,7 +305,7 @@ class VarGP(object):
         if self.model.single_dim:
             return dEsde_dak - (lamk * mk) - (2.0 * psik * sk)
         else:
-            return dEsde_dak - lamk.T.dot(mk) - 2.0 * psik.dot(sk)
+            return dEsde_dak - np.outer(lamk, mk) - 2.0 * psik.dot(sk)
         # _end_if_
     # _end_def_
 
@@ -317,7 +317,7 @@ class VarGP(object):
         if self.model.single_dim:
             return inv_sigma * (Edf + at) * st - (dEsde_dbt * mt)
         else:
-            return inv_sigma.dot(Edf + at).dot(st) - dEsde_dbt.T.dot(mt)
+            return inv_sigma.dot(Edf + at).dot(st) - np.outer(dEsde_dbt, mt)
         # _end_if_
     # _end_def_
 
@@ -327,9 +327,9 @@ class VarGP(object):
         the 1D or nD version of the calculation.
         """
         if self.model.single_dim:
-            return (-Efx - (at * mt) + bt) * inv_sigma
+            return inv_sigma * (-Efx - (at * mt) + bt)
         else:
-            return (-Efx - mt.dot(at.T) + bt).dot(inv_sigma.T)
+            return inv_sigma.dot(-Efx - at.dot(mt) + bt)
         # _end_if_
     # _end_def_
 
