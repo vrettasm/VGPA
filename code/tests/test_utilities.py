@@ -48,7 +48,6 @@ class TestUtilities(unittest.TestCase):
         # True value.
         f_true = [np.cos(z[0] ** 2 * z[1] ** 2) * 2.0 * z[0] * z[1] ** 2,
                   np.cos(z[0] ** 2 * z[1] ** 2) * 2.0 * z[0] ** 2 * z[1]]
-
         # Test.
         self.assertTrue(np.allclose(finite_diff(fun_2, z), f_true))
     # _end_def_
