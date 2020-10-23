@@ -1,3 +1,7 @@
 # Ignore files/dirs.
 .idea/
+.code/__pycache__/
+.code/src/__pycache__/
+.code/numerics/__pycache__/
+.code/dynamics/__pycache__/
 sim_params.json
