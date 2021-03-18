@@ -103,9 +103,8 @@ class DoubleWell(StochasticProcess):
             self.sig_inv = 1.0 / self.sigma_
         else:
             # Raise an error with a message.
-            raise ValueError(" {0}: The sigma value:"
-                             " {1}, should be strictly positive.".format(self.__class__.__name__,
-                                                                         new_value))
+            raise ValueError(f" {self.__class__.__name__}: The sigma value:"
+                             f" {new_value}, should be strictly positive.")
         # _end_if_
 
     # _end_def_

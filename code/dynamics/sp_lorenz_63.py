@@ -76,16 +76,14 @@ class Lorenz63(StochasticProcess):
             self.sigma_ = sigma
 
         else:
-            raise ValueError(" {0}: Wrong input dimensions:"
-                             " {1}".format(self.__class__.__name__,
-                                           sigma.ndim))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong input dimensions: {sigma.ndim}")
         # _end_if_
 
         # Check the dimensionality.
         if self.sigma_.shape != (3, 3):
-            raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__,
-                                           self.sigma_.shape))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong matrix dimensions: {self.sigma_.shape}")
         # _end_if_
 
         # Check for positive definiteness.
@@ -94,9 +92,8 @@ class Lorenz63(StochasticProcess):
             # This is a better way to invert Sigma.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
-            raise RuntimeError(" {0}: Noise matrix is not"
-                               " positive definite.".format(self.__class__.__name__,
-                                                            self.sigma_))
+            raise RuntimeError(f" {self.__class__.__name__}:"
+                               f" Noise matrix {self.sigma_} is not positive definite.")
         # _end_if_
 
         # Store the drift vector.
@@ -147,9 +144,8 @@ class Lorenz63(StochasticProcess):
 
         # Check the dimensionality.
         if new_value.shape != (3, 3):
-            raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__,
-                                           new_value.shape))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong matrix dimensions: {new_value.shape}.")
         # _end_if_
 
         # Check for positive definiteness.
@@ -160,9 +156,8 @@ class Lorenz63(StochasticProcess):
             # Update the inverse matrix.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
-            raise RuntimeError(" {0}: Noise matrix is not"
-                               " positive definite.".format(self.__class__.__name__,
-                                                            new_value))
+            raise RuntimeError(f" {self.__class__.__name__}:"
+                               f" Noise matrix {new_value} is not positive definite.")
         # _end_if_
     # _end_def_
 
@@ -218,7 +213,7 @@ class Lorenz63(StochasticProcess):
             ek = cholesky(self.sigma_ * dt)
         except LinAlgError:
             # Show a warning message.
-            print(" Warning : The input matrix was not positive definite."
+            print(" Warning : Input matrix was not positive definite."
                   " The diagonal elements will be used instead.")
 
             # If it fails use the diagonal only.

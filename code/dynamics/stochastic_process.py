@@ -54,8 +54,8 @@ class StochasticProcess(object):
         """
         # Check if the sample path is created.
         if self.xt is None:
-            raise NotImplementedError(" {0}: Sample path has not been"
-                                      " created.".format(self.__class__.__name__))
+            raise NotImplementedError(f" {self.__class__.__name__}:"
+                                      f" Sample path has not been created.")
         # _end_def_
 
         return self.xt
@@ -82,8 +82,8 @@ class StochasticProcess(object):
         """
         # Check if the sample path is created.
         if self.tk is None:
-            raise NotImplementedError(" {0}: Time window has not been"
-                                      " created yet.".format(self.__class__.__name__))
+            raise NotImplementedError(f" {self.__class__.__name__}:"
+                                      f" Time window has not been created yet.")
         # _end_def_
 
         return self.tk
@@ -110,8 +110,8 @@ class StochasticProcess(object):
         """
         # Check if the sample path is created.
         if self.tk is None:
-            raise NotImplementedError(" {0}: Time window has not been"
-                                      " created yet.".format(self.__class__.__name__))
+            raise NotImplementedError(f" {self.__class__.__name__}:"
+                                      f" Time window has not been created yet.")
         # _end_def_
 
         # Return the 'dt'.
@@ -146,8 +146,8 @@ class StochasticProcess(object):
 
         # Check if the sample path is created.
         if self.tk is None or self.xt is None:
-            raise NotImplementedError(" {0}: Sample path or time window have"
-                                      " not been created.".format(self.__class__.__name__))
+            raise NotImplementedError(f" {self.__class__.__name__}:"
+                                      f" Sample path (or time window) have not been created.")
         # _end_def_
 
         # Make sure input is numpy array.
@@ -160,8 +160,8 @@ class StochasticProcess(object):
         # per time unit exceeds the available capacity
         # of samples.
         if n_obs > int(1.0 / dt):
-            raise ValueError(" {0}: Observation density exceeds"
-                             " the number of samples.".format(self.__class__.__name__))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Observation density exceeds the number of samples.")
         # _end_def_
 
         # Total number of observations.

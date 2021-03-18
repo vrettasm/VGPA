@@ -134,7 +134,7 @@ class Lorenz96(StochasticProcess):
         super().__init__(r_seed, single_dim=False)
 
         # Display class info.
-        print(" Creating Lorenz-96 (D={0}) process.".format(dim_d))
+        print(f" Creating Lorenz-96 (D={dim_d}) process.")
 
         # Make sure the inputs are arrays.
         sigma = np.asarray(sigma)
@@ -142,8 +142,8 @@ class Lorenz96(StochasticProcess):
 
         # Check the number of input dimensions.
         if dim_d < 10:
-            raise ValueError(" {0}: Insufficient state vector dimensions:"
-                             " {1}".format(self.__class__.__name__, dim_d))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Insufficient state vector dimensions: {dim_d}")
         # _end_if_
 
         # Store the model dimensions.
@@ -163,27 +163,23 @@ class Lorenz96(StochasticProcess):
             self.sigma_ = sigma
 
         else:
-            raise ValueError(" {0}: Wrong input dimensions:"
-                             " {1}".format(self.__class__.__name__,
-                                           sigma.ndim))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong input dimensions: {sigma.ndim}")
         # _end_if_
 
         # Check the dimensionality.
         if self.sigma_.shape != (dim_d, dim_d):
-            raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__,
-                                           self.sigma_.shape))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong matrix dimensions: {self.sigma_.shape}")
         # _end_if_
 
         # Check for positive definiteness.
         if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
-
             # This is a better way to invert Sigma.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
-            raise RuntimeError(" {0}: Noise matrix is not"
-                               " positive definite.".format(self.__class__.__name__,
-                                                            self.sigma_))
+            raise RuntimeError(f" {self.__class__.__name__}:"
+                               f" Noise matrix {self.sigma_} is not positive definite.")
         # _end_if_
 
         # Store the drift vector.
@@ -234,9 +230,8 @@ class Lorenz96(StochasticProcess):
 
         # Check the dimensionality.
         if new_value.shape != (self.dim_d, self.dim_d):
-            raise ValueError(" {0}: Wrong matrix dimensions:"
-                             " {1}".format(self.__class__.__name__,
-                                           new_value.shape))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong matrix dimensions: {new_value.shape}")
         # _end_if_
 
         # Check for positive definiteness.
@@ -247,9 +242,8 @@ class Lorenz96(StochasticProcess):
             # Update the inverse matrix.
             self.sig_inv, _ = chol_inv(self.sigma_)
         else:
-            raise RuntimeError(" {0}: Noise matrix is not"
-                               " positive definite.".format(self.__class__.__name__,
-                                                            new_value))
+            raise RuntimeError(f" {self.__class__.__name__}:"
+                               f" Noise matrix {new_value} is not positive definite.")
         # _end_if_
     # _end_def_
 

@@ -34,18 +34,18 @@ class OrnsteinUhlenbeck(StochasticProcess):
         if sigma > 0.0:
             self.sigma_ = sigma
         else:
-            raise ValueError(" {0}: The diffusion noise value:"
-                             " {1}, should be strictly positive.".format(self.__class__.__name__,
-                                                                         sigma))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" The diffusion noise value: {sigma},"
+                             f" should be strictly positive.")
         # _end_if_
 
         # Store the drift parameter.
         if theta > 0.0:
             self.theta_ = theta
         else:
-            raise ValueError(" {0}: The drift parameter:"
-                             " {1}, should be strictly positive.".format(self.__class__.__name__,
-                                                                         theta))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" The drift parameter: {theta},"
+                             f" should be strictly positive.")
         # _end_if_
 
         # Inverse of sigma noise.
@@ -78,9 +78,8 @@ class OrnsteinUhlenbeck(StochasticProcess):
             self.theta_ = new_value
         else:
             # Raise an error with a message.
-            raise ValueError(" {0}: The drift value:"
-                             " {1}, should be strictly positive.".format(self.__class__.__name__,
-                                                                         new_value))
+            raise ValueError(f" {self.__class__.__name__}: The drift value"
+                             f" {new_value}, should be strictly positive.")
         # _end_if_
     # _end_def_
 
