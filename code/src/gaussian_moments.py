@@ -133,8 +133,8 @@ class GaussianMoments(object):
                          105 * (self.m_arr ** 3) * (self.v_arr ** 2) +
                          105 * self.m_arr * (self.v_arr ** 3))
         else:
-            raise ValueError(" {0}: Wrong order value."
-                             " Use values 1-8.".format(self.__class__.__name__))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong order value. Use values 1-8.")
         # _end_if_
 
         return x_out
@@ -178,8 +178,8 @@ class GaussianMoments(object):
                     1260 * (self.m_arr ** 2) * (self.v_arr ** 2) +\
                     420 * (self.v_arr ** 3)
         else:
-            raise ValueError(" {0}: Wrong order value."
-                             " Use values 1-8.".format(self.__class__.__name__))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong order value. Use values 1-8.")
         # _end_if_
 
         return x_out

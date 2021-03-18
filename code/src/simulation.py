@@ -255,7 +255,7 @@ class Simulation(object):
         # optimize.check_gradient_function(x.copy())
 
         # Print final duration in seconds.
-        print(" Elapsed time: {0:.2f} seconds.\n".format(time_tf - time_t0))
+        print(f" Elapsed time: {(time_tf - time_t0):.2f} seconds.", end='\n')
 
         # Unpack optimization output data.
         if self.m_data["model"].single_dim:
@@ -297,11 +297,11 @@ class Simulation(object):
         # Check if the output dictionary is empty.
         if not self.output:
             # Print a message and do not save anything.
-            print(" {0}: Simulation data structure 'output'"
-                  " is empty.".format(self.__class__.__name__))
+            print(f" {self.__class__.__name__}:"
+                  f" Simulation data structure 'output' is empty.")
         else:
             # Initial message.
-            print(" Saving the results to: {0}.h5".format(self.name))
+            print(f" Saving the results to: {self.name}.h5")
 
             # Create the output filename. Remove spaces (if any).
             file_out = Path(self.name.strip().replace(" ", "_") + ".h5")

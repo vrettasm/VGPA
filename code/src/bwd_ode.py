@@ -30,8 +30,8 @@ class BwdOde(object):
         if dt > 0.0:
             self.dt = dt
         else:
-            raise ValueError(" {0}: Discrete time step should be"
-                             " strictly positive -> {1}.".format(self.__class__.__name__, dt))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Discrete time step should be strictly positive -> {dt}.")
         # _end_if_
 
         # Convert method to lower-case.
@@ -54,9 +54,8 @@ class BwdOde(object):
 
             self.solver = RungeKutta4(dt, single_dim)
         else:
-            raise ValueError(" {0}: Integration method is unknown ->"
-                             " {1}.".format(self.__class__.__name__,
-                                            method))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Integration method is unknown -> {method}.")
         # _end_if_
 
         # Get a copy of the method name (for the __str__).
@@ -94,9 +93,8 @@ class BwdOde(object):
 
         :return: a string representation of a BwdOde object.
         """
-        return " BwdOde Id({0}):"\
-               " dt={1}, method={2}".format(id(self), self.dt,
-                                            self.method)
+        return f" BwdOde Id({id(self)}):"\
+               f" dt={self.dt}, method={self.method}"
     # _end_def_
 
 # _end_class_
