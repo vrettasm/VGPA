@@ -44,7 +44,7 @@ def validateInputParametersFile(filename):
 
             # The order in here doesn't matter.
             if k not in model_params:
-                raise ValueError(" Key: {0}, is not given.".format(k))
+                raise ValueError(f" Key: {k}, is not given.")
             # _end_if_
 
         # _end_for_
@@ -104,8 +104,7 @@ def main(params_file=None, data_file=None):
         data_file = Path(data_file)
 
         # Display where we got the observational data.
-        print(" Simulation observational data file:"
-              " {0}".format(data_file))
+        print(f" Simulation observational data file: {data_file}")
 
         # Open the data in "Read Only" mode.
         with open(data_file, 'r') as input_file:
