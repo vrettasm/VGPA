@@ -19,8 +19,8 @@ class OdeSolver(object):
         if dt > 0.0:
             self.dt = dt
         else:
-            raise ValueError(" {0}: Discrete time step should be positive -->"
-                             " {1}.".format(self.__class__.__name__, dt))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Discrete time step should be positive --> {dt}.")
         # _end_if_
 
         # Store the boolean flag.
