@@ -26,9 +26,9 @@ The forward-backward ODEs can be solved with four different solvers:
 ### Required packages
 ---
 
-The recommended version is **Python3.7**. The implementation is independent from
+The recommended version is **Python3.7**. The implementation is independent of
 third-party libraries since all the optimization (SCG) and integration routines
-(Fwd / Bwd) are custom made. However, you need to have installed basic packages
+(Fwd / Bwd) are custom-made. However, you need to have installed basic packages
 such as:
 
 > 
