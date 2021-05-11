@@ -35,6 +35,11 @@ such as:
 > numpy, scipy, numba, h5py, json 
 >
 
+To simplify the required packages just use:
+
+    $ pip install -r requirements.txt
+
+
 ## How to run
 ---
 
