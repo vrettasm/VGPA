@@ -4,7 +4,7 @@ import sys
 import json
 import pandas as pd
 from pathlib import Path
-from var_bayes.simulation import Simulation
+from src.var_bayes.simulation import Simulation
 
 # INFO:
 __author__ = "Michail Vrettas, PhD"
@@ -100,7 +100,7 @@ def main(params_file=None, data_file=None):
 
     # Check if we have given data separately.
     if data_file is not None:
-        # Make sure its a Path object.
+        # Make sure it's a Path object.
         data_file = Path(data_file)
 
         # Display where we got the observational data.
