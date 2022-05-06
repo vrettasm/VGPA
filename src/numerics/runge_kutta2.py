@@ -120,23 +120,6 @@ class RungeKutta2(OdeSolver):
                  2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
         """
 
-        # Pre-allocate memory according to single_dim.
-        if self.single_dim:
-            # Number of discrete points.
-            dim_n = dEsde_dm.size
-
-            # Return arrays.
-            lam = np.zeros(dim_n)
-            psi = np.zeros(dim_n)
-        else:
-            # Get the dimensions.
-            dim_n, dim_d = dEsde_dm.shape
-
-            # Return arrays.
-            lam = np.zeros((dim_n, dim_d))
-            psi = np.zeros((dim_n, dim_d, dim_d))
-        # _end_if_
-
         # Discrete time step.
         dt = self.dt
 
@@ -152,10 +135,34 @@ class RungeKutta2(OdeSolver):
         dEmk_mid = 0.5 * (dEsde_dm[0:-1] + dEsde_dm[1:])
         dEsk_mid = 0.5 * (dEsde_ds[0:-1] + dEsde_ds[1:])
 
-        # Correct dimensions, by adding a zero at the end.
-        ak_mid = np.array([*ak_mid, 0.0], dtype=object)
-        dEmk_mid = np.array([*dEmk_mid, 0.0], dtype=object)
-        dEsk_mid = np.array([*dEsk_mid, 0.0], dtype=object)
+        # Pre-allocate memory according to single_dim.
+        if self.single_dim:
+            # Number of discrete points.
+            dim_n = dEsde_dm.size
+
+            # Return arrays.
+            lam = np.zeros(dim_n)
+            psi = np.zeros(dim_n)
+
+            # Correct dimensions, by adding a zeros at the end.
+            ak_mid = np.append(ak_mid, 0.0)
+            dEmk_mid = np.append(dEmk_mid, 0.0)
+            dEsk_mid = np.append(dEsk_mid, 0.0)
+
+        else:
+            # Get the dimensions.
+            dim_n, dim_d = dEsde_dm.shape
+
+            # Return arrays.
+            lam = np.zeros((dim_n, dim_d))
+            psi = np.zeros((dim_n, dim_d, dim_d))
+
+            # Correct dimensions, by adding a zeros at the end.
+            ak_mid = np.concatenate((ak_mid, np.zeros((1, dim_d, dim_d))), axis=0)
+            dEmk_mid = np.concatenate((dEmk_mid, np.zeros((1, dim_d))), axis=0)
+            dEsk_mid = np.concatenate((dEsk_mid, np.zeros((1, dim_d, dim_d))), axis=0)
+
+        # _end_if_
 
         # Run through all-time points.
         for t in range(dim_n - 1, 0, -1):
