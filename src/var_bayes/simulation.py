@@ -355,7 +355,7 @@ def load(filename=None):
 
         # Extract all the data.
         for key in input_file:
-            sim_data[key] = np.array(input_file[key])
+            sim_data[key] = np.array(input_file[key], dtype=object)
         # _end_for_
 
     # _end_with_
