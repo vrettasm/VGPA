@@ -45,9 +45,9 @@ class Simulation(object):
         """
         Default constructor of the Simulation class.
 
-        :param name: (string) is optional but it will be
-        used for constructing a meaningful filename to
-        save the results at the end of the simulation.
+        :param name: (string) is optional, but it will
+        be used for constructing a meaningful filename
+        to save the results at the end of the simulation.
         """
 
         # Check if a simulation name has been given.
@@ -61,7 +61,7 @@ class Simulation(object):
         # all the simulation data.
         self.m_data = {}
 
-        # Place holder for the output
+        # Placeholder for the output
         # storage.
         self.output = {}
     # _end_def_

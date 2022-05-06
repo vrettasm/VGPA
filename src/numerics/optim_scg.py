@@ -104,7 +104,7 @@ class SCG(object):
         # Store the current values (fx / dfx).
         f_old, grad_old = f_now, np.copy(grad_new)
 
-        # Setup the initial search direction.
+        # Set the initial search direction.
         d = -grad_new
 
         # Force calculation of directional derivatives.

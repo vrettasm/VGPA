@@ -43,7 +43,7 @@ class TestSCG(unittest.TestCase):
         # The global minimum should be zero.
         self.assertTrue(np.allclose(fx_opt, 0.0))
 
-        # Also the position 'x' should be zero.
+        # Also, the position 'x' should be zero.
         self.assertTrue(np.allclose(x_opt, 0.0))
     # _end_def_
 

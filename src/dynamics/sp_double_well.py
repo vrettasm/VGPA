@@ -215,8 +215,7 @@ class DoubleWell(StochasticProcess):
         Ex6 = gauss_mom(order=6)
 
         # Auxiliary variable.
-        var_q = 8.0 * (Ex6 - c * Ex4 + offset_b * Ex3) + (c2 * Ex2) -\
-                (2.0 * offset_b * c * m) + (offset_b ** 2)
+        var_q = 8.0 * (Ex6 - c * Ex4 + offset_b * Ex3) + (c2 * Ex2) - (2.0 * offset_b * c * m) + (offset_b ** 2)
 
         # Energy from the sDyn: Eq(7)
         Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self.sigma_

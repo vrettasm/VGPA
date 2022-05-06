@@ -70,7 +70,7 @@ class Euler(OdeSolver):
         fun_mt = self.fun_mt
         fun_st = self.fun_st
 
-        # Run through all time points.
+        # Run through all-time points.
         for k in range(dim_n - 1):
             # Get the values at time 'tk'.
             ak = lin_a[k]
@@ -133,7 +133,7 @@ class Euler(OdeSolver):
         fun_lam = self.fun_lam
         fun_psi = self.fun_psi
 
-        # Run through all time points.
+        # Run through all-time points.
         for t in range(dim_n - 1, 0, -1):
             # Get the values at time 't'.
             at = lin_a[t]

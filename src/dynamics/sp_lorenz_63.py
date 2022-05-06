@@ -4,6 +4,7 @@ from src.dynamics.stochastic_process import StochasticProcess
 from src.numerics.utilities import my_trapz, chol_inv
 from scipy.linalg import cholesky, LinAlgError
 
+
 @njit
 def l63(state, u):
     """
@@ -30,6 +31,8 @@ def l63(state, u):
                    x * y - beta * z])
     # Return dx.
     return dx
+
+
 # _end_def_
 
 
@@ -98,6 +101,7 @@ class Lorenz63(StochasticProcess):
 
         # Store the drift vector.
         self.theta_ = theta
+
     # _end_def_
 
     @property
@@ -108,6 +112,7 @@ class Lorenz63(StochasticProcess):
         :return: the drift parameter.
         """
         return self.theta_
+
     # _end_def_
 
     @theta.setter
@@ -120,6 +125,7 @@ class Lorenz63(StochasticProcess):
         :return: None.
         """
         self.theta_ = new_value
+
     # _end_def_
 
     @property
@@ -130,6 +136,7 @@ class Lorenz63(StochasticProcess):
         :return: the system noise parameter.
         """
         return self.sigma_
+
     # _end_def_
 
     @sigma.setter
@@ -159,6 +166,7 @@ class Lorenz63(StochasticProcess):
             raise RuntimeError(f" {self.__class__.__name__}:"
                                f" Noise matrix {new_value} is not positive definite.")
         # _end_if_
+
     # _end_def_
 
     @property
@@ -169,6 +177,7 @@ class Lorenz63(StochasticProcess):
         :return: the inverse of diffusion noise parameter.
         """
         return self.sig_inv
+
     # _end_def_
 
     def make_trajectory(self, t0, tf, dt=0.01):
@@ -233,6 +242,7 @@ class Lorenz63(StochasticProcess):
 
         # Store the time window (inference).
         self.time_window = tk
+
     # _end_def_
 
     def energy(self, linear_a, offset_b, m, s, obs_t):
@@ -344,6 +354,7 @@ class Lorenz63(StochasticProcess):
 
         # --->
         return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dtheta, dEsde_dsigma)
+
     # _end_def_
 
     def energy_dm_ds(self, at, bt, mt, st, diag_sig_inv):
@@ -384,7 +395,7 @@ class Lorenz63(StochasticProcess):
         mx, my, mz = mt
 
         # Unpack data from St.
-        # Note that this is symmetric so we extract
+        # Note that this is symmetric, so we extract
         # only the upper triangular elements of S(t).
         Sxx, Sxy, Sxz = st[0]
         _, Syy, Syz = st[1]
@@ -406,19 +417,19 @@ class Lorenz63(StochasticProcess):
         Exyz = Sxy * mz + Sxz * my + Syz * mx + mx * my * mz
 
         # Compute forth (4th) order expectations.
-        Exxyy = Sxx * (my ** 2 + Syy) + Syy * (mx ** 2) +\
+        Exxyy = Sxx * (my ** 2 + Syy) + Syy * (mx ** 2) + \
                 4.0 * Sxy * mx * my + (mx * my) ** 2 + 2 * (Sxy ** 2)
-        Exxzz = Sxx * (mz ** 2 + Szz) + Szz * (mx ** 2) +\
+        Exxzz = Sxx * (mz ** 2 + Szz) + Szz * (mx ** 2) + \
                 4.0 * Sxz * mx * mz + (mx * mz) ** 2 + 2 * (Sxz ** 2)
 
         # Compute the expectation for the Energy.
-        EX = (vS ** 2) * (Eyy + Exx - 2 * Exy) + (A11 ** 2) * Exx + (A12 ** 2) * Eyy +\
+        EX = (vS ** 2) * (Eyy + Exx - 2 * Exy) + (A11 ** 2) * Exx + (A12 ** 2) * Eyy + \
              (A13 ** 2) * Ezz + b1 ** 2 + 2 * (A11 * A12 * Exy + A11 * A13 * Exz - b1 * A11 * mx +
                                                A12 * A13 * Eyz - b1 * A12 * my - b1 * A13 * mz +
                                                vS * (A11 * Exy + A12 * Eyy + A13 * Eyz - b1 * my -
                                                      A11 * Exx - A12 * Exy - A13 * Exz + b1 * mx))
         # ---
-        EY = (vR ** 2) * Exx + Eyy + Exxzz + (A21 ** 2) * Exx + (A22 ** 2) * Eyy +\
+        EY = (vR ** 2) * Exx + Eyy + Exxzz + (A21 ** 2) * Exx + (A22 ** 2) * Eyy + \
              (A23 ** 2) * Ezz + b2 ** 2 + 2 * (Exyz - A21 * Exy - A22 * Eyy - A23 * Eyz -
                                                A21 * Exxz - A22 * Exyz - A23 * Exzz +
                                                A21 * A22 * Exy + A21 * A23 * Exz +
@@ -426,7 +437,7 @@ class Lorenz63(StochasticProcess):
                                                vR * (Exy + Exxz - A21 * Exx - A22 * Exy - A23 * Exz) -
                                                b2 * (vR * mx - my - Exz + A21 * mx + A22 * my + A23 * mz))
         # ---
-        EZ = Exxyy + (vB ** 2) * Ezz + (A31 ** 2) * Exx + (A32 ** 2) * Eyy + (A33 ** 2) * Ezz +\
+        EZ = Exxyy + (vB ** 2) * Ezz + (A31 ** 2) * Exx + (A32 ** 2) * Eyy + (A33 ** 2) * Ezz + \
              b3 ** 2 + 2 * (A31 * Exxy + A32 * Exyy + A33 * Exyz + A31 * A32 * Exy +
                             A31 * A33 * Exz + A32 * A33 * Eyz -
                             vB * (Exyz + A31 * Exz + A32 * Eyz + A33 * Ezz) -
@@ -492,14 +503,14 @@ class Lorenz63(StochasticProcess):
                                                                   A11 * A12) + dExz_dmx * (A11 - vS) * A13 -
                                                       vS * A11 * dExx_dmx + b1 * (vS - A11))
         # ---
-        dmx2 = dExxzz_dmx + dExx_dmx * (vR ** 2 + A21 ** 2) +\
+        dmx2 = dExxzz_dmx + dExx_dmx * (vR ** 2 + A21 ** 2) + \
                2 * (dExy_dmx * (-vR + vR * A22 - A21 + A21 * A22) +
                     dExz_dmx * (vR * A23 + b2 + A21 * A23) + dExyz_dmx * (1 - A22) - vR * dExxz_dmx +
                     vR * A21 * dExx_dmx - A21 * dExxz_dmx - A23 * dExzz_dmx - b2 * (vR + A21))
         # ---
         dmx3 = dExxyy_dmx + (A31 ** 2) * dExx_dmx + 2 * (dExy_dmx * (A31 * A32 - b3) +
                                                          dExz_dmx * (A33 - vB) * A31 + dExyz_dmx * (
-                                                                     A33 - vB) + A31 * dExxy_dmx +
+                                                                 A33 - vB) + A31 * dExxy_dmx +
                                                          A32 * dExyy_dmx - A31 * b3)
         # ---
         dmy1 = dEyy_dmy * (vS ** 2 + A12 ** 2) + 2 * (dExy_dmy * (-(vS ** 2) + vS * A11 -
@@ -544,10 +555,10 @@ class Lorenz63(StochasticProcess):
                iSz * (dExxyy_dSxy + 2 * (dExyz_dSxy * (A33 - vB) + A31 * dExxy_dSxy +
                                          A32 * dExyy_dSxy + dExy_dSxy * (A31 * A32 - b3)))
         # ---
-        dSxz = iSx * 2 * (A11 - vS) * A13 * dExz_dSxz +\
+        dSxz = iSx * 2 * (A11 - vS) * A13 * dExz_dSxz + \
                iSy * (dExxzz_dSxz + 2 * (dExz_dSxz * (vR * A23 + b2 + A21 * A23) +
                                          dExyz_dSxz * (1 - A22) - dExxz_dSxz * (vR + A21) -
-                                         A23 * dExzz_dSxz)) +\
+                                         A23 * dExzz_dSxz)) + \
                iSz * 2 * (dExz_dSxz * (A33 - vB) * A31 + dExyz_dSxz * (A33 - vB))
         # ---
         dSyy = iSx * ((vS + A12) ** 2) * dEyy_dSyy + iSy * ((1 - A22) ** 2) * dEyy_dSyy + \
@@ -567,6 +578,7 @@ class Lorenz63(StochasticProcess):
                                    [dSxz, dSyz, dSzz]])
         # --->
         return Efg, dEsde_dm, dEsde_ds
+
     # _end_def_
 
     def Efg_drift_theta(self, at, bt, mt, st):
@@ -600,7 +612,7 @@ class Lorenz63(StochasticProcess):
         mx, my, mz = mt
 
         # Unpack data from st.
-        # Note that this is symmetric so we extract
+        # Note that this is symmetric, so we extract
         # only the upper triangular elements of s(t).
         Sxx, Sxy, Sxz = st[0]
         _, Syy, Syz = st[1]
@@ -619,14 +631,14 @@ class Lorenz63(StochasticProcess):
         Exyz = Sxy * mz + Sxz * my + Syz * mx + mx * my * mz
 
         # Compute the expectation.
-        V1 = Eyy * (vS + A12) + Exx * (vS - A11) +\
-             Exy * (A11 - 2 * vS - A12) +\
+        V1 = Eyy * (vS + A12) + Exx * (vS - A11) + \
+             Exy * (A11 - 2 * vS - A12) + \
              A13 * (Eyz - Exz) + b1 * (mx - my)
         # ---
-        V2 = vR * Exx - Exy - Exxz + A21 * Exx +\
+        V2 = vR * Exx - Exy - Exxz + A21 * Exx + \
              A22 * Exy + A23 * Exz - b2 * mx
         # ---
-        V3 = -Exyz + vB * Ezz - A31 * Exz - A32 * Eyz -\
+        V3 = -Exyz + vB * Ezz - A31 * Exz - A32 * Eyz - \
              A33 * Ezz + b3 * mz
         # --->
         return np.array([V1, V2, V3])

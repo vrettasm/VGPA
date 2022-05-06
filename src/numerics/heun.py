@@ -74,7 +74,7 @@ class Heun(OdeSolver):
         # Half step-size.
         h = 0.5 * dt
 
-        # Run through all time points.
+        # Run through all-time points.
         for k in range(dim_n - 1):
             # Get the values at time 'tk'.
             ak = lin_a[k]
@@ -156,7 +156,7 @@ class Heun(OdeSolver):
         # Half step-size.
         h = 0.5 * dt
 
-        # Run through all time points.
+        # Run through all-time points.
         for t in range(dim_n - 1, 0, -1):
             # Get the values at time 't'.
             at = lin_a[t]

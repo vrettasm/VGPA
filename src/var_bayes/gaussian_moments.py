@@ -4,7 +4,7 @@ import numpy as np
 class GaussianMoments(object):
     """
     This class creates an object that returns the higher order
-    moments, of an non-central Gaussian, up to the 8-th order.
+    moments, of a non-central Gaussian, up to the 8-th order.
 
         https://en.wikipedia.org/wiki/Normal_distribution
 

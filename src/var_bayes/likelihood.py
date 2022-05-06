@@ -42,7 +42,7 @@ class Likelihood(object):
             if y0.ndim == 0:
                 self.obs_h = np.asarray(1)
             else:
-                # Otherwise create identity matrix.
+                # Otherwise, create identity matrix.
                 self.obs_h = np.eye(y0.size)
             # _end_if_
         else:

@@ -173,7 +173,7 @@ class StochasticProcess(object):
         # Observation indexes.
         idx = np.linspace(0, dim_t, dim_m + 2, dtype=np.int)
 
-        # Convert it to list so you can use it as index.
+        # Convert it to list, so you can use it as index.
         # Make sure they are unique and sorted.
         obs_t = np.array(sorted(set(idx[1:-1].tolist())))
 

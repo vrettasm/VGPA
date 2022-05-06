@@ -75,7 +75,7 @@ class RungeKutta2(OdeSolver):
         ak_mid = 0.5 * (lin_a[0:-1] + lin_a[1:])
         bk_mid = 0.5 * (off_b[0:-1] + off_b[1:])
 
-        # Run through all time points.
+        # Run through all-time points.
         for k in range(dim_n - 1):
             # Get the values at time 'tk'.
             ak = lin_a[k]
@@ -157,7 +157,7 @@ class RungeKutta2(OdeSolver):
         dEmk_mid = np.array([*dEmk_mid, 0.0], dtype=object)
         dEsk_mid = np.array([*dEsk_mid, 0.0], dtype=object)
 
-        # Run through all time points.
+        # Run through all-time points.
         for t in range(dim_n - 1, 0, -1):
             # Get the values at time 't'.
             at = lin_a[t]
