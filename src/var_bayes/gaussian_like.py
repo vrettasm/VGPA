@@ -1,6 +1,6 @@
 import numpy as np
-from .likelihood import Likelihood
-from ..numerics.utilities import log_det, chol_inv
+from src.var_bayes.likelihood import Likelihood
+from src.numerics.utilities import log_det, chol_inv
 
 
 class GaussianLikelihood(Likelihood):

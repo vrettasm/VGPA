@@ -3,23 +3,23 @@ import time
 import numpy as np
 from pathlib import Path
 
-from .fwd_ode import FwdOde
-from .bwd_ode import BwdOde
+from src.var_bayes.fwd_ode import FwdOde
+from src.var_bayes.bwd_ode import BwdOde
 
-from ..dynamics.sp_lorenz_63 import Lorenz63
-from ..dynamics.sp_lorenz_96 import Lorenz96
-from ..dynamics.sp_double_well import DoubleWell
-from ..dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
+from src.dynamics.sp_lorenz_63 import Lorenz63
+from src.dynamics.sp_lorenz_96 import Lorenz96
+from src.dynamics.sp_double_well import DoubleWell
+from src.dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
 
-from ..src.variational import VarGP
-from ..src.prior_kl0 import PriorKL0
-from ..src.gaussian_like import GaussianLikelihood
-from ..numerics.optim_scg import SCG
+from src.var_bayes.variational import VarGP
+from src.var_bayes.prior_kl0 import PriorKL0
+from src.var_bayes.gaussian_like import GaussianLikelihood
+from src.numerics.optim_scg import SCG
 
 
 class Simulation(object):
     """
-    Main simulation class. The normal workflow is as follow:
+    Main simulation class. The normal workflow is as follows:
 
     1) Create a simulation object. You can also give a name
     that will be used when saving the data.

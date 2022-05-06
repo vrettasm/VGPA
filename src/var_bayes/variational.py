@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import CubicSpline
-from ..numerics.utilities import chol_inv
+from src.numerics.utilities import chol_inv
 
 
 class VarGP(object):

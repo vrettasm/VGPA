@@ -1,5 +1,5 @@
 import numpy as np
-from ..numerics.utilities import log_det, chol_inv
+from src.numerics.utilities import log_det, chol_inv
 
 
 class PriorKL0(object):
