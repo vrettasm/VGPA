@@ -83,6 +83,8 @@ class SCG(object):
         :return: 1)  x: the point where the minimum was found,
                  2) fx: the function value (at the minimum point).
         """
+        # Make a local copy of the function.
+        _copy = np.copy
 
         # Make sure input is flat.
         x = x0.flatten()
@@ -102,7 +104,7 @@ class SCG(object):
         self.stats["df_eval"] += 1
 
         # Store the current values (fx / dfx).
-        f_old, grad_old = f_now, np.copy(grad_new)
+        f_old, grad_old = f_now, _copy(grad_new)
 
         # Set the initial search direction.
         d = -grad_new
@@ -192,10 +194,10 @@ class SCG(object):
             if Delta >= 0.0:
                 success = 1
                 count_success += 1
-                x, f_now, g_now = np.copy((x_new, f_new, grad_new))
+                x, f_now, g_now = _copy(x_new), _copy(f_new), _copy(grad_new)
             else:
                 success = 0
-                f_now, g_now = f_old, np.copy(grad_old)
+                f_now, g_now = f_old, _copy(grad_old)
             # _end_if_
 
             # Total gradient.
@@ -226,7 +228,7 @@ class SCG(object):
                     return x, fx
                 else:
                     # Update variables for the new position.
-                    f_old, grad_old = f_new, np.copy(grad_new)
+                    f_old, grad_old = f_new, _copy(grad_new)
 
                     # Evaluate function/gradient at the new point.
                     f_now = self.f(x, *args)
