@@ -1,9 +1,9 @@
 import numpy as np
 from numba import njit
-from ..src.variational import grad_Esde_dm_ds
+from src.var_bayes.variational import grad_Esde_dm_ds
 from scipy.linalg import cholesky, LinAlgError
-from .stochastic_process import StochasticProcess
-from ..numerics.utilities import my_trapz, ut_approx, chol_inv
+from src.dynamics.stochastic_process import StochasticProcess
+from src.numerics.utilities import my_trapz, ut_approx, chol_inv
 
 
 @njit

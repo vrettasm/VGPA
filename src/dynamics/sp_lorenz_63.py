@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
-from .stochastic_process import StochasticProcess
-from ..numerics.utilities import my_trapz, chol_inv
+from src.dynamics.stochastic_process import StochasticProcess
+from src.numerics.utilities import my_trapz, chol_inv
 from scipy.linalg import cholesky, LinAlgError
 
 @njit
