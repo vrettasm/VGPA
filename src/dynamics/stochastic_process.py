@@ -173,9 +173,8 @@ class StochasticProcess(object):
         # Observation indexes.
         idx = np.linspace(0, dim_t, dim_m + 2, dtype=int)
 
-        # Convert it to list, so you can use it as index.
         # Make sure they are unique and sorted.
-        obs_t = np.array(sorted(set(idx[1:-1])))
+        obs_t = sorted(np.unique(idx[1:-1]))
 
         # Extract the complete observations (d = D) at times obs_t.
         obs_y = np.take(self.xt, obs_t, axis=0)
