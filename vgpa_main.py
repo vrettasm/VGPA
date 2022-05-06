@@ -35,9 +35,9 @@ def validateInputParametersFile(filename):
         model_params = json.load(input_file)
 
         # Required keys in the json file.
-        required_keys = ("Output_Name",  "Model",  "Ode-method",
+        required_keys = {"Output_Name",  "Model",  "Ode-method",
                          "Time-window", "Noise", "Observations",
-                         "Drift", "Prior", "Random-Seed")
+                         "Drift", "Prior", "Random-Seed"}
 
         # Check the keywords for membership.
         for k in required_keys:
