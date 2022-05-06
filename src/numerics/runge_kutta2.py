@@ -1,5 +1,5 @@
 import numpy as np
-from .ode_solver import OdeSolver
+from src.numerics.ode_solver import OdeSolver
 
 
 class RungeKutta2(OdeSolver):
