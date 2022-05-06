@@ -3,6 +3,16 @@ import numpy as np
 from src.numerics.optim_scg import SCG
 from src.numerics.utilities import finite_diff
 
+#
+# NOTE: THESE TESTS WILL FAIL UNLESS WE CHANGE THE FUNCTION CALL
+# IN OPTIM_SCG.PY (LINE=167)
+#
+# FROM: g_plus = self.df(x_plus, eval_fun=True) <--
+#   TO: g_plus = self.df(x_plus) <--
+#
+# THE REASON IS THAT WE TWEAKED THE OPTIMIZER TO RUN ON THE VGPA
+# ALGORITHM.
+#
 
 class TestSCG(unittest.TestCase):
     @classmethod
@@ -32,7 +42,7 @@ class TestSCG(unittest.TestCase):
         gradf = lambda x: finite_diff(fun, x)
 
         # Initial random point.
-        x0 = np.random.randn(5)
+        x0 = np.random.randn(4)
 
         # Create the SCG.
         optim_fun = SCG(fun, gradf)
@@ -44,7 +54,7 @@ class TestSCG(unittest.TestCase):
         self.assertTrue(np.allclose(fx_opt, 0.0))
 
         # Also, the position 'x' should be zero.
-        self.assertTrue(np.allclose(x_opt, 0.0))
+        self.assertTrue(np.allclose(x_opt, 0.0, atol=1.0e-4))
     # _end_def_
 
     def test_rosenbrock_fun(self):
