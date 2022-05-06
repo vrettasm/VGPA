@@ -163,9 +163,9 @@ class RungeKutta4(OdeSolver):
         dEsk_mid = 0.5 * (dEsde_ds[0:-1] + dEsde_ds[1:])
 
         # Correct dimensions, by adding a zero at the end.
-        ak_mid = np.array([*ak_mid, 0.0])
-        dEmk_mid = np.array([*dEmk_mid, 0.0])
-        dEsk_mid = np.array([*dEsk_mid, 0.0])
+        ak_mid = np.array([*ak_mid, 0.0], dtype=object)
+        dEmk_mid = np.array([*dEmk_mid, 0.0], dtype=object)
+        dEsk_mid = np.array([*dEsk_mid, 0.0], dtype=object)
 
         # Run through all-time points.
         for t in range(dim_n - 1, 0, -1):
