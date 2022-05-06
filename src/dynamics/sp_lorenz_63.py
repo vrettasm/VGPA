@@ -31,8 +31,6 @@ def l63(state, u):
                    x * y - beta * z])
     # Return dx.
     return dx
-
-
 # _end_def_
 
 
