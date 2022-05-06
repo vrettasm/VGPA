@@ -169,7 +169,7 @@ class RungeKutta4(OdeSolver):
 
             # Correct dimensions, by adding a zeros at the end.
             ak_mid = np.concatenate((ak_mid, np.zeros((1, dim_d, dim_d))), axis=0)
-            dEmk_mid = np.concatenate((dEsk_mid, np.zeros((1, dim_d))), axis=0)
+            dEmk_mid = np.concatenate((dEmk_mid, np.zeros((1, dim_d))), axis=0)
             dEsk_mid = np.concatenate((dEsk_mid, np.zeros((1, dim_d, dim_d))), axis=0)
         # _end_if_
 
