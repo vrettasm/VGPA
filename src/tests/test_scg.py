@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from code.numerics.optim_scg import SCG
-from code.numerics.utilities import finite_diff
+from src.numerics.optim_scg import SCG
+from src.numerics.utilities import finite_diff
 
 
 class TestSCG(unittest.TestCase):
