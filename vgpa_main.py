@@ -4,7 +4,7 @@ import sys
 import json
 import pandas as pd
 from pathlib import Path
-from code.src.simulation import Simulation
+from var_bayes.simulation import Simulation
 
 # INFO:
 __author__ = "Michail Vrettas, PhD"
