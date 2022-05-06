@@ -167,7 +167,7 @@ class RungeKutta4(OdeSolver):
             lam = np.zeros((dim_n, dim_d))
             psi = np.zeros((dim_n, dim_d, dim_d))
 
-            # Correct dimensions, by adding a zeros at the end.
+            # Correct dimensions, by adding zeros at the end.
             ak_mid = np.concatenate((ak_mid, np.zeros((1, dim_d, dim_d))), axis=0)
             dEmk_mid = np.concatenate((dEmk_mid, np.zeros((1, dim_d))), axis=0)
             dEsk_mid = np.concatenate((dEsk_mid, np.zeros((1, dim_d, dim_d))), axis=0)
