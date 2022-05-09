@@ -1,0 +1,43 @@
+{
+  "Info": "Input parameters file for the VGPA simulation",
+
+  "Author": "Michail Vrettas, PhD",
+
+  "Contact": "michail.vrettas@gmail.com",
+
+  "Date": "2022-05-09",
+
+  "Output_Name": "Sim_L3D",
+
+  "Model": "L63",
+
+  "Ode-method": "Heun",
+
+  "Random-Seed": 31415926535,
+
+  "Time-window": {
+    "t0": 0.00,
+    "tf": 20.0,
+    "dt": 0.01
+  },
+
+  "Noise": {
+    "sys": 10.0,
+    "obs": 2.0
+  },
+
+  "Observations": {
+    "density": 5,
+    "operator": null
+  },
+
+  "Drift": {
+    "theta": [10.0, 28.0, 2.667]
+  },
+
+  "Prior": {
+    "tau0": 0.5,
+    "mu0": 1.0
+  }
+
+}
