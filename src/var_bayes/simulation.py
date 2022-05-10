@@ -243,13 +243,13 @@ class Simulation(object):
         # optimize.check_gradient_function(x0.copy())
 
         # Start the timer.
-        time_t0 = time.time()
+        time_t0 = time.perf_counter()
 
         # Run the optimization procedure.
         x, fx = optimize(x0.copy())
 
         # Stop the timer.
-        time_tf = time.time()
+        time_tf = time.perf_counter()
 
         # Final gradient test.
         # optimize.check_gradient_function(x.copy())
