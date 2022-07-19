@@ -1,5 +1,5 @@
 scipy==1.5.2
-numpy==1.19.2
+numpy==1.22.0
 h5py==2.10.0
 pandas==1.2.0
 numba==0.51.2
