@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from src.var_bayes.gaussian_moments import GaussianMoments
+from var_bayes.gaussian_moments import GaussianMoments
 
 class TestGaussianMoments(unittest.TestCase):
 
@@ -13,7 +13,7 @@ class TestGaussianMoments(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        print(" >> TestGaussianMoments - FINISH -")
+        print(" >> TestGaussianMoments - FINISH -", end='\n\n')
     # _end_def_
 
     def setUp(self) -> None:

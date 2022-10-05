@@ -1,7 +1,9 @@
 import unittest
 import numpy as np
 from numpy.linalg import det
-from src.numerics.utilities import finite_diff, log_det, safe_log, my_trapz, chol_inv
+from scipy.integrate import trapz as sp_trapezoid
+from numerics.utilities import (finite_diff, log_det, safe_log,
+                                my_trapz, chol_inv)
 
 class TestUtilities(unittest.TestCase):
     @classmethod
@@ -11,12 +13,15 @@ class TestUtilities(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        print(" >> TestUtilities - FINISH -")
+        print(" >> TestUtilities - FINISH -", end="\n\n")
     # _end_def_
 
     def test_finite_diff(self):
-        # Information.
-        print(" Testing 'finite_diff' ... ")
+        """
+        Testing custom 'finite_diff' ...
+
+        :return: None
+        """
 
         # Test point:
         x0 = 0.0
@@ -53,8 +58,11 @@ class TestUtilities(unittest.TestCase):
     # _end_def_
 
     def test_safe_log(self):
-        # Information.
-        print(" Testing 'safe_log' ... ")
+        """
+        Testing 'safe_log' ...
+
+        :return: None
+        """
 
         # Test scalar input:
         x1 = 3.9457
@@ -77,8 +85,11 @@ class TestUtilities(unittest.TestCase):
     # _end_def_
 
     def test_log_det(self):
-        # Information.
-        print(" Testing 'log_det' ... ")
+        """
+        Testing 'log_det' ...
+
+        :return: None
+        """
 
         # Test scalar input:
         x0 = 3.9457
@@ -99,11 +110,12 @@ class TestUtilities(unittest.TestCase):
         self.assertTrue(np.allclose(y1, np.log(det(np.diag(x1)))))
     # _end_def_
 
-    def test_my_trapz(self):
-        from scipy.integrate import trapz as sp_trapz
+    def test_my_trapezoid(self):
+        """
+        Testing custom 'my_trapz' ...
 
-        # Information.
-        print(" Testing 'my_trapz' ... ")
+        :return: None
+        """
 
         # Three function types (scalar, vector, matrix):
         fxs = np.random.rand(1000)
@@ -117,7 +129,7 @@ class TestUtilities(unittest.TestCase):
         for x_val in [fxs, fxv, fxm]:
             # Integrals.
             tot_1 = my_trapz(x_val, dx=dx)
-            tot_2 = sp_trapz(x_val, dx=dx, axis=0)
+            tot_2 = sp_trapezoid(x_val, dx=dx, axis=0)
 
             # Test how close they are.
             self.assertTrue(np.all(np.abs(tot_1 - tot_2) <= 1.0e-8))
@@ -131,15 +143,18 @@ class TestUtilities(unittest.TestCase):
 
         # Integrals.
         tot_1 = my_trapz(fxo, dx=dx, obs_t=obs_t)
-        tot_2 = sp_trapz(fxo, dx=dx, axis=0)
+        tot_2 = sp_trapezoid(fxo, dx=dx, axis=0)
 
         # Test how close they are.
         self.assertTrue(np.all(np.abs(tot_1 - tot_2) <= 1.0e-6))
     # _end_def_
 
     def test_chol_inv(self):
-        # Information.
-        print(" Testing 'chol_inv' ... ")
+        """
+        Testing 'chol_inv' ...
+
+        :return: None
+        """
 
         # Scalar value test.
         x = 0.2

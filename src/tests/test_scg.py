@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from src.numerics.optim_scg import SCG
-from src.numerics.utilities import finite_diff
+from numerics.optim_scg import SCG
+from numerics.utilities import finite_diff
 
 #
 # NOTE: THESE TESTS WILL FAIL UNLESS WE CHANGE THE FUNCTION CALL
@@ -22,7 +22,7 @@ class TestSCG(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        print(" >> TestSCG - FINISH -")
+        print(" >> TestSCG - FINISH -", end="\n\n")
     # _end_def_
 
     def test_sphere_fun(self):
