@@ -23,8 +23,7 @@ The forward-backward ODEs can be solved with four different solvers:
 3. [Runge-Kutta 2](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods): 2nd order
 4. [Runge-Kutta 4](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods): 4th order
 
-### Required packages
----
+## Required packages
 
 The recommended version is **Python3.7**. The implementation is independent of
 third-party libraries since all the optimization (SCG) and integration routines
@@ -39,9 +38,7 @@ To simplify the required packages just use:
 
     $ pip install -r requirements.txt
 
-
 ## How to run
----
 
 To execute the program, first navigate to the main directory of the project
 (i.e. where the vgpa_main.py is located), and then run the following command:
@@ -69,7 +66,6 @@ The models parameters should be given in the 'sim_params.json' file as follows:
 ```
 
 ## References
----
 
 The code refers to the initial algorithms as published in:
 
@@ -99,6 +95,5 @@ All the copyrights of this algorithm remain with the original author of the
 book (Ian T. Nabney).
 
 ### Contact
----
 
 For any questions / comments please contact me at: vrettasm@gmail.com
