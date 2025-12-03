@@ -18,7 +18,7 @@ class PriorKL0(object):
         :param tau0: prior moment for the co-variance (dim_d x dim_d).
         """
 
-        # Prior mean (t=0).
+        # Prior mean values (t=0).
         self.mu0 = np.asarray(mu0)
 
         # Prior co-variance (t=0).
@@ -40,12 +40,8 @@ class PriorKL0(object):
 
         :return: energy of the initial state KL0, (scalar).
         """
-
         # Switch according to the system dimensions.
-        if self.single_dim:
-            return self.gauss_1D(m0, s0)
-        else:
-            return self.gauss_nD(m0, s0)
+        return self.gauss_1D(m0, s0) if self.single_dim else self.gauss_nD(m0, s0)
     # _end_def_
 
     def gauss_1D(self, m0, s0):
@@ -58,7 +54,6 @@ class PriorKL0(object):
 
         :return: energy of the initial state KL0, (scalar).
         """
-
         # Pre-compute once.
         z0 = m0 - self.mu0
 
@@ -80,7 +75,6 @@ class PriorKL0(object):
 
         :return: energy of the initial state KL0, (scalar).
         """
-
         # Inverse of tau0 matrix.
         inv_tau0, _ = chol_inv(self.tau0)
 
@@ -112,7 +106,6 @@ class PriorKL0(object):
 
         :return: Gradient of KL0 w.r.t. the initial mean / variance.
         """
-
         # Switch according to the system dimensions.
         if self.single_dim:
             return self.gradients_1D(m0, s0, lam0, psi0)
@@ -134,7 +127,6 @@ class PriorKL0(object):
 
         :return: Gradient of KL0 w.r.t. the initial mean / variance.
         """
-
         # Auxiliary variable.
         z0 = m0 - self.mu0
 
@@ -162,7 +154,6 @@ class PriorKL0(object):
 
         :return: Gradient of KL0 w.r.t. the initial mean / variance.
         """
-
         # Inverse of tau0 matrix.
         inv_tau0, _ = chol_inv(self.tau0)
 

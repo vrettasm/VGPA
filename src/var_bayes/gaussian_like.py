@@ -8,9 +8,13 @@ class GaussianLikelihood(Likelihood):
     Gaussian likelihood function.
     """
 
-    __slots__ = ("single_dim", "log2pi")
+    # Store log(2*pi), as class member.
+    LOG2PI = np.log(2.0 * np.pi)
 
-    def __init__(self, values, times, noise, operator, single_dim=True):
+    __slots__ = ("single_dim",)
+
+    def __init__(self, values, times, noise, operator,
+                 single_dim: bool = True) -> None:
         """
         Default constructor of the Gaussian Likelihood object.
 
@@ -24,16 +28,12 @@ class GaussianLikelihood(Likelihood):
 
         :param single_dim: single dimension flag.
         """
-
         # Call the constructor of the parent class.
         super().__init__(values, times, noise, operator)
 
         # Marks whether the likelihood corresponds to
         # a single or multiple dimensions observations.
         self.single_dim = single_dim
-
-        # Store log(2*pi), as class member.
-        self.log2pi = np.log(2.0 * np.pi)
     # _end_def_
 
     def __call__(self, m, s):
@@ -48,11 +48,7 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-        if self.single_dim:
-            return self.gauss_1D(m, s)
-        else:
-            return self.gauss_nD(m, s)
-        # _end_if_
+        return self.gauss_1D(m, s) if self.single_dim else self.gauss_nD(m, s)
     # _end_def_
 
     def gradients(self, m, s):
@@ -67,11 +63,7 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-        if self.single_dim:
-            return self.gradients_1D(m, s)
-        else:
-            return self.gradients_nD(m)
-        # _end_if_
+        return self.gradients_1D(m, s) if self.single_dim else self.gradients_nD(m)
     # _end_def_
 
     def gauss_1D(self, m, s):
@@ -84,7 +76,6 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-
         # Extract the observation values and times
         # from the parent class (Likelihood).
         obs_y, obs_t = self.values, self.times
@@ -98,7 +89,7 @@ class GaussianLikelihood(Likelihood):
 
         # Energy from the observations.
         Eobs = 0.5 * np.sum((obs_y ** 2) - 2.0 * obs_y * m[obs_t] + Ex2) / self.noise +\
-               0.5 * dim_m * (self.log2pi + np.log(self.noise))
+               0.5 * dim_m * (GaussianLikelihood.LOG2PI + np.log(self.noise))
 
         # Energy term from the observations.
         return Eobs
@@ -114,7 +105,6 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-
         # Extract the observation values and times
         # from the parent class (Likelihood).
         obs_y, obs_t = self.values, self.times
@@ -156,7 +146,7 @@ class GaussianLikelihood(Likelihood):
         # _end_for_
 
         # Compute the final including the constants.
-        Eobs = 0.5 * (Eobs + dim_m * (dim_o * self.log2pi + log_det(self.noise)))
+        Eobs = 0.5 * (Eobs + dim_m * (dim_o * GaussianLikelihood.LOG2PI + log_det(self.noise)))
 
         # Energy from the (noisy) observation set.
         return Eobs
@@ -172,7 +162,6 @@ class GaussianLikelihood(Likelihood):
 
         :return: dEobs_dm, dEobs_ds, dEobs_dr.
         """
-
         # Extract the observation values and times
         # from the parent class (Likelihood).
         obs_y, obs_t = self.values, self.times
@@ -216,7 +205,6 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-
         # Extract the observation values and times
         # from the parent class (Likelihood).
         obs_y, obs_t = self.values, self.times

@@ -6,15 +6,19 @@ from pathlib import Path
 from src.var_bayes.fwd_ode import FwdOde
 from src.var_bayes.bwd_ode import BwdOde
 
-from src.dynamics.sp_lorenz_63 import Lorenz63
-from src.dynamics.sp_lorenz_96 import Lorenz96
-from src.dynamics.sp_double_well import DoubleWell
-from src.dynamics.sp_ornstein_uhlenbeck import OrnsteinUhlenbeck
+from src.dynamics.lorenz_63 import Lorenz63
+from src.dynamics.lorenz_96 import Lorenz96
+from src.dynamics.double_well import DoubleWell
+from src.dynamics.ornstein_uhlenbeck import OrnsteinUhlenbeck
 
 from src.var_bayes.variational import VarGP
 from src.var_bayes.prior_kl0 import PriorKL0
 from src.var_bayes.gaussian_like import GaussianLikelihood
 from src.numerics.optim_scg import SCG
+
+# Define a dictionary with all the dynamical systems.
+dynamical_systems = {"DW": DoubleWell, "OU": OrnsteinUhlenbeck,
+                     "L63": Lorenz63, "L96": Lorenz96}
 
 
 class Simulation(object):
@@ -26,7 +30,7 @@ class Simulation(object):
 
         >> sim_vgpa = Simulation("Sim_01")
 
-    2) Setup its simulation parameters.
+    2) Set up its simulation parameters.
 
         >> sim_vgpa.setup(params, data)
 
@@ -41,7 +45,7 @@ class Simulation(object):
 
     __slots__ = ("name", "m_data", "output")
 
-    def __init__(self, name=None):
+    def __init__(self, name: str = None) -> None:
         """
         Default constructor of the Simulation class.
 
@@ -49,20 +53,13 @@ class Simulation(object):
         be used for constructing a meaningful filename
         to save the results at the end of the simulation.
         """
-
         # Check if a simulation name has been given.
-        if name is not None:
-            self.name = name
-        else:
-            self.name = "ID_None"
-        # _end_if_
+        self.name = str(name) if name else "ID_None"
 
-        # This dictionary will hold
-        # all the simulation data.
+        # This dictionary will hold the simulation data.
         self.m_data = {}
 
-        # Placeholder for the output
-        # storage.
+        # Placeholder for the output storage.
         self.output = {}
     # _end_def_
 
@@ -85,23 +82,11 @@ class Simulation(object):
         # Make input string upper-case.
         model_upper = str(model).upper()
 
-        # Create the model.
-        if model_upper == "DW":
-            return DoubleWell(*args)
-
-        elif model_upper == "OU":
-            return OrnsteinUhlenbeck(*args)
-
-        elif model_upper == "L63":
-            return Lorenz63(*args)
-
-        elif model_upper == "L96":
-            return Lorenz96(*args)
-
-        else:
-            raise ValueError(" {0}: Unknown stochastic model ->"
-                             " {1}".format(cls.__name__, model_upper))
-        # _end_if_
+        try:
+            return dynamical_systems[model_upper](*args)
+        except KeyError:
+            raise ValueError(f" {cls.__name__}:"
+                             f" Unknown stochastic model -> {model_upper}")
     # _end_def_
 
     def setup(self, params, data):
@@ -118,7 +103,6 @@ class Simulation(object):
 
         :return: None.
         """
-
         # Extract drift parameters.
         self.m_data["drift"] = params["Drift"]
 
@@ -202,7 +186,6 @@ class Simulation(object):
 
         :return: None.
         """
-
         # Forward ODE solver.
         fwd_ode = FwdOde(self.m_data["time_window"]["dt"],
                          self.m_data["ode_solver"],

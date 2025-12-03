@@ -196,7 +196,7 @@ class VarGP(object):
         self.output["psit"] = psit
 
         # Total free energy value.
-        return np.asscalar(E0 + Esde + Eobs)
+        return np.array(E0 + Esde + Eobs).item()
     # _end_def_
 
     def gradient(self, x, eval_fun=False):

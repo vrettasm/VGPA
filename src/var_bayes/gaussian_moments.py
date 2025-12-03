@@ -40,7 +40,7 @@ class GaussianMoments(object):
         self.n_size = m_arr.shape[0]
     # _end_def_
 
-    def __call__(self, order=0):
+    def __call__(self, order: int = 0):
         """
         Compute the correct non-central moment up to 8-th order.
 
@@ -50,7 +50,6 @@ class GaussianMoments(object):
 
         :raises ValueError: if the input order is out of bounds.
         """
-
         if order == 0:
             x_out = np.ones(self.n_size)
         elif order == 1:
@@ -85,14 +84,14 @@ class GaussianMoments(object):
                     420 * (self.m_arr ** 2) * (self.v_arr ** 3) +\
                     105 * (self.v_arr ** 4)
         else:
-            raise ValueError(" {0}: Wrong order value."
-                             " Use values 0-8.".format(self.__class__.__name__))
+            raise ValueError(f" {self.__class__.__name__}:"
+                             f" Wrong {order} value. Use values 0-8.")
         # _end_if_
 
         return x_out
     # _end_def_
 
-    def dM(self, order=1):
+    def dM(self, order: int = 1):
         """
         Compute the derivative with respect to the marginal
         means, of the non-central moment, up to 8-th order.
@@ -104,7 +103,6 @@ class GaussianMoments(object):
 
         :raises ValueError: if the input order is out of bounds.
         """
-
         if order == 1:
             x_out = np.ones(self.n_size)
         elif order == 2:
@@ -134,13 +132,13 @@ class GaussianMoments(object):
                          105 * self.m_arr * (self.v_arr ** 3))
         else:
             raise ValueError(f" {self.__class__.__name__}:"
-                             f" Wrong order value. Use values 1-8.")
+                             f" Wrong {order} value. Use values 1-8.")
         # _end_if_
 
         return x_out
     # _end_def_
 
-    def dS(self, order=1):
+    def dS(self, order: int = 1):
         """
         Compute the derivative with respect to the marginal
         variances, of the un-centered moment, up to 8-th order.
@@ -152,7 +150,6 @@ class GaussianMoments(object):
 
         :raises ValueError: if the input order is out of bounds.
         """
-
         if order == 1:
             x_out = np.zeros(self.n_size)
         elif order == 2:
@@ -179,7 +176,7 @@ class GaussianMoments(object):
                     420 * (self.v_arr ** 3)
         else:
             raise ValueError(f" {self.__class__.__name__}:"
-                             f" Wrong order value. Use values 1-8.")
+                             f" Wrong {order} value. Use values 1-8.")
         # _end_if_
 
         return x_out
