@@ -2,6 +2,14 @@ import numpy as np
 from numba import njit
 from numpy.linalg import solve, cholesky, LinAlgError
 
+from src.numerics.heun import Heun
+from src.numerics.euler import Euler
+from src.numerics.runge_kutta2 import RungeKutta2
+from src.numerics.runge_kutta4 import RungeKutta4
+
+# Define a dictionary with all the integration methods.
+num_integration = {"euler": Euler, "heun": Heun,
+                   "rk2": RungeKutta2, "rk4": RungeKutta4}
 
 def finite_diff(fun, x, *args):
     """
