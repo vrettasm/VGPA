@@ -69,15 +69,15 @@ class TestGaussianMoments(unittest.TestCase):
 
     # _end_def_
 
-    def test_dM(self):
+    def test_dm(self):
         """
-        Test the dM() method.
+        Test the dm() method.
 
         :return: None
         """
 
         # First order derivative.
-        x_out_1 = self.test_obj.dM(1)
+        x_out_1 = self.test_obj.dm(1)
 
         # True output of 1-th order dM.
         t_out_1 = np.ones(self.n_size)
@@ -86,7 +86,7 @@ class TestGaussianMoments(unittest.TestCase):
         self.assertEqual(0.0, np.sum(x_out_1 - t_out_1))
 
         # Second order derivative.
-        x_out_2 = self.test_obj.dM(2)
+        x_out_2 = self.test_obj.dm(2)
 
         # True output of 2-nd order dM.
         t_out_2 = 2 * self.m_arr
@@ -96,19 +96,19 @@ class TestGaussianMoments(unittest.TestCase):
 
         # The accepted values are [1-8].
         with self.assertRaises(ValueError):
-            self.test_obj.dM(0)
+            self.test_obj.dm(0)
         # _end_with_
     # _end_def_
 
-    def test_dS(self):
+    def test_ds(self):
         """
-        Test the dS() method.
+        Test the ds() method.
 
         :return: None
         """
 
         # First order derivative.
-        x_out_1 = self.test_obj.dS(1)
+        x_out_1 = self.test_obj.ds(1)
 
         # True output of 1-th order dM.
         t_out_1 = np.zeros(self.n_size)
@@ -117,7 +117,7 @@ class TestGaussianMoments(unittest.TestCase):
         self.assertEqual(0.0, np.sum(x_out_1 - t_out_1))
 
         # Second order derivative.
-        x_out_2 = self.test_obj.dS(2)
+        x_out_2 = self.test_obj.ds(2)
 
         # True output of 2-nd order dM.
         t_out_2 = np.ones(self.n_size)
@@ -127,7 +127,7 @@ class TestGaussianMoments(unittest.TestCase):
 
         # The accepted values are [1-8].
         with self.assertRaises(ValueError):
-            self.test_obj.dS(0)
+            self.test_obj.ds(0)
         # _end_with_
     # _end_def_
 
