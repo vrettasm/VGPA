@@ -6,7 +6,7 @@ from scipy.linalg import cholesky, LinAlgError
 
 
 @njit
-def l63(state, u):
+def l63(state: np.ndarray, u: np.ndarray) -> np.ndarray:
     """
     Lorenz63 function.
 
@@ -41,9 +41,9 @@ class Lorenz63(StochasticProcess):
     https://en.wikipedia.org/wiki/Lorenz_system
     """
 
-    __slots__ = ("sigma_", "theta_", "sig_inv")
+    __slots__ = ("_sigma", "_theta", "sig_inv")
 
-    def __init__(self, sigma, theta, r_seed=None):
+    def __init__(self, sigma, theta, r_seed=None) -> None:
         """
         Default constructor of the L63 object.
 
@@ -64,17 +64,17 @@ class Lorenz63(StochasticProcess):
         theta = np.asarray(theta)
 
         # Check the dimensions of the input.
-        if sigma.ndim == 0:
+        if np.isscalar(sigma):
             # Diagonal matrix (from scalar).
-            self.sigma_ = sigma * np.eye(3)
+            self._sigma = sigma * np.eye(3)
 
         elif sigma.ndim == 1:
             # Diagonal matrix (from vector).
-            self.sigma_ = np.diag(sigma)
+            self._sigma = np.diag(sigma)
 
         elif sigma.ndim == 2:
             # Full Matrix.
-            self.sigma_ = sigma
+            self._sigma = sigma
 
         else:
             raise ValueError(f" {self.__class__.__name__}:"
@@ -82,39 +82,36 @@ class Lorenz63(StochasticProcess):
         # _end_if_
 
         # Check the dimensionality.
-        if self.sigma_.shape != (3, 3):
+        if self._sigma.shape != (3, 3):
             raise ValueError(f" {self.__class__.__name__}:"
-                             f" Wrong matrix dimensions: {self.sigma_.shape}")
+                             f" Wrong matrix dimensions: {self._sigma.shape}")
         # _end_if_
 
         # Check for positive definiteness.
-        if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
-
-            # This is a better way to invert Sigma.
-            self.sig_inv, _ = chol_inv(self.sigma_)
-        else:
+        if np.any(np.linalg.eigvals(self._sigma) <= 0.0):
             raise RuntimeError(f" {self.__class__.__name__}:"
-                               f" Noise matrix {self.sigma_} is not positive definite.")
+                               f" Noise matrix {self._sigma} is not positive definite.")
         # _end_if_
 
-        # Store the drift vector.
-        self.theta_ = theta
+        # This is a better way to invert Sigma.
+        self.sig_inv, _ = chol_inv(self._sigma)
 
+        # Store the drift vector.
+        self._theta = theta
     # _end_def_
 
     @property
-    def theta(self):
+    def theta(self) -> np.ndarray:
         """
         Accessor method.
 
         :return: the drift parameter.
         """
-        return self.theta_
-
+        return self._theta
     # _end_def_
 
     @theta.setter
-    def theta(self, new_value):
+    def theta(self, new_value) -> None:
         """
         Accessor method.
 
@@ -122,23 +119,21 @@ class Lorenz63(StochasticProcess):
 
         :return: None.
         """
-        self.theta_ = new_value
-
+        self._theta = new_value
     # _end_def_
 
     @property
-    def sigma(self):
+    def sigma(self) -> np.ndarray:
         """
         Accessor method.
 
         :return: the system noise parameter.
         """
-        return self.sigma_
-
+        return self._sigma
     # _end_def_
 
     @sigma.setter
-    def sigma(self, new_value):
+    def sigma(self, new_value) -> None:
         """
         Accessor method.
 
@@ -146,7 +141,6 @@ class Lorenz63(StochasticProcess):
 
         :return: None.
         """
-
         # Check the dimensionality.
         if new_value.shape != (3, 3):
             raise ValueError(f" {self.__class__.__name__}:"
@@ -154,31 +148,29 @@ class Lorenz63(StochasticProcess):
         # _end_if_
 
         # Check for positive definiteness.
-        if np.all(np.linalg.eigvals(new_value) > 0.0):
-            # Make the change.
-            self.sigma_ = new_value
-
-            # Update the inverse matrix.
-            self.sig_inv, _ = chol_inv(self.sigma_)
-        else:
+        if np.all(np.linalg.eigvals(new_value) <= 0.0):
             raise RuntimeError(f" {self.__class__.__name__}:"
                                f" Noise matrix {new_value} is not positive definite.")
         # _end_if_
 
+        # Make the change.
+        self._sigma = new_value
+
+        # Update the inverse matrix.
+        self.sig_inv, _ = chol_inv(self._sigma)
     # _end_def_
 
     @property
-    def inverse_sigma(self):
+    def inverse_sigma(self) -> np.ndarray:
         """
         Accessor method.
 
         :return: the inverse of diffusion noise parameter.
         """
         return self.sig_inv
-
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt=0.01):
+    def make_trajectory(self, t0, tf, dt: float = 0.01) -> None:
         """
         Generates a realizations of the Lorenz63 (3D)
         dynamical system, within a specified time-window.
@@ -191,7 +183,6 @@ class Lorenz63(StochasticProcess):
 
         :return: None.
         """
-
         # Create locally a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
@@ -206,7 +197,7 @@ class Lorenz63(StochasticProcess):
 
         # BURN IN:
         for t in range(5000):
-            x0 = x0 + l63(x0, self.theta_) * delta_t
+            x0 = x0 + l63(x0, self._theta) * delta_t
         # _end_for_
 
         # Allocate array.
@@ -217,14 +208,14 @@ class Lorenz63(StochasticProcess):
 
         # Compute the Cholesky decomposition of input matrix.
         try:
-            ek = cholesky(self.sigma_ * dt)
+            ek = cholesky(self._sigma * dt)
         except LinAlgError:
             # Show a warning message.
             print(" Warning : Input matrix was not positive definite."
                   " The diagonal elements will be used instead.")
 
             # If it fails use the diagonal only.
-            ek = np.sqrt(np.eye(3) * self.sigma_ * dt)
+            ek = np.sqrt(np.eye(3) * self._sigma * dt)
         # _end_try_
 
         # Random variables.
@@ -232,7 +223,7 @@ class Lorenz63(StochasticProcess):
 
         # Create the path by solving the "stochastic" Diff.Eq. iteratively.
         for t in range(1, dim_t):
-            x[t] = x[t - 1] + l63(x[t - 1], self.theta_) * dt + ek[t]
+            x[t] = x[t - 1] + l63(x[t - 1], self._theta) * dt + ek[t]
         # _end_for_
 
         # Store the sample path (trajectory).
@@ -240,12 +231,11 @@ class Lorenz63(StochasticProcess):
 
         # Store the time window (inference).
         self.time_window = tk
-
     # _end_def_
 
     def energy(self, linear_a, offset_b, m, s, obs_t):
         """
-        Energy for the stochastic Lorenz 63 DE (3 dimensional)
+        Energy for the stochastic Lorenz 63 DE (3-dimensional)
         and related quantities (including gradients).
 
         :param linear_a: variational linear parameters (dim_t x 3 x 3).
@@ -268,7 +258,6 @@ class Lorenz63(StochasticProcess):
                  dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
                  dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
-
         # Number of discrete time points.
         dim_t = self.time_window.size
 
@@ -301,7 +290,7 @@ class Lorenz63(StochasticProcess):
         dEsde_dSig = np.zeros((dim_t, 3))
 
         # Drift parameters.
-        v_sigma, v_rho, v_beta = self.theta_
+        v_sigma, v_rho, v_beta = self._theta
 
         # Compute the quantities iteratively.
         for t in range(dim_t):
@@ -352,7 +341,6 @@ class Lorenz63(StochasticProcess):
 
         # --->
         return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dtheta, dEsde_dsigma)
-
     # _end_def_
 
     def energy_dm_ds(self, at, bt, mt, st, diag_sig_inv):
@@ -377,9 +365,8 @@ class Lorenz63(StochasticProcess):
                  2) dEsde_dm: dEsde(t)/dm(t) (3 x 1).
                  3) dEsde_ds: dEsde(t)/ds(t) (3 x 3).
         """
-
         # Get the drift parameters.
-        vS, vR, vB = self.theta_
+        vS, vR, vB = self._theta
 
         # Unpack data from At.
         A11, A12, A13 = at[0]
@@ -594,9 +581,8 @@ class Lorenz63(StochasticProcess):
 
         :return: gradient w.r.t. drift vector theta (3 x 1).
         """
-
         # Get the drift parameters.
-        vS, vR, vB = self.theta_
+        vS, vR, vB = self._theta
 
         # Unpack data from At.
         A11, A12, A13 = at[0]

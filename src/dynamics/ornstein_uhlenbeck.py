@@ -12,9 +12,9 @@ class OrnsteinUhlenbeck(StochasticProcess):
     https://en.wikipedia.org/wiki/Ornstein%E2%80%93Uhlenbeck_process
     """
 
-    __slots__ = ("sigma_", "theta_", "sig_inv")
+    __slots__ = ("_sigma", "_theta", "sig_inv")
 
-    def __init__(self, sigma, theta, r_seed=None):
+    def __init__(self, sigma, theta, r_seed=None) -> None:
         """
         Default constructor of the DW object.
 
@@ -30,40 +30,38 @@ class OrnsteinUhlenbeck(StochasticProcess):
         # Display class info.
         print(" Creating Ornstein-Uhlenbeck process.")
 
-        # Store the diffusion noise.
-        if sigma > 0.0:
-            self.sigma_ = sigma
-        else:
+        # Check noise value.
+        if sigma <= 0.0:
             raise ValueError(f" {self.__class__.__name__}:"
                              f" The diffusion noise value: {sigma},"
                              f" should be strictly positive.")
-        # _end_if_
+        # Store the noise.
+        self._sigma = sigma
 
-        # Store the drift parameter.
-        if theta > 0.0:
-            self.theta_ = theta
-        else:
+        # Check the drift parameter.
+        if theta <= 0.0:
             raise ValueError(f" {self.__class__.__name__}:"
                              f" The drift parameter: {theta},"
                              f" should be strictly positive.")
-        # _end_if_
+        # Store the drift.
+        self._theta = theta
 
         # Inverse of sigma noise.
         self.sig_inv = 1.0 / sigma
     # _end_def_
 
     @property
-    def theta(self):
+    def theta(self) -> float:
         """
         Accessor method.
 
         :return: the drift parameter.
         """
-        return self.theta_
+        return self._theta
     # _end_def_
 
     @theta.setter
-    def theta(self, new_value):
+    def theta(self, new_value: float) -> None:
         """
         Accessor method.
 
@@ -71,30 +69,27 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         :return: None.
         """
-
         # Accept only positive values.
-        if new_value > 0.0:
-            # Make the change.
-            self.theta_ = new_value
-        else:
+        if new_value <= 0.0:
             # Raise an error with a message.
             raise ValueError(f" {self.__class__.__name__}: The drift value"
                              f" {new_value}, should be strictly positive.")
-        # _end_if_
+        # Make the change.
+        self._theta = new_value
     # _end_def_
 
     @property
-    def sigma(self):
+    def sigma(self) -> float:
         """
         Accessor method.
 
         :return: the diffusion noise parameter.
         """
-        return self.sigma_
+        return self._sigma
     # _end_def_
 
     @sigma.setter
-    def sigma(self, new_value):
+    def sigma(self, new_value: float) -> None:
         """
         Accessor method.
 
@@ -104,22 +99,19 @@ class OrnsteinUhlenbeck(StochasticProcess):
         """
 
         # Accept only positive values.
-        if new_value > 0.0:
-            # Make the change.
-            self.sigma_ = new_value
-
-            # Update the inverse value.
-            self.sig_inv = 1.0 / self.sigma_
-        else:
+        if new_value <= 0.0:
             # Raise an error with a message.
-            raise ValueError(" {0}: The sigma value:"
-                             " {1}, should be strictly positive.".format(self.__class__.__name__,
-                                                                         new_value))
-        # _end_if_
+            raise ValueError(f"{self.__class__.__name__}: The sigma value "
+                             f"{new_value}, should be strictly positive.")
+        # Make the change.
+        self._sigma = new_value
+
+        # Update the inverse value.
+        self.sig_inv = 1.0 / self._sigma
     # _end_def_
 
     @property
-    def inverse_sigma(self):
+    def inverse_sigma(self) -> float:
         """
         Accessor method.
 
@@ -128,7 +120,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt=0.01, mu=0.0):
+    def make_trajectory(self, t0, tf, dt: float = 0.01, mu: float = 0.0) -> None:
         """
         Generates a realizations of the Ornstein - Uhlenbeck
         (OU) dynamical system, within a specified time-window.
@@ -143,7 +135,6 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         :return: None.
         """
-
         # Create a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
@@ -157,11 +148,11 @@ class OrnsteinUhlenbeck(StochasticProcess):
         x[0] = mu
 
         # Random variables (notice the scale of noise with the 'dt').
-        ek = np.sqrt(self.sigma_ * dt) * self.rng.standard_normal(dim_t)
+        ek = np.sqrt(self._sigma * dt) * self.rng.standard_normal(dim_t)
 
         # Create the sample path.
         for t in range(1, dim_t):
-            x[t] = x[t - 1] + self.theta_ * (mu - x[t - 1]) * dt + ek[t]
+            x[t] = x[t - 1] + self._theta * (mu - x[t - 1]) * dt + ek[t]
         # _end_for_
 
         # Store the sample path (trajectory).
@@ -171,7 +162,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, obs_t):
+    def energy(self, linear_a, offset_b, m, s, obs_t) -> tuple:
         """
         Energy for the OU SDE and related quantities (including gradients).
 
@@ -196,7 +187,6 @@ class OrnsteinUhlenbeck(StochasticProcess):
             dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
             dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
-
         # Gaussian Moments object.
         gauss_mom = GaussianMoments(m, s)
 
@@ -207,34 +197,34 @@ class OrnsteinUhlenbeck(StochasticProcess):
         Ex2 = gauss_mom(order=2)
 
         # Pre-compute these quantities only once.
-        Q1 = (self.theta_ - linear_a) ** 2
+        Q1 = (self._theta - linear_a) ** 2
         Q2 = linear_a * offset_b
 
         # Auxiliary variable.
-        var_q = Ex2 * Q1 + 2.0 * m * (self.theta_ - linear_a) * offset_b + (offset_b ** 2)
+        var_q = Ex2 * Q1 + 2.0 * m * (self._theta - linear_a) * offset_b + (offset_b ** 2)
 
         # Energy from the sDyn: Eq(7)
-        Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self.sigma_
+        Esde = 0.5 * my_trapz(var_q, dt, obs_t) / self._sigma
 
         # Average drift.
-        Ef = - self.theta_ * m
+        Ef = - self._theta * m
 
         # Average gradient of drift.
-        Edf = - self.theta_ * np.ones(m.shape)
+        Edf = - self._theta * np.ones(m.shape)
 
         # Gradients of Esde w.r.t. 'means'.
-        dEsde_dm = (m * (self.theta_ - linear_a) ** 2 +
-                    self.theta_ * offset_b - Q2) / self.sigma_
+        dEsde_dm = (m * (self._theta - linear_a) ** 2 +
+                    self._theta * offset_b - Q2) / self._sigma
 
         # Gradients of Esde w.r.t. 'variances'.
-        dEsde_dS = 0.5 * Q1 / self.sigma_
+        dEsde_dS = 0.5 * Q1 / self._sigma
 
         # Gradients of Esde w.r.t. 'theta'.
-        dEsde_dth = my_trapz(Ex2 * (self.theta_ - linear_a) +
-                             m * offset_b, dt, obs_t) / self.sigma_
+        dEsde_dth = my_trapz(Ex2 * (self._theta - linear_a) +
+                             m * offset_b, dt, obs_t) / self._sigma
 
         # Gradients of Esde w.r.t. 'sigma'.
-        dEsde_dSig = - Esde / self.sigma_
+        dEsde_dSig = - Esde / self._sigma
 
         # --->
         return Esde, (Ef, Edf), (dEsde_dm, dEsde_dS, dEsde_dth, dEsde_dSig)

@@ -1,44 +1,38 @@
 import numpy as np
 from numba import njit
-from src.var_bayes.variational import grad_Esde_dm_ds
 from scipy.linalg import cholesky, LinAlgError
+from src.var_bayes.variational import grad_Esde_dm_ds
 from src.dynamics.stochastic_process import StochasticProcess
 from src.numerics.utilities import my_trapz, ut_approx, chol_inv
 
 
 @njit
-def fwd_1(x):
+def fwd_1(x: np.ndarray) -> np.ndarray:
     # Shift forward by one.
     return np.roll(x, -1)
 # _end_def_
 
-
 @njit
-def bwd_1(x):
+def bwd_1(x: np.ndarray) -> np.ndarray:
     # Shift backward by one.
     return np.roll(x, +1)
 # _end_def_
 
-
 @njit
-def bwd_2(x):
+def bwd_2(x: np.ndarray) -> np.ndarray:
     # Shift backward by two.
     return np.roll(x, +2)
 # _end_def
 
-
 @njit
-def shift_vectors(x):
+def shift_vectors(x: np.ndarray) -> tuple:
     # Return ALL the shifted
     # vectors: (-1, +1, +2).
-    return np.roll(x, -1),\
-           np.roll(x, +1),\
-           np.roll(x, +2)
+    return np.roll(x, -1), np.roll(x, +1), np.roll(x, +2)
 # _end_def_
 
-
 @njit
-def E96_drift_dx(x):
+def E96_drift_dx(x: np.ndarray) -> np.ndarray:
     """
     Returns the mean value of the gradient of the drift
     function with respect to the state vector: <df(x)/dx>.
@@ -47,7 +41,6 @@ def E96_drift_dx(x):
 
     :return: mean gradient w.r.t. 'x' (dim_d x dim_d).
     """
-
     # Size of the state vector.
     dim_d = x.size
 
@@ -90,7 +83,7 @@ def E96_drift_dx(x):
 # _end_def_
 
 @njit
-def l96(x, u):
+def l96(x: np.ndarray, u: np.ndarray) -> np.ndarray:
     """
     The Lorenz 96 model function.
 
@@ -100,7 +93,6 @@ def l96(x, u):
 
     :return: One step ahead in the equation.
     """
-
     # Get the shifted values.
     fwd_1x, bwd_1x, bwd_2x = shift_vectors(x)
 
@@ -116,9 +108,9 @@ class Lorenz96(StochasticProcess):
     https://en.wikipedia.org/wiki/Lorenz_96_model
     """
 
-    __slots__ = ("sigma_", "theta_", "sig_inv", "dim_d")
+    __slots__ = ("_sigma", "_theta", "sig_inv", "dim_d")
 
-    def __init__(self, sigma, theta, r_seed=None, dim_d=40):
+    def __init__(self, sigma, theta, r_seed=None, dim_d: int = 40) -> None:
         """
         Default constructor of the L96 object.
 
@@ -150,17 +142,17 @@ class Lorenz96(StochasticProcess):
         self.dim_d = dim_d
 
         # Check the dimensions of the input.
-        if sigma.ndim == 0:
+        if np.isscalar(sigma):
             # Diagonal matrix (from scalar).
-            self.sigma_ = sigma * np.eye(dim_d)
+            self._sigma = sigma * np.eye(dim_d)
 
         elif sigma.ndim == 1:
             # Diagonal matrix (from vector).
-            self.sigma_ = np.diag(sigma)
+            self._sigma = np.diag(sigma)
 
         elif sigma.ndim == 2:
             # Full matrix.
-            self.sigma_ = sigma
+            self._sigma = sigma
 
         else:
             raise ValueError(f" {self.__class__.__name__}:"
@@ -168,36 +160,36 @@ class Lorenz96(StochasticProcess):
         # _end_if_
 
         # Check the dimensionality.
-        if self.sigma_.shape != (dim_d, dim_d):
+        if self._sigma.shape != (dim_d, dim_d):
             raise ValueError(f" {self.__class__.__name__}:"
-                             f" Wrong matrix dimensions: {self.sigma_.shape}")
+                             f" Wrong matrix dimensions: {self._sigma.shape}")
         # _end_if_
 
         # Check for positive definiteness.
-        if np.all(np.linalg.eigvals(self.sigma_) > 0.0):
+        if np.all(np.linalg.eigvals(self._sigma) > 0.0):
             # This is a better way to invert Sigma.
-            self.sig_inv, _ = chol_inv(self.sigma_)
+            self.sig_inv, _ = chol_inv(self._sigma)
         else:
             raise RuntimeError(f" {self.__class__.__name__}:"
-                               f" Noise matrix {self.sigma_} is not positive definite.")
+                               f" Noise matrix {self._sigma} is not positive definite.")
         # _end_if_
 
         # Store the drift vector.
-        self.theta_ = theta
+        self._theta = theta
     # _end_def_
 
     @property
-    def theta(self):
+    def theta(self) -> np.ndarray:
         """
         Accessor method.
 
         :return: the drift parameter.
         """
-        return self.theta_
+        return self._theta
     # _end_def_
 
     @theta.setter
-    def theta(self, new_value):
+    def theta(self, new_value: float) -> None:
         """
         Accessor method.
 
@@ -205,21 +197,21 @@ class Lorenz96(StochasticProcess):
 
         :return: None.
         """
-        self.theta_ = new_value
+        self._theta = new_value
     # _end_def_
 
     @property
-    def sigma(self):
+    def sigma(self) -> np.ndarray:
         """
         Accessor method.
 
         :return: the system noise parameter.
         """
-        return self.sigma_
+        return self._sigma
     # _end_def_
 
     @sigma.setter
-    def sigma(self, new_value):
+    def sigma(self, new_value: np.ndarray) -> None:
         """
         Accessor method.
 
@@ -227,28 +219,24 @@ class Lorenz96(StochasticProcess):
 
         :return: None.
         """
-
         # Check the dimensionality.
         if new_value.shape != (self.dim_d, self.dim_d):
             raise ValueError(f" {self.__class__.__name__}:"
                              f" Wrong matrix dimensions: {new_value.shape}")
-        # _end_if_
 
         # Check for positive definiteness.
-        if np.all(np.linalg.eigvals(new_value) > 0.0):
-            # Make the change.
-            self.sigma_ = new_value
-
-            # Update the inverse matrix.
-            self.sig_inv, _ = chol_inv(self.sigma_)
-        else:
+        if np.all(np.linalg.eigvals(new_value) <= 0.0):
             raise RuntimeError(f" {self.__class__.__name__}:"
                                f" Noise matrix {new_value} is not positive definite.")
-        # _end_if_
+        # Make the change.
+        self._sigma = new_value
+
+        # Update the inverse matrix.
+        self.sig_inv, _ = chol_inv(self._sigma)
     # _end_def_
 
     @property
-    def inverse_sigma(self):
+    def inverse_sigma(self) -> np.ndarray:
         """
         Accessor method.
 
@@ -257,7 +245,7 @@ class Lorenz96(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt=0.01):
+    def make_trajectory(self, t0, tf, dt: float = 0.01) -> None:
         """
         Generates a realizations of the Lorenz96 (40D)
         dynamical system, within a specified time-window.
@@ -270,7 +258,6 @@ class Lorenz96(StochasticProcess):
 
         :return: None.
         """
-
         # Create a time-window.
         tk = np.arange(t0, tf + dt, dt)
 
@@ -278,7 +265,7 @@ class Lorenz96(StochasticProcess):
         dim_t = tk.size
 
         # Default starting point.
-        x0 = self.theta_ * np.ones(self.dim_d)
+        x0 = self._theta * np.ones(self.dim_d)
 
         # Initial conditions time step.
         delta_t = 1.0e-3
@@ -288,7 +275,7 @@ class Lorenz96(StochasticProcess):
 
         # BURN IN:
         for t in range(5000):
-            x0 = x0 + l96(x0, self.theta_) * delta_t
+            x0 = x0 + l96(x0, self._theta) * delta_t
         # _end_for_
 
         # Allocate array.
@@ -299,14 +286,14 @@ class Lorenz96(StochasticProcess):
 
         # Compute the Cholesky decomposition of input matrix.
         try:
-            ek = cholesky(self.sigma_ * dt)
+            ek = cholesky(self._sigma * dt)
         except LinAlgError:
             # Show a warning message.
             print(" Warning : The input matrix was not positive definite."
                   " The diagonal elements will be used instead.")
 
             # If it fails use the diagonal only.
-            ek = np.sqrt(np.eye(self.dim_d) * self.sigma_ * dt)
+            ek = np.sqrt(np.eye(self.dim_d) * self._sigma * dt)
         # _end_try_
 
         # Random variables.
@@ -314,7 +301,7 @@ class Lorenz96(StochasticProcess):
 
         # Create the path by solving the "stochastic" Diff.Eq. iteratively.
         for t in range(1, dim_t):
-            x[t] = x[t - 1] + l96(x[t - 1], self.theta_) * dt + ek[t]
+            x[t] = x[t - 1] + l96(x[t - 1], self._theta) * dt + ek[t]
         # _end_for_
 
         # Store the sample path (trajectory).
@@ -324,7 +311,7 @@ class Lorenz96(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, obs_t):
+    def energy(self, linear_a, offset_b, m, s, obs_t) -> tuple:
         """
         Energy for the stochastic Lorenz 96 DE (dim_d = 40)
         and related quantities (including gradients).
@@ -349,7 +336,6 @@ class Lorenz96(StochasticProcess):
                  dEsde_dtheta : gradient of Esde w.r.t. the parameter theta.
                  dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
-
         # System dimensions.
         dim_d = self.dim_d
 

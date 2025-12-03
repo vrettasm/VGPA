@@ -9,9 +9,9 @@ class StochasticProcess(object):
 
     __slots__ = ("xt", "tk", "rand_g", "single_dimension")
 
-    def __init__(self, r_seed=None, single_dim=True):
+    def __init__(self, r_seed = None, single_dim: bool = True) -> None:
         """
-        Default constructor.
+        Default initializer.
 
         :param r_seed: random seed.
 
@@ -19,7 +19,7 @@ class StochasticProcess(object):
         """
 
         # Create a random number generator.
-        if r_seed is not None:
+        if r_seed:
             self.rand_g = default_rng(SeedSequence(r_seed))
         else:
             self.rand_g = default_rng()
@@ -36,7 +36,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @property
-    def single_dim(self):
+    def single_dim(self) -> bool:
         """
         Accessor method.
 
@@ -62,7 +62,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @sample_path.setter
-    def sample_path(self, new_value):
+    def sample_path(self, new_value) -> None:
         """
         Accessor method.
 
@@ -90,7 +90,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @time_window.setter
-    def time_window(self, new_value):
+    def time_window(self, new_value) -> None:
         """
         Accessor method.
 
@@ -134,8 +134,7 @@ class StochasticProcess(object):
         from a sample path (trajectory). The observations are
         collected at equidistant time points.
 
-        :param n_obs: Observations density (# of observations
-        per time unit).
+        :param n_obs: Observations density (observations per time unit).
 
         :param rn: Observation noise (co)-variance.
 
@@ -180,7 +179,7 @@ class StochasticProcess(object):
         obs_y = np.take(self.xt, obs_t, axis=0)
 
         # Check if a mask has been given.
-        if h_mask is not None:
+        if h_mask:
             # Here we have (d < D)
             obs_y = obs_y[:, h_mask]
         # _end_if_
