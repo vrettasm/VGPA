@@ -11,7 +11,7 @@ __author__ = "Michail Vrettas, PhD"
 __email__ = "michail.vrettas@gmail.com"
 
 
-def validateInputParametersFile(filename):
+def validate_input_parameters_file(filename):
     """
     Validates an input (json) file to check if
     it contains the required keys. It does not
@@ -80,7 +80,7 @@ def main(params_file=None, data_file=None):
             params_file = Path(params_file)
 
             # Check if everything is ok.
-            params = validateInputParametersFile(params_file)
+            params = validate_input_parameters_file(params_file)
         except ValueError as e0:
             # Show the error message.
             print(e0)
