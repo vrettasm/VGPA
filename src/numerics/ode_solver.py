@@ -1,3 +1,5 @@
+import numpy as np
+
 
 class OdeSolver(object):
     """
@@ -26,7 +28,7 @@ class OdeSolver(object):
         self.single_dim = single_dim
     # _end_def_
 
-    def fun_mt(self, mt, at, bt):
+    def fun_mt(self, mt: np.ndarray, at: np.ndarray, bt: np.ndarray) -> np.ndarray:
         """
         Auxiliary mean function.
 
@@ -42,7 +44,7 @@ class OdeSolver(object):
         return -(at * mt) + bt if self.single_dim else -at.dot(mt) + bt
     # _end_def_
 
-    def fun_st(self, st, at, sn):
+    def fun_st(self, st: np.ndarray, at: np.ndarray, sn: np.ndarray) -> np.ndarray:
         """
         Auxiliary co-variance function.
 
@@ -58,7 +60,8 @@ class OdeSolver(object):
         return -(2.0 * at * st) + sn if self.single_dim else -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
 
-    def fun_lam(self, df_dm, at, lamt):
+    def fun_lam(self, df_dm: np.ndarray, at: np.ndarray,
+                lam_t: np.ndarray) -> np.ndarray:
         """
         Auxiliary Lagrange function.
 
@@ -66,15 +69,16 @@ class OdeSolver(object):
 
         :param at: variational parameter a(t).
 
-        :param lamt: Lagrange multiplier lam(t).
+        :param lam_t: Lagrange multiplier lam(t).
 
         :return: - dEf_dm + (lam * A.T)
         """
         # Switch according to single_dim.
-        return -df_dm + (lamt * at) if self.single_dim else -df_dm + lamt.dot(at.T)
+        return -df_dm + (lam_t * at) if self.single_dim else -df_dm + lam_t.dot(at.T)
     # _end_def_
 
-    def fun_psi(self, df_ds, at, psit):
+    def fun_psi(self, df_ds: np.ndarray, at: np.ndarray,
+                psi_t: np.ndarray) -> np.ndarray:
         """
         Auxiliary Lagrange function.
 
@@ -82,12 +86,12 @@ class OdeSolver(object):
 
         :param at: variational parameter a(t).
 
-        :param psit: Lagrange multiplier psi(t).
+        :param psi_t: Lagrange multiplier psi(t).
 
         :return: - dEf_dS + (psi * A) + (A.T * psi).
         """
         # Switch according to single_dim.
-        return -df_ds + (2.0 * psit * at) if self.single_dim else -df_ds + psit.dot(at) + at.T.dot(psit)
+        return -df_ds + (2.0 * psi_t * at) if self.single_dim else -df_ds + psi_t.dot(at) + at.T.dot(psi_t)
     # _end_def_
 
 # _end_class_

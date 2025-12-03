@@ -22,7 +22,8 @@ class RungeKutta2(OdeSolver):
         super().__init__(dt, single_dim)
     # _end_def_
 
-    def solve_fwd(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd(self, lin_a: np.ndarray, off_b: np.ndarray,
+                  m0: np.ndarray, s0: np.ndarray, sigma: np.ndarray):
         """
         Runge-Kutta (2) integration method. This provides the actual solution.
 
@@ -100,7 +101,9 @@ class RungeKutta2(OdeSolver):
         return mt, st
     # _end_def_
 
-    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
+    def solve_bwd(self, lin_a: np.ndarray,
+                  dEsde_dm: np.ndarray, dEsde_ds: np.ndarray,
+                  dEobs_dm: np.ndarray, dEobs_ds: np.ndarray):
         """
         RK2 integration method. Provides the actual solution.
 
@@ -165,8 +168,8 @@ class RungeKutta2(OdeSolver):
         for t in range(dim_n - 1, 0, -1):
             # Get the values at time 't'.
             at = lin_a[t]
-            lamt = lam[t]
-            psit = psi[t]
+            lam_t = lam[t]
+            psi_t = psi[t]
 
             # Get the midpoints at time 't - 0.5*dt'.
             ak = ak_mid[t-1]
@@ -174,16 +177,16 @@ class RungeKutta2(OdeSolver):
             dEsk = dEsk_mid[t-1]
 
             # Lambda (backward) propagation.
-            lamk = lamt - h * fun_lam(dEsde_dm[t], at, lamt)
+            lamk = lam_t - h * fun_lam(dEsde_dm[t], at, lam_t)
 
             # NEW "lambda" point.
-            lam[t - 1] = lamt - dt * fun_lam(dEmk, ak, lamk) + dEobs_dm[t - 1]
+            lam[t - 1] = lam_t - dt * fun_lam(dEmk, ak, lamk) + dEobs_dm[t - 1]
 
             # Psi (backward) propagation.
-            psik = psit - h * fun_psi(dEsde_ds[t], at, psit)
+            psik = psi_t - h * fun_psi(dEsde_ds[t], at, psi_t)
 
             # NEW "Psi" point.
-            psi[t - 1] = psit - dt * fun_psi(dEsk, ak, psik) + dEobs_ds[t - 1]
+            psi[t - 1] = psi_t - dt * fun_psi(dEsk, ak, psik) + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.

@@ -22,7 +22,8 @@ class RungeKutta4(OdeSolver):
         super().__init__(dt, single_dim)
     # _end_def_
 
-    def solve_fwd(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd(self, lin_a: np.ndarray, off_b: np.ndarray,
+                  m0: np.ndarray, s0: np.ndarray, sigma: np.ndarray):
         """
         Runge-Kutta (4) integration method. This provides the actual solution.
 
@@ -111,7 +112,9 @@ class RungeKutta4(OdeSolver):
         return mt, st
     # _end_def_
 
-    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
+    def solve_bwd(self, lin_a: np.ndarray,
+                  dEsde_dm: np.ndarray, dEsde_ds: np.ndarray,
+                  dEobs_dm: np.ndarray, dEobs_ds: np.ndarray):
         """
         RK4 integration method. Provides the actual solution.
 
@@ -176,8 +179,8 @@ class RungeKutta4(OdeSolver):
         for t in range(dim_n - 1, 0, -1):
             # Get the values at time 't'.
             at = lin_a[t]
-            lamt = lam[t]
-            psit = psi[t]
+            lam_t = lam[t]
+            psi_t = psi[t]
 
             # Get the midpoints at time 't - 0.5*dt'.
             ak = ak_mid[t-1]
@@ -185,22 +188,22 @@ class RungeKutta4(OdeSolver):
             dEsk = dEsk_mid[t-1]
 
             # Lambda (backward) propagation: Intermediate steps.
-            K1 = fun_lam(dEsde_dm[t], at, lamt)
-            K2 = fun_lam(dEmk, ak, (lamt - h * K1))
-            K3 = fun_lam(dEmk, ak, (lamt - h * K2))
-            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lamt - dt * K3))
+            K1 = fun_lam(dEsde_dm[t], at, lam_t)
+            K2 = fun_lam(dEmk, ak, (lam_t - h * K1))
+            K3 = fun_lam(dEmk, ak, (lam_t - h * K2))
+            K4 = fun_lam(dEsde_dm[t - 1], lin_a[t - 1], (lam_t - dt * K3))
 
             # NEW "Lambda" point.
-            lam[t - 1] = lamt - dt * (K1 + 2.0 * (K2 + K3) + K4) / 6.0 + dEobs_dm[t - 1]
+            lam[t - 1] = lam_t - dt * (K1 + 2.0 * (K2 + K3) + K4) / 6.0 + dEobs_dm[t - 1]
 
             # Psi (backward) propagation: Intermediate steps.
-            L1 = fun_psi(dEsde_ds[t], at, psit)
-            L2 = fun_psi(dEsk, ak, (psit - h * L1))
-            L3 = fun_psi(dEsk, ak, (psit - h * L2))
-            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psit - dt * L3))
+            L1 = fun_psi(dEsde_ds[t], at, psi_t)
+            L2 = fun_psi(dEsk, ak, (psi_t - h * L1))
+            L3 = fun_psi(dEsk, ak, (psi_t - h * L2))
+            L4 = fun_psi(dEsde_ds[t - 1], lin_a[t - 1], (psi_t - dt * L3))
 
             # NEW "Psi" point.
-            psi[t - 1] = psit - dt * (L1 + 2.0 * (L2 + L3) + L4) / 6.0 + dEobs_ds[t - 1]
+            psi[t - 1] = psi_t - dt * (L1 + 2.0 * (L2 + L3) + L4) / 6.0 + dEobs_ds[t - 1]
         # _end_for_
 
         # Lagrange multipliers.

@@ -20,7 +20,7 @@ class SCG(object):
 
     __slots__ = ("f", "df", "nit", "x_tol", "f_tol", "display", "stats")
 
-    def __init__(self, f, df, *args):
+    def __init__(self, f, df, *args) -> None:
         """
         Default constructor the SCG class.
 
@@ -72,7 +72,7 @@ class SCG(object):
                       "df_eval": 0.0, "beta": np.zeros(self.nit)}
     # _end_def_
 
-    def __call__(self, x0, *args):
+    def __call__(self, x0: np.ndarray, *args):
         """
         The call of the object itself will enable the optimization.
 
@@ -190,8 +190,8 @@ class SCG(object):
             self.stats["f_eval"] += 1
 
             # Calculate the new comparison ratio.
-            Delta = 2.0 * (f_new - f_old) / (alpha * mu)
-            if Delta >= 0.0:
+            delta = 2.0 * (f_new - f_old) / (alpha * mu)
+            if delta >= 0.0:
                 success = 1
                 count_success += 1
                 x, f_now, g_now = _copy(x_new), _copy(f_new), _copy(grad_new)
@@ -252,11 +252,11 @@ class SCG(object):
             # _end_if_
 
             # Adjust beta according to comparison ratio.
-            if Delta < 0.25:
+            if delta < 0.25:
                 beta = np.minimum(4.0 * beta, beta_max)
             # _end_if_
 
-            if Delta > 0.75:
+            if delta > 0.75:
                 beta = np.maximum(0.5 * beta, beta_min)
             # _end_if_
 
@@ -285,7 +285,7 @@ class SCG(object):
     # _end_def_
 
     @property
-    def statistics(self):
+    def statistics(self) -> dict:
         """
         Accessor method.
 
@@ -294,7 +294,8 @@ class SCG(object):
         return self.stats
     # _end_def_
 
-    def check_gradient_function(self, x, tol=1.0e-4):
+    def check_gradient_function(self, x: np.ndarray,
+                                tol: float = 1.0e-4) -> None:
         """
         Tests whether the gradient function is accurate,
         compared to the numerical differentiation value.
@@ -311,23 +312,23 @@ class SCG(object):
 
         # Analytical gradient calculation.
         print(" > Calculating gradient(s) analytically ...", end="")
-        grad_A = self.df(x.copy(), eval_fun=True)
+        grad_a = self.df(x.copy(), eval_fun=True)
         print(" done.")
 
         # Numerical gradient calculation.
         print(" > Calculating gradient(s) numerically  ...", end="")
-        grad_N = finite_diff(self.f, x.copy())
+        grad_n = finite_diff(self.f, x.copy())
         print(" done.")
 
         # Get their norms (L2).
-        norm_A = np.linalg.norm(grad_A)
-        norm_N = np.linalg.norm(grad_N)
+        norm_a = np.linalg.norm(grad_a)
+        norm_n = np.linalg.norm(grad_n)
 
         # Norm(A-N)
-        norm_diff = np.linalg.norm(grad_A - grad_N)
+        norm_diff = np.linalg.norm(grad_a - grad_n)
 
         # Get their relative difference.
-        rel_diff = norm_diff / (norm_A + norm_N)
+        rel_diff = norm_diff / (norm_a + norm_n)
 
         # Display info.
         print(" > Relative difference is: {0:.4}.".format(rel_diff))
@@ -343,7 +344,7 @@ class SCG(object):
     # _end_def_
 
     # Auxiliary.
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Override to print a readable string presentation
         of the object. This will include its id(), along
@@ -351,7 +352,6 @@ class SCG(object):
 
         :return: a string representation of a SCG object.
         """
-
         return " SCG Id({0}):" \
                " Function={1}, Gradient={2}, Max-It={3}," \
                " x_tol={4}, f_tol={5}".format(id(self), self.f, self.df,

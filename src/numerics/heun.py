@@ -25,7 +25,8 @@ class Heun(OdeSolver):
         super().__init__(dt, single_dim)
     # _end_def_
 
-    def solve_fwd(self, lin_a, off_b, m0, s0, sigma):
+    def solve_fwd(self, lin_a: np.ndarray, off_b: np.ndarray,
+                  m0: np.ndarray, s0: np.ndarray, sigma: np.ndarray):
         """
         Heun integration method. This provides the actual solution.
 
@@ -109,7 +110,9 @@ class Heun(OdeSolver):
         return mt, st
     # _end_def_
 
-    def solve_bwd(self, lin_a, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
+    def solve_bwd(self, lin_a: np.ndarray,
+                  dEsde_dm: np.ndarray, dEsde_ds: np.ndarray,
+                  dEobs_dm: np.ndarray, dEobs_ds: np.ndarray):
         """
         Heun integration method. Provides the actual solution.
 
