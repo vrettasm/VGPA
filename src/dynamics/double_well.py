@@ -20,7 +20,7 @@ class DoubleWell(StochasticProcess):
 
     __slots__ = ("_sigma", "_theta", "sig_inv")
 
-    def __init__(self, sigma, theta, r_seed=None) -> None:
+    def __init__(self, sigma: float, theta: float, r_seed=None) -> None:
         """
         Default constructor of the DW object.
 
@@ -52,7 +52,7 @@ class DoubleWell(StochasticProcess):
     # _end_def_
 
     @property
-    def theta(self) -> np.ndarray:
+    def theta(self) -> float:
         """
         Accessor method.
 
@@ -62,7 +62,7 @@ class DoubleWell(StochasticProcess):
     # _end_def_
 
     @theta.setter
-    def theta(self, new_value) -> None:
+    def theta(self, new_value: float) -> None:
         """
         Accessor method.
 
@@ -84,7 +84,7 @@ class DoubleWell(StochasticProcess):
     # _end_def_
 
     @sigma.setter
-    def sigma(self, new_value) -> None:
+    def sigma(self, new_value: float) -> None:
         """
         Accessor method.
 
@@ -115,10 +115,10 @@ class DoubleWell(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt: float = 0.01) -> None:
+    def make_trajectory(self, t0: float, tf: float, dt: float = 0.01) -> None:
         """
-        Generates a realizations of the double well (DW)
-        dynamical system, within a specified time-window.
+        Generates a realizations of the double well (DW) dynamical system,
+        within a specified time-window.
 
         :param t0: initial time point.
 
@@ -166,7 +166,8 @@ class DoubleWell(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, obs_t):
+    def energy(self, linear_a: np.ndarray, offset_b: np.ndarray,
+               m: np.ndarray, s: np.ndarray, obs_t: np.ndarray):
         """
         Energy for the Double-Well SDE and related quantities.
 
@@ -223,20 +224,20 @@ class DoubleWell(StochasticProcess):
 
         # Derivatives of higher order Gaussian moments
         # w.r.t. marginal moments 'm(t)' and 's(t)'.
-        Dm2 = gauss_mom.dM(order=2)
-        Ds2 = gauss_mom.dS(order=2)
+        Dm2 = gauss_mom.dm(order=2)
+        Ds2 = gauss_mom.ds(order=2)
 
         # ---
-        Dm3 = gauss_mom.dM(order=3)
-        Ds3 = gauss_mom.dS(order=3)
+        Dm3 = gauss_mom.dm(order=3)
+        Ds3 = gauss_mom.ds(order=3)
 
         # ---
-        Dm4 = gauss_mom.dM(order=4)
-        Ds4 = gauss_mom.dS(order=4)
+        Dm4 = gauss_mom.dm(order=4)
+        Ds4 = gauss_mom.ds(order=4)
 
         # ---
-        Dm6 = gauss_mom.dM(order=6)
-        Ds6 = gauss_mom.dS(order=6)
+        Dm6 = gauss_mom.dm(order=6)
+        Ds6 = gauss_mom.ds(order=6)
 
         # Gradients of Esde w.r.t. 'means'.
         dEsde_dm = 0.5 * (16.0 * Dm6 - 8.0 * c * Dm4 +

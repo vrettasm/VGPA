@@ -1,8 +1,8 @@
 import numpy as np
 from numba import njit
-from src.dynamics.stochastic_process import StochasticProcess
-from src.numerics.utilities import my_trapz, chol_inv
 from scipy.linalg import cholesky, LinAlgError
+from src.numerics.utilities import my_trapz, chol_inv
+from src.dynamics.stochastic_process import StochasticProcess
 
 
 @njit
@@ -43,7 +43,8 @@ class Lorenz63(StochasticProcess):
 
     __slots__ = ("_sigma", "_theta", "sig_inv")
 
-    def __init__(self, sigma, theta, r_seed=None) -> None:
+    def __init__(self, sigma: np.ndarray, theta: np.ndarray,
+                 r_seed=None) -> None:
         """
         Default constructor of the L63 object.
 
@@ -111,7 +112,7 @@ class Lorenz63(StochasticProcess):
     # _end_def_
 
     @theta.setter
-    def theta(self, new_value) -> None:
+    def theta(self, new_value: np.ndarray) -> None:
         """
         Accessor method.
 
@@ -133,7 +134,7 @@ class Lorenz63(StochasticProcess):
     # _end_def_
 
     @sigma.setter
-    def sigma(self, new_value) -> None:
+    def sigma(self, new_value: np.ndarray) -> None:
         """
         Accessor method.
 
@@ -170,7 +171,7 @@ class Lorenz63(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt: float = 0.01) -> None:
+    def make_trajectory(self, t0: float, tf: float, dt: float = 0.01) -> None:
         """
         Generates a realizations of the Lorenz63 (3D)
         dynamical system, within a specified time-window.
@@ -233,7 +234,8 @@ class Lorenz63(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, obs_t):
+    def energy(self, linear_a: np.ndarray, offset_b: np.ndarray,
+               m: np.ndarray, s: np.ndarray, obs_t: np.ndarray):
         """
         Energy for the stochastic Lorenz 63 DE (3-dimensional)
         and related quantities (including gradients).
@@ -265,10 +267,10 @@ class Lorenz63(StochasticProcess):
         dt = self.time_step
 
         # Inverse System Noise.
-        inv_Sigma = self.sig_inv
+        inv_sigma = self.sig_inv
 
         # Diagonal elements of inverse Sigma.
-        diag_sig_inv = np.diag(inv_Sigma)
+        diag_sig_inv = np.diag(inv_sigma)
 
         # Energy from the sde.
         Esde = np.zeros(dim_t)
@@ -337,13 +339,14 @@ class Lorenz63(StochasticProcess):
         dEsde_dtheta = diag_sig_inv * my_trapz(dEsde_dth, dt, obs_t)
 
         # Final adjustments for the System noise.
-        dEsde_dsigma = - 0.5 * inv_Sigma.dot(np.diag(my_trapz(dEsde_dSig, dt, obs_t))).dot(inv_Sigma)
+        dEsde_dsigma = - 0.5 * inv_sigma.dot(np.diag(my_trapz(dEsde_dSig, dt, obs_t))).dot(inv_sigma)
 
         # --->
         return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dtheta, dEsde_dsigma)
     # _end_def_
 
-    def energy_dm_ds(self, at, bt, mt, st, diag_sig_inv):
+    def energy_dm_ds(self, at: np.ndarray, bt: np.ndarray,
+                     mt: np.ndarray, st: np.ndarray, diag_sig_inv: np.ndarray):
         """
         Returns the Energy of the Lorenz 3D system and related
         gradients. More specifically, it returns the gradient
@@ -566,7 +569,8 @@ class Lorenz63(StochasticProcess):
 
     # _end_def_
 
-    def Efg_drift_theta(self, at, bt, mt, st):
+    def Efg_drift_theta(self, at: np.ndarray, bt: np.ndarray,
+                        mt: np.ndarray, st: np.ndarray):
         """
         Returns expectation : <(f-g)' * (df/dtheta)>.
         It is used when estimating the drift parameters.

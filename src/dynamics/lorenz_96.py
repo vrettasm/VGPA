@@ -110,7 +110,8 @@ class Lorenz96(StochasticProcess):
 
     __slots__ = ("_sigma", "_theta", "sig_inv", "dim_d")
 
-    def __init__(self, sigma, theta, r_seed=None, dim_d: int = 40) -> None:
+    def __init__(self, sigma: np.ndarray, theta: float,
+                 r_seed=None, dim_d: int = 40) -> None:
         """
         Default constructor of the L96 object.
 
@@ -189,7 +190,7 @@ class Lorenz96(StochasticProcess):
     # _end_def_
 
     @theta.setter
-    def theta(self, new_value: float) -> None:
+    def theta(self, new_value: np.ndarray) -> None:
         """
         Accessor method.
 
@@ -245,7 +246,8 @@ class Lorenz96(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt: float = 0.01) -> None:
+    def make_trajectory(self, t0: float, tf: float,
+                        dt: float = 0.01) -> None:
         """
         Generates a realizations of the Lorenz96 (40D)
         dynamical system, within a specified time-window.
@@ -311,7 +313,8 @@ class Lorenz96(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, obs_t) -> tuple:
+    def energy(self, linear_a: np.ndarray, offset_b: np.ndarray,
+               m: np.ndarray, s: np.ndarray, obs_t: np.ndarray):
         """
         Energy for the stochastic Lorenz 96 DE (dim_d = 40)
         and related quantities (including gradients).
@@ -434,7 +437,7 @@ class Lorenz96(StochasticProcess):
         return Esde, (Ef, Edf), (dEsde_dm, dEsde_ds, dEsde_dth, dEsde_dSig)
     # _end_def_
 
-    def E96_drift(self, mt, st):
+    def E96_drift(self, mt: np.ndarray, st: np.ndarray):
         """
         Returns the mean value of the drift function <f(x)>.
 

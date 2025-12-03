@@ -14,7 +14,7 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
     __slots__ = ("_sigma", "_theta", "sig_inv")
 
-    def __init__(self, sigma, theta, r_seed=None) -> None:
+    def __init__(self, sigma: float, theta: float, r_seed=None) -> None:
         """
         Default constructor of the DW object.
 
@@ -97,7 +97,6 @@ class OrnsteinUhlenbeck(StochasticProcess):
 
         :return: None.
         """
-
         # Accept only positive values.
         if new_value <= 0.0:
             # Raise an error with a message.
@@ -120,7 +119,8 @@ class OrnsteinUhlenbeck(StochasticProcess):
         return self.sig_inv
     # _end_def_
 
-    def make_trajectory(self, t0, tf, dt: float = 0.01, mu: float = 0.0) -> None:
+    def make_trajectory(self, t0: float, tf: float,
+                        dt: float = 0.01, mu: float = 0.0) -> None:
         """
         Generates a realizations of the Ornstein - Uhlenbeck
         (OU) dynamical system, within a specified time-window.
@@ -162,7 +162,8 @@ class OrnsteinUhlenbeck(StochasticProcess):
         self.time_window = tk
     # _end_def_
 
-    def energy(self, linear_a, offset_b, m, s, obs_t) -> tuple:
+    def energy(self, linear_a: np.ndarray, offset_b: np.ndarray,
+               m: np.ndarray, s: np.ndarray, obs_t: np.ndarray):
         """
         Energy for the OU SDE and related quantities (including gradients).
 
@@ -188,13 +189,13 @@ class OrnsteinUhlenbeck(StochasticProcess):
             dEsde_dsigma : gradient of Esde w.r.t. the parameter Sigma.
         """
         # Gaussian Moments object.
-        gauss_mom = GaussianMoments(m, s)
+        gauss_moments = GaussianMoments(m, s)
 
         # Get the time step from the parent class.
         dt = self.time_step
 
         # Higher order Gaussian Moments.
-        Ex2 = gauss_mom(order=2)
+        Ex2 = gauss_moments(order=2)
 
         # Pre-compute these quantities only once.
         Q1 = (self._theta - linear_a) ** 2

@@ -17,7 +17,6 @@ class StochasticProcess(object):
 
         :param single_dim: single dimensional flag.
         """
-
         # Create a random number generator.
         if r_seed:
             self.rand_g = default_rng(SeedSequence(r_seed))
@@ -46,7 +45,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @property
-    def sample_path(self):
+    def sample_path(self) -> np.ndarray:
         """
         Accessor method.
 
@@ -62,7 +61,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @sample_path.setter
-    def sample_path(self, new_value) -> None:
+    def sample_path(self, new_value: np.ndarray) -> None:
         """
         Accessor method.
 
@@ -74,7 +73,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @property
-    def time_window(self):
+    def time_window(self) -> np.ndarray:
         """
         Accessor method.
 
@@ -90,7 +89,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @time_window.setter
-    def time_window(self, new_value) -> None:
+    def time_window(self, new_value: np.ndarray) -> None:
         """
         Accessor method.
 
@@ -102,7 +101,7 @@ class StochasticProcess(object):
     # _end_def_
 
     @property
-    def time_step(self):
+    def time_step(self) -> np.ndarray:
         """
         Accessor method.
 
@@ -128,7 +127,7 @@ class StochasticProcess(object):
         return self.rand_g
     # _end_def_
 
-    def collect_obs(self, n_obs, rn, h_mask=None):
+    def collect_obs(self, n_obs: int, rn: np.ndarray, h_mask=None):
         """
         This function collects a number of noisy observations
         from a sample path (trajectory). The observations are
