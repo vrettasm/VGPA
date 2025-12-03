@@ -13,7 +13,7 @@ class Heun(OdeSolver):
 
     """
 
-    def __init__(self, dt, single_dim):
+    def __init__(self, dt: float, single_dim: bool) -> None:
         """
         Default constructor.
 
@@ -21,7 +21,6 @@ class Heun(OdeSolver):
 
         :param single_dim: flags the ode as 1D or nD.
         """
-
         # Call the constructor of the parent class.
         super().__init__(dt, single_dim)
     # _end_def_
@@ -43,7 +42,6 @@ class Heun(OdeSolver):
         :return: 1) mt: posterior means values (dim_n x dim_d).
                  2) st: posterior variance values (dim_n x dim_d x dim_d).
         """
-
         # Pre-allocate memory according to single_dim.
         if self.single_dim:
             # Number of discrete time points.
@@ -128,7 +126,6 @@ class Heun(OdeSolver):
         :return: 1) lam: Lagrange multipliers for the mean  values (dim_n x dim_d),
                  2) psi: Lagrange multipliers for the var values (dim_n x dim_d x dim_d).
         """
-
         # Pre-allocate memory according to single_dim.
         if self.single_dim:
             # Number of discrete points.

@@ -10,7 +10,7 @@ class RungeKutta4(OdeSolver):
 
     """
 
-    def __init__(self, dt, single_dim):
+    def __init__(self, dt: float, single_dim: bool) -> None:
         """
         Default constructor.
 
@@ -18,7 +18,6 @@ class RungeKutta4(OdeSolver):
 
         :param single_dim: flags the ode as 1D or nD.
         """
-
         # Call the constructor of the parent class.
         super().__init__(dt, single_dim)
     # _end_def_

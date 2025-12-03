@@ -6,7 +6,7 @@ class OdeSolver(object):
 
     __slots__ = ("dt", "single_dim")
 
-    def __init__(self, dt=0.01, single_dim=True):
+    def __init__(self, dt: float = 0.01, single_dim: bool = True) -> None:
         """
         Default (parent) class constructor.
 
@@ -16,12 +16,11 @@ class OdeSolver(object):
         """
 
         # Check if time step is positive.
-        if dt > 0.0:
-            self.dt = dt
-        else:
+        if dt <= 0.0:
             raise ValueError(f" {self.__class__.__name__}:"
                              f" Discrete time step should be positive --> {dt}.")
-        # _end_if_
+        # Store the time discretization step.
+        self.dt = dt
 
         # Store the boolean flag.
         self.single_dim = single_dim
@@ -39,12 +38,8 @@ class OdeSolver(object):
 
         :return: - (A * m.T) + B
         """
-
         # Switch according to single_dim.
-        if self.single_dim:
-            return -(at * mt) + bt
-        else:
-            return -at.dot(mt) + bt
+        return -(at * mt) + bt if self.single_dim else -at.dot(mt) + bt
     # _end_def_
 
     def fun_st(self, st, at, sn):
@@ -59,12 +54,8 @@ class OdeSolver(object):
 
         :return: - (A * S) - (S * A.T) + Sigma
         """
-
         # Switch according to single_dim.
-        if self.single_dim:
-            return -(2.0 * at * st) + sn
-        else:
-            return -at.dot(st) - st.dot(at.T) + sn
+        return -(2.0 * at * st) + sn if self.single_dim else -at.dot(st) - st.dot(at.T) + sn
     # _end_def_
 
     def fun_lam(self, df_dm, at, lamt):
@@ -79,12 +70,8 @@ class OdeSolver(object):
 
         :return: - dEf_dm + (lam * A.T)
         """
-
         # Switch according to single_dim.
-        if self.single_dim:
-            return -df_dm + (lamt * at)
-        else:
-            return -df_dm + lamt.dot(at.T)
+        return -df_dm + (lamt * at) if self.single_dim else -df_dm + lamt.dot(at.T)
     # _end_def_
 
     def fun_psi(self, df_ds, at, psit):
@@ -99,12 +86,8 @@ class OdeSolver(object):
 
         :return: - dEf_dS + (psi * A) + (A.T * psi).
         """
-
         # Switch according to single_dim.
-        if self.single_dim:
-            return -df_ds + (2.0 * psit * at)
-        else:
-            return -df_ds + psit.dot(at) + at.T.dot(psit)
+        return -df_ds + (2.0 * psit * at) if self.single_dim else -df_ds + psit.dot(at) + at.T.dot(psit)
     # _end_def_
 
 # _end_class_
