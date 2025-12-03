@@ -11,9 +11,9 @@ class BwdOde(object):
 
     __slots__ = ("dt", "method", "solver")
 
-    def __init__(self, dt, method, single_dim=True):
+    def __init__(self, dt: float, method: str, single_dim: bool = True) -> None:
         """
-        Default constructor of backwards ode solver.
+        Default initializer of backwards ODE solver.
 
         :param dt: discrete time step.
 
@@ -38,8 +38,8 @@ class BwdOde(object):
                              f" Integration method is unknown -> {method}.")
         # _end_try_
 
-        # Copy of the method name (for the __str__).
-        self.method = method
+        # Copy of the method name.
+        self.method = method_str
     # _end_def_
 
     def __call__(self, at, dEsde_dm, dEsde_ds, dEobs_dm, dEobs_ds):
@@ -65,7 +65,7 @@ class BwdOde(object):
     # _end_def_
 
     # Auxiliary.
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Override to print a readable string presentation of
         the object. This will include its id(), along with
