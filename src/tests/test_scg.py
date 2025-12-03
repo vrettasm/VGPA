@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from numerics.optim_scg import SCG
-from numerics.utilities import finite_diff
+from src.numerics.optim_scg import SCG
+from src.numerics.utilities import finite_diff
 
 #
 # NOTE: THESE TESTS WILL FAIL UNLESS WE CHANGE THE FUNCTION CALL

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from var_bayes.gaussian_moments import GaussianMoments
+from src.var_bayes.gaussian_moments import GaussianMoments
 
 class TestGaussianMoments(unittest.TestCase):
 

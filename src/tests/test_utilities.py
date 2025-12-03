@@ -2,8 +2,8 @@ import unittest
 import numpy as np
 from numpy.linalg import det
 from scipy.integrate import trapz as sp_trapezoid
-from numerics.utilities import (finite_diff, log_det, safe_log,
-                                my_trapz, chol_inv)
+from src.numerics.utilities import (finite_diff, log_det, safe_log,
+                                    my_trapz, chol_inv)
 
 class TestUtilities(unittest.TestCase):
     @classmethod
