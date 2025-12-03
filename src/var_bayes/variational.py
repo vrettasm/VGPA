@@ -13,7 +13,7 @@ class VarGP(object):
                  "output")
 
     def __init__(self, model, m0, s0, fwd_ode, bwd_ode, likelihood,
-                 kl0, obs_y, obs_t):
+                 kl0, obs_y, obs_t) -> None:
         """
         Default constructor of VGPA object.
 

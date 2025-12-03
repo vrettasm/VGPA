@@ -9,7 +9,7 @@ class PriorKL0(object):
 
     __slots__ = ("mu0", "tau0", "single_dim")
 
-    def __init__(self, mu0, tau0, single_dim=True):
+    def __init__(self, mu0, tau0, single_dim: bool = True) -> None:
         """
         Default constructor.
 
@@ -17,7 +17,6 @@ class PriorKL0(object):
 
         :param tau0: prior moment for the co-variance (dim_d x dim_d).
         """
-
         # Prior mean values (t=0).
         self.mu0 = np.asarray(mu0)
 
@@ -41,10 +40,10 @@ class PriorKL0(object):
         :return: energy of the initial state KL0, (scalar).
         """
         # Switch according to the system dimensions.
-        return self.gauss_1D(m0, s0) if self.single_dim else self.gauss_nD(m0, s0)
+        return self.gauss_1d(m0, s0) if self.single_dim else self.gauss_nd(m0, s0)
     # _end_def_
 
-    def gauss_1D(self, m0, s0):
+    def gauss_1d(self, m0: np.ndarray, s0: np.ndarray) -> np.ndarray:
         """
         1D Gaussian version.
 
@@ -65,7 +64,7 @@ class PriorKL0(object):
         return kl0
     # _end_def_
 
-    def gauss_nD(self, m0, s0):
+    def gauss_nd(self, m0: np.ndarray, s0: np.ndarray) -> np.ndarray:
         """
         nD Gaussian version.
 
@@ -108,12 +107,13 @@ class PriorKL0(object):
         """
         # Switch according to the system dimensions.
         if self.single_dim:
-            return self.gradients_1D(m0, s0, lam0, psi0)
+            return self.gradients_1d(m0, s0, lam0, psi0)
         else:
-            return self.gradients_nD(m0, s0, lam0, psi0)
+            return self.gradients_nd(m0, s0, lam0, psi0)
     # _end_def_
 
-    def gradients_1D(self, m0, s0, lam0, psi0):
+    def gradients_1d(self, m0: np.ndarray, s0: np.ndarray,
+                     lam0: np.ndarray, psi0: np.ndarray):
         """
         1D Gradient of KL0.
 
@@ -140,7 +140,8 @@ class PriorKL0(object):
         return dKL0_dm0, dKL0_ds0
     # _end_def_
 
-    def gradients_nD(self, m0, s0, lam0, psi0):
+    def gradients_nd(self, m0: np.ndarray, s0: np.ndarray,
+                     lam0: np.ndarray, psi0: np.ndarray):
         """
         nD Gradient of KL0.
 

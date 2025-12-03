@@ -12,10 +12,10 @@ class GaussianMoments(object):
 
     __slots__ = ("m_arr", "v_arr", "n_size")
 
-    def __init__(self, m_arr, v_arr):
+    def __init__(self, m_arr: np.ndarray, v_arr: np.ndarray) -> None:
         """
-        Constructs an object that holds the marginal means
-        and variances at all times (t).
+        Constructs an object that holds the marginal means and
+        variances at all times (t).
 
         :param m_arr: marginal means array (N x 1).
 
@@ -91,7 +91,7 @@ class GaussianMoments(object):
         return x_out
     # _end_def_
 
-    def dM(self, order: int = 1):
+    def dm(self, order: int = 1) -> np.ndarray:
         """
         Compute the derivative with respect to the marginal
         means, of the non-central moment, up to 8-th order.
@@ -138,7 +138,7 @@ class GaussianMoments(object):
         return x_out
     # _end_def_
 
-    def dS(self, order: int = 1):
+    def ds(self, order: int = 1) -> np.ndarray:
         """
         Compute the derivative with respect to the marginal
         variances, of the un-centered moment, up to 8-th order.

@@ -36,11 +36,11 @@ class GaussianLikelihood(Likelihood):
         self.single_dim = single_dim
     # _end_def_
 
-    def __call__(self, m, s):
+    def __call__(self, m: np.ndarray, s: np.ndarray) -> np.ndarray:
         """
-        Compute the Gaussian likelihood function. This is a
-        convenience method that will call automatically the
-        correct version of the gauss-likelihood.
+        Compute the Gaussian likelihood function. This is a convenience
+        method that will call automatically the correct version of the
+        Gaussian likelihood.
 
         :param m: marginal means m(t), (dim_n x dim_d).
 
@@ -48,10 +48,10 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-        return self.gauss_1D(m, s) if self.single_dim else self.gauss_nD(m, s)
+        return self.gauss_1d(m, s) if self.single_dim else self.gauss_nd(m, s)
     # _end_def_
 
-    def gradients(self, m, s):
+    def gradients(self, m: np.ndarray, s: np.ndarray):
         """
         Compute the gradients of the Gaussian likelihood function.
         This is a convenience method that will call automatically
@@ -63,10 +63,10 @@ class GaussianLikelihood(Likelihood):
 
         :return: Energy from the observation likelihood, (scalar).
         """
-        return self.gradients_1D(m, s) if self.single_dim else self.gradients_nD(m)
+        return self.gradients_1d(m, s) if self.single_dim else self.gradients_nd(m)
     # _end_def_
 
-    def gauss_1D(self, m, s):
+    def gauss_1d(self, m: np.ndarray, s: np.ndarray):
         """
         Gaussian 1D method.
 
@@ -95,7 +95,7 @@ class GaussianLikelihood(Likelihood):
         return Eobs
     # _end_def_
 
-    def gauss_nD(self, m, s):
+    def gauss_nd(self, m: np.ndarray, s: np.ndarray):
         """
         Gaussian nD method.
 
@@ -152,7 +152,7 @@ class GaussianLikelihood(Likelihood):
         return Eobs
     # _end_def_
 
-    def gradients_1D(self, m, s):
+    def gradients_1d(self, m: np.ndarray, s: np.ndarray):
         """
         1D gradients of Eobs.
 
@@ -197,7 +197,7 @@ class GaussianLikelihood(Likelihood):
         return dEobs_dm, dEobs_ds, dEobs_dr
     # _end_def
 
-    def gradients_nD(self, m):
+    def gradients_nd(self, m: np.ndarray):
         """
         nD gradients of Eobs.
 

@@ -64,7 +64,7 @@ class Simulation(object):
     # _end_def_
 
     @classmethod
-    def _stochastic_model(cls, model, *args):
+    def _stochastic_model(cls, model: str, *args):
         """
         Auxiliary (class) method that returns
         an instance of the requested stochastic
@@ -175,7 +175,6 @@ class Simulation(object):
             self.m_data["mu0"] *= np.ones(dim_d)
             self.m_data["tau0"] *= np.eye(dim_d)
         # _end_if_
-
     # _end_def_
 
     def run(self):

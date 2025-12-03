@@ -10,7 +10,7 @@ class Likelihood(object):
 
     __slots__ = ("obs_v", "obs_t", "obs_n", "obs_h")
 
-    def __init__(self, values, times, noise, operator=None):
+    def __init__(self, values, times, noise, operator=None) -> None:
         """
         Default constructor. No checks are performed for the
         validity of the input data.
@@ -27,7 +27,6 @@ class Likelihood(object):
         (function or matrix) that maps the observation space. It
         is usually assumed to be the identity matrix (for simplicity).
         """
-
         # Store observation times/values.
         self.obs_t = np.asarray(times)
         self.obs_v = np.asarray(values)
@@ -44,10 +43,8 @@ class Likelihood(object):
             else:
                 # Otherwise, create identity matrix.
                 self.obs_h = np.eye(y0.size)
-            # _end_if_
         else:
             self.obs_h = np.asarray(operator)
-        # _end_if_
     # _end_def_
 
     @property
